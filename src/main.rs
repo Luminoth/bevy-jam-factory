@@ -2,18 +2,22 @@ mod plugins;
 mod states;
 
 use bevy::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
 
 fn main() {
     let mut app = App::new();
 
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "Bevy Jam - Factory".into(),
-            resolution: (1280.0, 720.0).into(),
+    app.add_plugins((
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Bevy Jam - Factory".into(),
+                resolution: (1280.0, 720.0).into(),
+                ..default()
+            }),
             ..default()
         }),
-        ..default()
-    }));
+        TilemapPlugin,
+    ));
 
     app.init_state::<states::AppState>()
         .add_sub_state::<states::IsPaused>()

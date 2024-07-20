@@ -1,4 +1,5 @@
 mod plugins;
+mod states;
 
 use bevy::prelude::*;
 
@@ -7,7 +8,9 @@ fn main() {
 
     app.add_plugins(DefaultPlugins);
 
-    app.add_plugins(plugins::FactoryPlugin);
+    app.init_state::<states::AppState>()
+        .add_sub_state::<states::IsPaused>()
+        .add_plugins(plugins::FactoryPlugin);
 
     app.run();
 }

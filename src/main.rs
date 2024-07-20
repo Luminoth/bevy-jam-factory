@@ -1,5 +1,13 @@
+mod plugins;
+
 use bevy::prelude::*;
 
 fn main() {
-    App::new().add_plugins(DefaultPlugins).run();
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins);
+
+    app.add_plugins(plugins::FactoryPlugin);
+
+    app.run();
 }

@@ -2,8 +2,10 @@ mod plugins;
 mod states;
 mod systems;
 
+use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
 
 fn main() {
     let mut app = App::new();
@@ -21,6 +23,9 @@ fn main() {
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
         TilemapPlugin,
+        WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
+        StateInspectorPlugin::<states::AppState>::default()
+            .run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
     app.init_state::<states::AppState>()

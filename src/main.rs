@@ -1,6 +1,7 @@
 mod plugins;
 mod states;
 mod systems;
+mod tiled;
 
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
@@ -23,6 +24,7 @@ fn main() {
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
         TilemapPlugin,
+        tiled::TiledMapPlugin,
         WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
         StateInspectorPlugin::<states::AppState>::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),

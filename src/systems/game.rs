@@ -1,9 +1,17 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
+//use bevy_ecs_tilemap::prelude::*;
 
 pub fn setup_game(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((Camera2dBundle::default(), Name::new("Main Camera")));
 
+    let map_handle: Handle<crate::tiled::TiledMap> = asset_server.load("map.tmx");
+
+    commands.spawn(crate::tiled::TiledMapBundle {
+        tiled_map: map_handle,
+        ..Default::default()
+    });
+
+    /*
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
 
     let map_size = TilemapSize { x: 128, y: 128 };
@@ -46,5 +54,5 @@ pub fn setup_game(mut commands: Commands, asset_server: Res<AssetServer>) {
         tile_size,
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
         ..Default::default()
-    });
+    });*/
 }

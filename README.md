@@ -21,7 +21,9 @@
     * 50x50 grid
     * Use Layer Groups for each tile
     * Can edit brush sharpness settings to be more pixely
+      * This works better with an actual 32x32 tile
     * Can add Filter Mask - Map - Palletize
+      * This works better with an actual 32x32 tile
     * .. Transition textures
   * Copy Paste tile layers onto tile map
     * Transform to 32x32

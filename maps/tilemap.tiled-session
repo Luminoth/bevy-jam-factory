@@ -1,0 +1,35 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "/home/shane/Documents/github/bevy-jam-factory/assets/map.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "/home/shane/Documents/github/bevy-jam-factory/assets/map.tmx": {
+            "scale": 2.736197916666667,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 479.4974778718949,
+                "y": 319.60407347482635
+            }
+        },
+        "/home/shane/Documents/github/bevy-jam-factory/assets/tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "/home/shane/Documents/github/bevy-jam-factory/assets",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "/home/shane/Documents/github/bevy-jam-factory/assets/tiles.tsx",
+        "/home/shane/Documents/github/bevy-jam-factory/assets/map.tmx"
+    ],
+    "project": "tilemap.tiled-project",
+    "recentFiles": [
+        "/home/shane/Documents/github/bevy-jam-factory/assets/tiles.tsx",
+        "/home/shane/Documents/github/bevy-jam-factory/assets/map.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

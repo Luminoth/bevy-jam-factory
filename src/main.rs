@@ -1,7 +1,8 @@
+mod assets;
+mod components;
 mod plugins;
 mod states;
 mod systems;
-mod tiled;
 
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
@@ -24,7 +25,6 @@ fn main() {
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
         TilemapPlugin,
-        tiled::TiledMapPlugin,
         WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
         StateInspectorPlugin::<states::AppState>::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
@@ -43,7 +43,7 @@ fn main() {
         .add_systems(OnEnter(states::AppState::InGame), systems::setup_game)
         .add_systems(OnEnter(states::IsPaused::Paused), systems::setup_pause_menu)
         .enable_state_scoped_entities::<states::IsPaused>()
-        .add_plugins(plugins::FactoryPlugin);
+        .add_plugins((plugins::TiledMapPlugin, plugins::FactoryPlugin));
 
     app.run();
 }

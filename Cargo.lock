@@ -372,6 +372,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_ecs_tilemap",
+ "futures-lite",
  "thiserror",
  "tiled",
 ]

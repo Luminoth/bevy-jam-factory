@@ -9,6 +9,7 @@ edition = "2021"
 bevy = "0.14"
 bevy-inspector-egui = "0.25"
 bevy_ecs_tilemap = "0.14"
+futures-lite = "2.3"
 thiserror = "1.0"
 tiled = "0.12"
 

@@ -12,7 +12,9 @@
 //   * When the 'atlas' feature is enabled tilesets using a collection of images will be skipped.
 //   * Only finite tile layers are loaded. Infinite tile layers and object layers will be skipped.
 
-use std::io::{Cursor, ErrorKind};
+// TSX support adapted from https://github.com/StarArawn/bevy_ecs_tilemap/pull/429
+
+use std::io::{Cursor, Error, ErrorKind, Read};
 use std::path::Path;
 use std::sync::Arc;
 
@@ -68,25 +70,34 @@ pub struct TiledMapBundle {
     pub render_settings: TilemapRenderSettings,
 }
 
-struct BytesResourceReader {
+struct BytesResourceReader<'a, 'ctx> {
     bytes: Arc<[u8]>,
+    load_context: &'a mut bevy::asset::LoadContext<'ctx>,
 }
 
-impl BytesResourceReader {
-    fn new(bytes: &[u8]) -> Self {
+impl<'a, 'ctx> BytesResourceReader<'a, 'ctx> {
+    fn new(bytes: &[u8], load_context: &'a mut bevy::asset::LoadContext<'ctx>) -> Self {
         Self {
             bytes: Arc::from(bytes),
+            load_context,
         }
     }
 }
 
-impl tiled::ResourceReader for BytesResourceReader {
-    type Resource = Cursor<Arc<[u8]>>;
+impl<'a, 'ctx> tiled::ResourceReader for BytesResourceReader<'a, 'ctx> {
+    type Resource = Box<dyn Read + 'a>;
     type Error = std::io::Error;
 
-    fn read_from(&mut self, _path: &Path) -> std::result::Result<Self::Resource, Self::Error> {
-        // In this case, the path is ignored because the byte data is already provided.
-        Ok(Cursor::new(self.bytes.clone()))
+    fn read_from(&mut self, path: &Path) -> std::result::Result<Self::Resource, Self::Error> {
+        if let Some(extension) = path.extension() {
+            if extension == "tsx" {
+                let future = self.load_context.read_asset_bytes(path.to_owned());
+                let data = futures_lite::future::block_on(future)
+                    .map_err(|err| Error::new(ErrorKind::NotFound, err))?;
+                return Ok(Box::new(Cursor::new(data.clone())));
+            }
+        }
+        Ok(Box::new(Cursor::new(self.bytes.clone())))
     }
 }
 
@@ -113,11 +124,12 @@ impl AssetLoader for TiledLoader {
         let mut bytes = Vec::new();
         reader.read_to_end(&mut bytes).await?;
 
+        let path = load_context.path().to_owned();
         let mut loader = tiled::Loader::with_cache_and_reader(
             tiled::DefaultResourceCache::new(),
-            BytesResourceReader::new(&bytes),
+            BytesResourceReader::new(&bytes, load_context),
         );
-        let map = loader.load_tmx_map(load_context.path()).map_err(|e| {
+        let map = loader.load_tmx_map(path).map_err(|e| {
             std::io::Error::new(ErrorKind::Other, format!("Could not load TMX map: {e}"))
         })?;
 

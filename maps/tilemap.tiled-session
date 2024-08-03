@@ -8,11 +8,11 @@
     ],
     "fileStates": {
         "/home/shane/Documents/github/bevy-jam-factory/assets/map.tmx": {
-            "scale": 2.736197916666667,
+            "scale": 1.0331249999999998,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 479.4974778718949,
-                "y": 319.60407347482635
+                "x": 479.12885662431944,
+                "y": 320.3871748336358
             }
         },
         "/home/shane/Documents/github/bevy-jam-factory/assets/tiles.tsx": {

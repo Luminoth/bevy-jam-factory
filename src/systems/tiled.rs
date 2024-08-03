@@ -60,44 +60,55 @@ pub fn process_loaded_maps(
                     // commands.entity(*layer_entity).despawn_recursive();
                 }
 
-                // The TilemapBundle requires that all tile images come exclusively from a single
-                // tiled texture or from a Vec of independent per-tile images. Furthermore, all of
-                // the per-tile images must be the same size. Since Tiled allows tiles of mixed
-                // tilesets on each layer and allows differently-sized tile images in each tileset,
-                // this means we need to load each combination of tileset and layer separately.
-                for (tileset_index, tileset) in tiled_map.map.tilesets().iter().enumerate() {
-                    // Once materials have been created/added we need to then create the layers.
-                    for (layer_index, layer) in tiled_map.map.layers().enumerate() {
-                        let offset_x = layer.offset_x;
-                        let offset_y = layer.offset_y;
+                process_loaded_map(
+                    &mut commands,
+                    tiled_map,
+                    &mut layer_storage,
+                    *render_settings,
+                );
+            }
+        }
+    }
+}
 
-                        match layer.layer_type() {
-                            tiled::LayerType::Tiles(tile_layer) => {
-                                process_tile_layer(
-                                    &mut commands,
-                                    &mut layer_storage,
-                                    tiled_map,
-                                    tileset_index,
-                                    tileset,
-                                    layer_index,
-                                    layer.id(),
-                                    &tile_layer,
-                                    (offset_x, offset_y),
-                                    *render_settings,
-                                );
-                            }
-                            tiled::LayerType::Objects(object_layer) => {
-                                process_object_layer(layer.id(), &object_layer);
-                            }
-                            _ => {
-                                info!(
-                                    "Skipping layer {} because only tile layers are supported.",
-                                    layer.id()
-                                );
-                                continue;
-                            }
-                        }
-                    }
+fn process_loaded_map(
+    commands: &mut Commands,
+    tiled_map: &TiledMap,
+    layer_storage: &mut TiledLayersStorage,
+    render_settings: TilemapRenderSettings,
+) {
+    // The TilemapBundle requires that all tile images come exclusively from a single
+    // tiled texture or from a Vec of independent per-tile images. Furthermore, all of
+    // the per-tile images must be the same size. Since Tiled allows tiles of mixed
+    // tilesets on each layer and allows differently-sized tile images in each tileset,
+    // this means we need to load each combination of tileset and layer separately.
+    for (tileset_index, tileset) in tiled_map.map.tilesets().iter().enumerate() {
+        // Once materials have been created/added we need to then create the layers.
+        for (layer_index, layer) in tiled_map.map.layers().enumerate() {
+            match layer.layer_type() {
+                tiled::LayerType::Tiles(tile_layer) => {
+                    process_tile_layer(
+                        commands,
+                        layer_storage,
+                        tiled_map,
+                        tileset_index,
+                        tileset,
+                        layer_index,
+                        layer.id(),
+                        &tile_layer,
+                        (layer.offset_x, layer.offset_y),
+                        render_settings,
+                    );
+                }
+                tiled::LayerType::Objects(object_layer) => {
+                    process_object_layer(layer.id(), &object_layer);
+                }
+                _ => {
+                    info!(
+                        "Skipping layer {} because only tile layers are supported.",
+                        layer.id()
+                    );
+                    continue;
                 }
             }
         }

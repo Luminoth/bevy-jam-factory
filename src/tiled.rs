@@ -129,7 +129,7 @@ impl AssetLoader for TiledLoader {
             tiled::DefaultResourceCache::new(),
             BytesResourceReader::new(&bytes, load_context),
         );
-        let map = loader.load_tmx_map(path).map_err(|e| {
+        let map = loader.load_tmx_map(&path).map_err(|e| {
             std::io::Error::new(ErrorKind::Other, format!("Could not load TMX map: {e}"))
         })?;
 
@@ -195,7 +195,7 @@ impl AssetLoader for TiledLoader {
             tile_image_offsets,
         };
 
-        log::info!("Loaded map: {}", load_context.path().display());
+        log::info!("Loaded map: {}", path.display());
         Ok(asset_map)
     }
 

@@ -14,21 +14,21 @@ pub fn process_loaded_maps(
         &mut TiledLayersStorage,
         &TilemapRenderSettings,
     )>,
-    new_maps: Query<&Handle<TiledMap>, Added<Handle<TiledMap>>>,
+    //new_maps: Query<&Handle<TiledMap>, Added<Handle<TiledMap>>>,
 ) {
     let mut changed_maps = Vec::<AssetId<TiledMap>>::default();
     for event in map_events.read() {
         match event {
             AssetEvent::Added { id } => {
-                info!("Map added!");
+                info!("Map {} added", id);
                 changed_maps.push(*id);
             }
             AssetEvent::Modified { id } => {
-                info!("Map changed!");
+                info!("Map {} changed", id);
                 changed_maps.push(*id);
             }
             AssetEvent::Removed { id } => {
-                info!("Map removed!");
+                info!("Map {} removed", id);
                 // if mesh was modified and removed in the same update, ignore the modification
                 // events are ordered so future modification events are ok
                 changed_maps.retain(|changed_handle| changed_handle == id);
@@ -38,9 +38,12 @@ pub fn process_loaded_maps(
     }
 
     // If we have new map entities add them to the changed_maps list.
-    for new_map_handle in new_maps.iter() {
+    // NOTE: not sure why this is done, the Added event should be handling this?
+    // and doing this causes us to process new maps twice
+    /*for new_map_handle in new_maps.iter() {
+        info!("New map {} added", new_map_handle.id());
         changed_maps.push(new_map_handle.id());
-    }
+    }*/
 
     for changed_map in changed_maps.iter() {
         for (map_handle, mut layer_storage, render_settings) in map_query.iter_mut() {
@@ -48,6 +51,8 @@ pub fn process_loaded_maps(
             if map_handle.id() != *changed_map {
                 continue;
             }
+
+            info!("Processing map {}", map_handle.id());
 
             if let Some(tiled_map) = maps.get(map_handle) {
                 // TODO: Create a RemoveMap component..
@@ -77,14 +82,26 @@ fn process_loaded_map(
     layer_storage: &mut TiledLayersStorage,
     render_settings: TilemapRenderSettings,
 ) {
+    // TODO: these loops aren't the right way to load this
+    // the tilesets are independent of the layers
+
     // The TilemapBundle requires that all tile images come exclusively from a single
     // tiled texture or from a Vec of independent per-tile images. Furthermore, all of
     // the per-tile images must be the same size. Since Tiled allows tiles of mixed
     // tilesets on each layer and allows differently-sized tile images in each tileset,
     // this means we need to load each combination of tileset and layer separately.
     for (tileset_index, tileset) in tiled_map.map.tilesets().iter().enumerate() {
+        info!("Processing tileset {}", tileset_index);
+
         // Once materials have been created/added we need to then create the layers.
         for (layer_index, layer) in tiled_map.map.layers().enumerate() {
+            info!(
+                "Processing layer {} ({}) of tileset {}",
+                layer_index,
+                layer.id(),
+                tileset_index
+            );
+
             match layer.layer_type() {
                 tiled::LayerType::Tiles(tile_layer) => {
                     process_tile_layer(
@@ -101,7 +118,18 @@ fn process_loaded_map(
                     );
                 }
                 tiled::LayerType::Objects(object_layer) => {
-                    process_object_layer(layer.id(), &object_layer);
+                    process_object_layer(
+                        commands,
+                        layer_storage,
+                        tiled_map,
+                        tileset_index,
+                        tileset,
+                        layer_index,
+                        layer.id(),
+                        &object_layer,
+                        (layer.offset_x, layer.offset_y),
+                        render_settings,
+                    );
                 }
                 _ => {
                     info!(
@@ -128,7 +156,9 @@ fn process_tile_layer(
     offset: (f32, f32),
     render_settings: TilemapRenderSettings,
 ) {
-    let tiled::TileLayer::Finite(layer_data) = layer else {
+    info!("Processing tile layer {} ({})", layer_index, layer_id);
+
+    let tiled::TileLayer::Finite(layer) = layer else {
         info!(
             "Skipping layer {} because only finite layers are supported.",
             layer_id,
@@ -179,7 +209,7 @@ fn process_tile_layer(
             let mapped_x = x as i32;
             let mapped_y = mapped_y as i32;
 
-            let layer_tile = match layer_data.get_tile(mapped_x, mapped_y) {
+            let layer_tile: tiled::LayerTile = match layer.get_tile(mapped_x, mapped_y) {
                 Some(t) => t,
                 None => {
                     continue;
@@ -190,7 +220,7 @@ fn process_tile_layer(
                 continue;
             }
 
-            let layer_tile_data = match layer_data.get_tile_data(mapped_x, mapped_y) {
+            let layer_tile_data = match layer.get_tile_data(mapped_x, mapped_y) {
                 Some(d) => d,
                 None => continue,
             };
@@ -246,9 +276,76 @@ fn process_tile_layer(
         .insert(layer_index as u32, layer_entity);
 }
 
-fn process_object_layer(layer_id: u32, _layer: &tiled::ObjectLayer) {
-    info!(
-        "Skipping layer {} because object layers are not supported.",
-        layer_id,
-    );
+fn process_object_layer(
+    commands: &mut Commands,
+    layer_storage: &mut TiledLayersStorage,
+    tiled_map: &TiledMap,
+    tileset_index: usize,
+    tileset: &tiled::Tileset,
+    layer_index: usize,
+    layer_id: u32,
+    _layer: &tiled::ObjectLayer,
+    offset: (f32, f32),
+    render_settings: TilemapRenderSettings,
+) {
+    info!("Processing object layer {} ({})", layer_index, layer_id);
+
+    let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset_index) else {
+        warn!("Skipped creating layer with missing tilemap textures.");
+        return;
+    };
+
+    let map_size = TilemapSize {
+        x: tiled_map.map.width,
+        y: tiled_map.map.height,
+    };
+
+    let grid_size = TilemapGridSize {
+        x: tiled_map.map.tile_width as f32,
+        y: tiled_map.map.tile_height as f32,
+    };
+
+    let tile_size = TilemapTileSize {
+        x: tileset.tile_width as f32,
+        y: tileset.tile_height as f32,
+    };
+
+    let tile_spacing = TilemapSpacing {
+        x: tileset.spacing as f32,
+        y: tileset.spacing as f32,
+    };
+
+    let map_type = match tiled_map.map.orientation {
+        tiled::Orientation::Hexagonal => TilemapType::Hexagon(HexCoordSystem::Row),
+        tiled::Orientation::Isometric => TilemapType::Isometric(IsoCoordSystem::Diamond),
+        tiled::Orientation::Staggered => TilemapType::Isometric(IsoCoordSystem::Staggered),
+        tiled::Orientation::Orthogonal => TilemapType::Square,
+    };
+
+    let mut tile_storage = TileStorage::empty(map_size);
+    let layer_entity = commands.spawn_empty().id();
+
+    warn!("TODO: process object layer {} ({})", layer_index, layer_id,);
+
+    commands.entity(layer_entity).insert(TilemapBundle {
+        grid_size,
+        size: map_size,
+        storage: tile_storage,
+        texture: tilemap_texture.clone(),
+        tile_size,
+        spacing: tile_spacing,
+        transform: get_tilemap_center_transform(
+            &map_size,
+            &grid_size,
+            &map_type,
+            layer_index as f32,
+        ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+        map_type,
+        render_settings,
+        ..Default::default()
+    });
+
+    layer_storage
+        .storage
+        .insert(layer_index as u32, layer_entity);
 }

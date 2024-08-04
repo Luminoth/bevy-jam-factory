@@ -92,6 +92,8 @@ impl AssetLoader for TiledLoader {
         reader.read_to_end(&mut bytes).await?;
 
         let path = load_context.path().to_owned();
+        info!("Loading map: {}", path.display());
+
         let mut loader = tiled::Loader::with_cache_and_reader(
             tiled::DefaultResourceCache::new(),
             BytesResourceReader::new(&bytes, load_context),

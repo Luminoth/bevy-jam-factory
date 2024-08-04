@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="3">
  <tileset firstgid="1" source="tiles.tsx"/>
- <layer id="1" name="Tile Layer 1" width="30" height="20">
+ <tileset firstgid="65" source="objects.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="30" height="20" locked="1">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,
@@ -25,5 +26,7 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
- <objectgroup id="2" name="Object Layer 1"/>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="2" gid="65" x="163.446" y="238.572" width="32" height="32"/>
+ </objectgroup>
 </map>

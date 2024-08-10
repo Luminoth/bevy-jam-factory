@@ -27,6 +27,6 @@
 </data>
  </layer>
  <objectgroup id="2" name="Object Layer 1">
-  <object id="2" gid="65" x="163.446" y="238.572" width="32" height="32"/>
+  <object id="2" gid="65" x="160.522" y="223.953" width="32" height="32"/>
  </objectgroup>
 </map>

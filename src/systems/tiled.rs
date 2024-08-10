@@ -82,62 +82,49 @@ fn process_loaded_map(
     layer_storage: &mut TiledLayersStorage,
     render_settings: TilemapRenderSettings,
 ) {
-    // TODO: these loops aren't the right way to load this
-    // the tilesets are independent of the layers
-
+    // TODO: better explain the way this is restricted and what we're doing about it
+    //
     // The TilemapBundle requires that all tile images come exclusively from a single
     // tiled texture or from a Vec of independent per-tile images. Furthermore, all of
     // the per-tile images must be the same size. Since Tiled allows tiles of mixed
     // tilesets on each layer and allows differently-sized tile images in each tileset,
     // this means we need to load each combination of tileset and layer separately.
-    for (tileset_index, tileset) in tiled_map.map.tilesets().iter().enumerate() {
-        info!("Processing tileset {}", tileset_index);
 
-        // Once materials have been created/added we need to then create the layers.
-        for (layer_index, layer) in tiled_map.map.layers().enumerate() {
-            info!(
-                "Processing layer {} ({}) of tileset {}",
-                layer_index,
-                layer.id(),
-                tileset_index
-            );
+    // Once materials have been created/added we need to then create the layers.
+    for (layer_index, layer) in tiled_map.map.layers().enumerate() {
+        info!("Processing layer {} ({}) ", layer_index, layer.id(),);
 
-            match layer.layer_type() {
-                tiled::LayerType::Tiles(tile_layer) => {
-                    process_tile_layer(
-                        commands,
-                        layer_storage,
-                        tiled_map,
-                        tileset_index,
-                        tileset,
-                        layer_index,
-                        layer.id(),
-                        &tile_layer,
-                        (layer.offset_x, layer.offset_y),
-                        render_settings,
-                    );
-                }
-                tiled::LayerType::Objects(object_layer) => {
-                    process_object_layer(
-                        commands,
-                        layer_storage,
-                        tiled_map,
-                        tileset_index,
-                        tileset,
-                        layer_index,
-                        layer.id(),
-                        &object_layer,
-                        (layer.offset_x, layer.offset_y),
-                        render_settings,
-                    );
-                }
-                _ => {
-                    info!(
-                        "Skipping layer {} because only tile layers are supported.",
-                        layer.id()
-                    );
-                    continue;
-                }
+        match layer.layer_type() {
+            tiled::LayerType::Tiles(tile_layer) => {
+                process_tile_layer(
+                    commands,
+                    layer_storage,
+                    tiled_map,
+                    layer_index,
+                    layer.id(),
+                    &tile_layer,
+                    (layer.offset_x, layer.offset_y),
+                    render_settings,
+                );
+            }
+            tiled::LayerType::Objects(object_layer) => {
+                process_object_layer(
+                    commands,
+                    layer_storage,
+                    tiled_map,
+                    layer_index,
+                    layer.id(),
+                    &object_layer,
+                    (layer.offset_x, layer.offset_y),
+                    render_settings,
+                );
+            }
+            _ => {
+                info!(
+                    "Skipping layer {} because only tile layers are supported.",
+                    layer.id()
+                );
+                continue;
             }
         }
     }
@@ -148,8 +135,6 @@ fn process_tile_layer(
     commands: &mut Commands,
     layer_storage: &mut TiledLayersStorage,
     tiled_map: &TiledMap,
-    tileset_index: usize,
-    tileset: &tiled::Tileset,
     layer_index: usize,
     layer_id: u32,
     layer: &tiled::TileLayer,
@@ -166,11 +151,6 @@ fn process_tile_layer(
         return;
     };
 
-    let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset_index) else {
-        warn!("Skipped creating layer with missing tilemap textures.");
-        return;
-    };
-
     let map_size = TilemapSize {
         x: tiled_map.map.width,
         y: tiled_map.map.height,
@@ -179,16 +159,6 @@ fn process_tile_layer(
     let grid_size = TilemapGridSize {
         x: tiled_map.map.tile_width as f32,
         y: tiled_map.map.tile_height as f32,
-    };
-
-    let tile_size = TilemapTileSize {
-        x: tileset.tile_width as f32,
-        y: tileset.tile_height as f32,
-    };
-
-    let tile_spacing = TilemapSpacing {
-        x: tileset.spacing as f32,
-        y: tileset.spacing as f32,
     };
 
     let map_type = match tiled_map.map.orientation {
@@ -200,6 +170,10 @@ fn process_tile_layer(
 
     let mut tile_storage = TileStorage::empty(map_size);
     let layer_entity = commands.spawn_empty().id();
+
+    let mut shared_tilemap_texture = None;
+    let mut tile_size = TilemapTileSize::default();
+    let mut tile_spacing = TilemapSpacing::default();
 
     for x in 0..map_size.x {
         for y in 0..map_size.y {
@@ -216,9 +190,26 @@ fn process_tile_layer(
                 }
             };
 
-            if tileset_index != layer_tile.tileset_index() {
-                continue;
+            let tileset = layer_tile.get_tileset();
+
+            let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset.name) else {
+                warn!("Skipped creating layer with missing tilemap textures.");
+                return;
+            };
+
+            if shared_tilemap_texture.is_none() {
+                shared_tilemap_texture = Some(tilemap_texture.clone());
             }
+
+            tile_size = TilemapTileSize {
+                x: tileset.tile_width as f32,
+                y: tileset.tile_height as f32,
+            };
+
+            tile_spacing = TilemapSpacing {
+                x: tileset.spacing as f32,
+                y: tileset.spacing as f32,
+            };
 
             let layer_tile_data = match layer.get_tile_data(mapped_x, mapped_y) {
                 Some(d) => d,
@@ -229,7 +220,8 @@ fn process_tile_layer(
                 TilemapTexture::Single(_) => layer_tile.id(),
                 #[cfg(not(feature = "atlas"))]
                 TilemapTexture::Vector(_) =>
-                    *tiled_map.tile_image_offsets.get(&(tileset_index, layer_tile.id()))
+                    // TODO: this string clone is so bad :(
+                    *tiled_map.tile_image_offsets.get(&(tileset.name.clone(), layer_tile.id()))
                     .expect("The offset into to image vector should have been saved during the initial load."),
                 #[cfg(not(feature = "atlas"))]
                 _ => unreachable!()
@@ -257,7 +249,7 @@ fn process_tile_layer(
         grid_size,
         size: map_size,
         storage: tile_storage,
-        texture: tilemap_texture.clone(),
+        texture: shared_tilemap_texture.unwrap(),
         tile_size,
         spacing: tile_spacing,
         transform: get_tilemap_center_transform(
@@ -280,8 +272,6 @@ fn process_object_layer(
     commands: &mut Commands,
     layer_storage: &mut TiledLayersStorage,
     tiled_map: &TiledMap,
-    tileset_index: usize,
-    tileset: &tiled::Tileset,
     layer_index: usize,
     layer_id: u32,
     _layer: &tiled::ObjectLayer,
@@ -289,11 +279,6 @@ fn process_object_layer(
     render_settings: TilemapRenderSettings,
 ) {
     info!("Processing object layer {} ({})", layer_index, layer_id);
-
-    let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset_index) else {
-        warn!("Skipped creating layer with missing tilemap textures.");
-        return;
-    };
 
     let map_size = TilemapSize {
         x: tiled_map.map.width,
@@ -303,16 +288,6 @@ fn process_object_layer(
     let grid_size = TilemapGridSize {
         x: tiled_map.map.tile_width as f32,
         y: tiled_map.map.tile_height as f32,
-    };
-
-    let tile_size = TilemapTileSize {
-        x: tileset.tile_width as f32,
-        y: tileset.tile_height as f32,
-    };
-
-    let tile_spacing = TilemapSpacing {
-        x: tileset.spacing as f32,
-        y: tileset.spacing as f32,
     };
 
     let map_type = match tiled_map.map.orientation {
@@ -325,13 +300,17 @@ fn process_object_layer(
     let mut tile_storage = TileStorage::empty(map_size);
     let layer_entity = commands.spawn_empty().id();
 
-    warn!("TODO: process object layer {} ({})", layer_index, layer_id,);
+    //let mut shared_tilemap_texture = None;
+    let mut tile_size = TilemapTileSize::default();
+    let mut tile_spacing = TilemapSpacing::default();
 
-    commands.entity(layer_entity).insert(TilemapBundle {
+    warn!("TODO: process object layer {} ({})", layer_index, layer_id);
+
+    /*commands.entity(layer_entity).insert(TilemapBundle {
         grid_size,
         size: map_size,
         storage: tile_storage,
-        texture: tilemap_texture.clone(),
+        texture: shared_tilemap_texture.unwrap(),
         tile_size,
         spacing: tile_spacing,
         transform: get_tilemap_center_transform(
@@ -343,7 +322,7 @@ fn process_object_layer(
         map_type,
         render_settings,
         ..Default::default()
-    });
+    });*/
 
     layer_storage
         .storage

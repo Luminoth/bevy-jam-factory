@@ -29,11 +29,17 @@ use thiserror::Error;
 pub struct TiledMap {
     pub map: tiled::Map,
 
-    pub tilemap_textures: HashMap<usize, TilemapTexture>,
+    // TODO: storing by name is pretty bad here
+    // but we need a way to from a Tileset to this texture
+    // and I can't find an easier id for it (so far)
+    pub tilemap_textures: HashMap<String, TilemapTexture>,
 
     // The offset into the tileset_images for each tile id within each tileset.
+    // TODO: storing by name is pretty bad here
+    // but we need a way to from a Tileset to this texture
+    // and I can't find an easier id for it (so far)
     #[cfg(not(feature = "atlas"))]
-    pub tile_image_offsets: HashMap<(usize, tiled::TileId), u32>,
+    pub tile_image_offsets: HashMap<(String, tiled::TileId), u32>,
 }
 
 struct BytesResourceReader<'a, 'ctx> {
@@ -130,8 +136,10 @@ impl AssetLoader for TiledLoader {
                                 let asset_path = AssetPath::from(tile_path);
                                 info!("Loading tile image from {asset_path:?} as image ({tileset_index}, {tile_id})");
                                 let texture: Handle<Image> = load_context.load(asset_path.clone());
-                                tile_image_offsets
-                                    .insert((tileset_index, tile_id), tile_images.len() as u32);
+                                tile_image_offsets.insert(
+                                    (tileset.name.clone(), tile_id),
+                                    tile_images.len() as u32,
+                                );
                                 tile_images.push(texture.clone());
                             }
                         }
@@ -154,7 +162,7 @@ impl AssetLoader for TiledLoader {
                 }
             };
 
-            tilemap_textures.insert(tileset_index, tilemap_texture);
+            tilemap_textures.insert(tileset.name.clone(), tilemap_texture);
         }
 
         let asset_map = TiledMap {

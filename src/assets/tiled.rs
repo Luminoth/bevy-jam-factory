@@ -27,6 +27,8 @@ use thiserror::Error;
 
 #[derive(TypePath, Asset)]
 pub struct TiledMap {
+    pub name: String,
+
     pub map: tiled::Map,
 
     // TODO: storing by name is pretty bad here
@@ -166,6 +168,7 @@ impl AssetLoader for TiledLoader {
         }
 
         let asset_map = TiledMap {
+            name: path.display().to_string(),
             map,
             tilemap_textures,
             #[cfg(not(feature = "atlas"))]

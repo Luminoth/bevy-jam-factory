@@ -85,7 +85,7 @@ fn process_loaded_map(
     debug!("Processing loaded map {}", tiled_map.name);
 
     commands
-        .spawn(Name::new(tiled_map.name.clone()))
+        .spawn((SpatialBundle::default(), Name::new(tiled_map.name.clone())))
         .with_children(|parent| {
             // TODO: better explain the way this is restricted and what we're doing about it
             //
@@ -175,7 +175,10 @@ fn process_tile_layer(
     };
 
     let mut tile_storage = TileStorage::empty(map_size);
-    let mut layer_entity = parent.spawn(Name::new(format!("Tile Layer {}", layer_id)));
+    let mut layer_entity = parent.spawn((
+        SpatialBundle::default(),
+        Name::new(format!("Tile Layer {}", layer_id)),
+    ));
     let layer_entity_id = layer_entity.id();
 
     let mut shared_tilemap_texture = None;
@@ -309,7 +312,10 @@ fn process_object_layer(
     };
 
     let mut tile_storage = TileStorage::empty(map_size);
-    let mut layer_entity = parent.spawn(Name::new(format!("Object layer {}", layer_id)));
+    let mut layer_entity = parent.spawn((
+        SpatialBundle::default(),
+        Name::new(format!("Object layer {}", layer_id)),
+    ));
     let layer_entity_id = layer_entity.id();
 
     let mut shared_tilemap_texture = None;

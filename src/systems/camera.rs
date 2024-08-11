@@ -2,17 +2,17 @@ use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::components::MainCamera;
 
-const CAMERA_SPEED: f32 = 10.0;
+const CAMERA_SPEED: f32 = 200.0;
 
 pub fn pan_camera(
     keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
     mut _mouse_motion_events: EventReader<MouseMotion>,
     mut camera_query: Query<&mut Transform, With<MainCamera>>,
 ) {
     let mut camera = camera_query.single_mut();
 
-    // TODO: decouple from frame rate
-    let speed = CAMERA_SPEED;
+    let speed = CAMERA_SPEED * time.delta_seconds();
 
     if keys.pressed(KeyCode::ArrowRight) {
         camera.translation.x += speed;

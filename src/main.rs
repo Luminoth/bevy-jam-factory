@@ -4,7 +4,10 @@ mod plugins;
 mod states;
 mod systems;
 
-use bevy::{input::common_conditions::input_toggle_active, prelude::*};
+use bevy::{
+    diagnostic::FrameTimeDiagnosticsPlugin, input::common_conditions::input_toggle_active,
+    prelude::*,
+};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::quick::{StateInspectorPlugin, WorldInspectorPlugin};
 
@@ -24,9 +27,12 @@ fn main() {
             })
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
+        FrameTimeDiagnosticsPlugin::default(),
         TilemapPlugin,
         WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
+
+    // TODO: add debug menu stuff that includes displaying FPS
 
     app.add_plugins((plugins::TiledMapPlugin, plugins::GamePlugin));
 

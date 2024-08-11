@@ -1,5 +1,5 @@
-mod factory;
+mod game;
 mod tiled;
 
-pub use factory::*;
+pub use game::*;
 pub use tiled::*;

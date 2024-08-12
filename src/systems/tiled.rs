@@ -259,23 +259,26 @@ fn process_tile_layer(
         }
     });
 
-    layer_entity.insert(TilemapBundle {
-        grid_size,
-        size: map_size,
-        storage: tile_storage,
-        texture: shared_tilemap_texture.unwrap(),
-        tile_size,
-        spacing: tile_spacing,
-        transform: get_tilemap_center_transform(
-            &map_size,
-            &grid_size,
-            &map_type,
-            layer_index as f32,
-        ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
-        map_type,
-        render_settings,
-        ..Default::default()
-    });
+    layer_entity.insert((
+        TilemapBundle {
+            grid_size,
+            size: map_size,
+            storage: tile_storage,
+            texture: shared_tilemap_texture.unwrap(),
+            tile_size,
+            spacing: tile_spacing,
+            transform: get_tilemap_center_transform(
+                &map_size,
+                &grid_size,
+                &map_type,
+                layer_index as f32,
+            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            map_type,
+            render_settings,
+            ..Default::default()
+        },
+        TiledMapTileLayer,
+    ));
 
     layer_storage
         .storage
@@ -404,23 +407,26 @@ fn process_object_layer(
         }
     });
 
-    layer_entity.insert(TilemapBundle {
-        grid_size,
-        size: map_size,
-        storage: tile_storage,
-        texture: shared_tilemap_texture.unwrap(),
-        tile_size,
-        spacing: tile_spacing,
-        transform: get_tilemap_center_transform(
-            &map_size,
-            &grid_size,
-            &map_type,
-            layer_index as f32,
-        ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
-        map_type,
-        render_settings,
-        ..Default::default()
-    });
+    layer_entity.insert((
+        TilemapBundle {
+            grid_size,
+            size: map_size,
+            storage: tile_storage,
+            texture: shared_tilemap_texture.unwrap(),
+            tile_size,
+            spacing: tile_spacing,
+            transform: get_tilemap_center_transform(
+                &map_size,
+                &grid_size,
+                &map_type,
+                layer_index as f32,
+            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            map_type,
+            render_settings,
+            ..Default::default()
+        },
+        TiledMapObjectLayer,
+    ));
 
     layer_storage
         .storage

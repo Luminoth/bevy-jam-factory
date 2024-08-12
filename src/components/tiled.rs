@@ -19,3 +19,9 @@ pub struct TiledMapBundle {
     pub global_transform: GlobalTransform,
     pub render_settings: TilemapRenderSettings,
 }
+
+#[derive(Component)]
+pub struct TiledMapTileLayer;
+
+#[derive(Component)]
+pub struct TiledMapObjectLayer;

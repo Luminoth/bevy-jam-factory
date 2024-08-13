@@ -285,6 +285,7 @@ fn process_tile_layer(
         .insert(layer_index as u32, layer_entity_id);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn process_object_layer(
     parent: &mut ChildBuilder,
     layer_storage: &mut TiledLayersStorage,

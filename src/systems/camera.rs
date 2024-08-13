@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_ecs_tilemap::prelude::*;
 
 use crate::components::tiled::TiledMapTileLayer;
@@ -7,15 +7,21 @@ use crate::components::MainCamera;
 const CAMERA_SPEED: f32 = 200.0;
 
 pub fn pan_camera(
-    keys: Res<ButtonInput<KeyCode>>,
+    _keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut _mouse_motion_events: EventReader<MouseMotion>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
     mut camera_query: Query<(&mut Transform, &OrthographicProjection), With<MainCamera>>,
     tilemap_query: Query<(&TilemapSize, &TilemapGridSize), With<TiledMapTileLayer>>,
 ) {
+    // this can happen if the tilemap isn't loaded yet
+    // TODO: we shouldn't even be running this until the tilemap is loaded
     if tilemap_query.is_empty() {
         return;
     }
+
+    let window = window_query.single();
+    let window_movement_width = window.width() / 4.0;
+    let window_movement_height = window.height() / 4.0;
 
     let mut camera = camera_query.single_mut();
     let view_half_width = camera.1.area.width() / 2.0;
@@ -27,9 +33,26 @@ pub fn pan_camera(
 
     let speed = CAMERA_SPEED * time.delta_seconds();
 
-    // TODO: use the mouse instead of the keyboard
+    if let Some(position) = window.cursor_position() {
+        if position.x < window_movement_width {
+            camera.0.translation.x =
+                (camera.0.translation.x - speed).max(view_half_width - map_half_width);
+        } else if position.x > window.width() - window_movement_width {
+            camera.0.translation.x =
+                (camera.0.translation.x + speed).min(map_half_width - view_half_width);
+        }
 
-    if keys.pressed(KeyCode::ArrowRight) {
+        if position.y < window_movement_height {
+            camera.0.translation.y =
+                (camera.0.translation.y + speed).min(map_half_height - view_half_height);
+        } else if position.y > window.height() - window_movement_height {
+            camera.0.translation.y =
+                (camera.0.translation.y - speed).max(view_half_height - map_half_height);
+        }
+    }
+
+    // TODO: this could be useful for debugging
+    /*if keys.pressed(KeyCode::ArrowRight) {
         camera.0.translation.x =
             (camera.0.translation.x + speed).min(map_half_width - view_half_width);
     }
@@ -47,5 +70,5 @@ pub fn pan_camera(
     if keys.pressed(KeyCode::ArrowDown) {
         camera.0.translation.y =
             (camera.0.translation.y - speed).max(view_half_height - map_half_height);
-    }
+    }*/
 }

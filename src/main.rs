@@ -27,14 +27,19 @@ fn main() {
             })
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
-        FrameTimeDiagnosticsPlugin::default(),
+        FrameTimeDiagnosticsPlugin,
         TilemapPlugin,
         WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
     // TODO: add debug menu stuff that includes displaying FPS
 
-    app.add_plugins((plugins::TiledMapPlugin, plugins::GamePlugin));
+    app.add_plugins((
+        plugins::TiledMapPlugin,
+        plugins::MainMenuPlugin,
+        plugins::PauseMenuPlugin,
+        plugins::GamePlugin,
+    ));
 
     // TODO: move to a state init or something
     app.init_state::<states::AppState>()
@@ -44,26 +49,6 @@ fn main() {
             StateInspectorPlugin::<states::AppState>::default()
                 .run_if(input_toggle_active(false, KeyCode::Backquote)),
         );
-
-    // TODO: move to main menu plugin
-    app.add_systems(
-        OnEnter(states::AppState::MainMenu),
-        systems::main_menu::setup_main_menu,
-    )
-    .add_systems(
-        Update,
-        systems::main_menu::update_main_menu.run_if(in_state(states::AppState::MainMenu)),
-    );
-
-    // TODO: move to pause menu plugin
-    app.add_systems(
-        OnEnter(states::IsPaused::Paused),
-        systems::pause_menu::setup_pause_menu,
-    )
-    .add_systems(
-        Update,
-        systems::pause_menu::update_pause_menu.run_if(in_state(states::IsPaused::Paused)),
-    );
 
     app.run();
 }

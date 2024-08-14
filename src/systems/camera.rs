@@ -13,12 +13,6 @@ pub fn pan_camera(
     mut camera_query: Query<(&mut Transform, &OrthographicProjection), With<MainCamera>>,
     tilemap_query: Query<(&TilemapSize, &TilemapGridSize), With<TiledMapTileLayer>>,
 ) {
-    // this can happen if the tilemap isn't loaded yet
-    // TODO: we shouldn't even be running this until the tilemap is loaded
-    if tilemap_query.is_empty() {
-        return;
-    }
-
     let window = window_query.single();
     let window_movement_width = window.width() / 4.0;
     let window_movement_height = window.height() / 4.0;

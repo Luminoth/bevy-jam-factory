@@ -2,14 +2,14 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use crate::assets::tiled::*;
-use crate::components::tiled::*;
+use crate::components::{game::OnInGame, tiled::*};
 
 pub fn process_loaded_maps(
     mut commands: Commands,
     mut map_events: EventReader<AssetEvent<TiledMap>>,
-    maps: Res<Assets<TiledMap>>,
+    tiled_maps: Res<Assets<TiledMap>>,
     tile_storage_query: Query<(Entity, &TileStorage)>,
-    mut map_query: Query<(
+    mut tiled_map_query: Query<(
         &Handle<TiledMap>,
         &mut TiledLayersStorage,
         &TilemapRenderSettings,
@@ -46,7 +46,7 @@ pub fn process_loaded_maps(
     }*/
 
     for changed_map in changed_maps.iter() {
-        for (map_handle, mut layer_storage, render_settings) in map_query.iter_mut() {
+        for (map_handle, mut layer_storage, render_settings) in tiled_map_query.iter_mut() {
             // only deal with currently changed map
             if map_handle.id() != *changed_map {
                 continue;
@@ -54,7 +54,7 @@ pub fn process_loaded_maps(
 
             debug!("Processing map {}", map_handle.id());
 
-            if let Some(tiled_map) = maps.get(map_handle) {
+            if let Some(tiled_map) = tiled_maps.get(map_handle) {
                 // TODO: Create a RemoveMap component..
                 for layer_entity in layer_storage.storage.values() {
                     if let Ok((_, layer_tile_storage)) = tile_storage_query.get(*layer_entity) {
@@ -85,7 +85,11 @@ fn process_loaded_map(
     debug!("Processing loaded map {}", tiled_map.name);
 
     commands
-        .spawn((SpatialBundle::default(), Name::new(tiled_map.name.clone())))
+        .spawn((
+            SpatialBundle::default(),
+            Name::new(tiled_map.name.clone()),
+            OnInGame,
+        ))
         .with_children(|parent| {
             // TODO: better explain the way this is restricted and what we're doing about it
             //

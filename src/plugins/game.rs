@@ -8,7 +8,12 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::InGame), game::enter)
+        app.add_systems(OnEnter(AppState::LoadAssets), game::load_assets)
+            .add_systems(
+                Update,
+                game::wait_for_assets.run_if(in_state(AppState::LoadAssets)),
+            )
+            .add_systems(OnEnter(AppState::InGame), game::enter)
             .add_systems(
                 Update,
                 (

@@ -6,7 +6,7 @@ pub enum AppState {
     Splash,
     #[default]
     MainMenu,
-    //TODO: LoadMap,
+    LoadAssets,
     InGame,
 }
 

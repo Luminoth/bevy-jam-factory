@@ -32,7 +32,7 @@ pub fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
 pub fn wait_for_assets(
     mut contexts: EguiContexts,
     mut game_state: ResMut<NextState<AppState>>,
-    tilemap_query: Query<&TiledMapTileLayer>,
+    tiledmap_query: Query<&TiledMapTileLayer>,
 ) {
     egui::Window::new("Loading").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {
@@ -40,7 +40,7 @@ pub fn wait_for_assets(
         });
     });
 
-    if tilemap_query.is_empty() {
+    if tiledmap_query.is_empty() {
         return;
     }
 

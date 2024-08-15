@@ -11,7 +11,7 @@ impl Plugin for MainMenuPlugin {
         app.add_systems(OnEnter(AppState::MainMenu), main_menu::enter)
             .add_systems(
                 Update,
-                main_menu::update.run_if(in_state(AppState::MainMenu)),
+                (main_menu::update,).run_if(in_state(AppState::MainMenu)),
             )
             .add_systems(OnExit(AppState::MainMenu), cleanup_state::<OnMainMenu>);
     }

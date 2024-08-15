@@ -6,7 +6,7 @@ use crate::components::MainCamera;
 
 const CAMERA_SPEED: f32 = 200.0;
 
-pub fn pan_camera(
+pub fn pan(
     _keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     window_query: Query<&Window, With<PrimaryWindow>>,

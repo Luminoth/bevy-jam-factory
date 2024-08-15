@@ -1,17 +1,3 @@
-// How to use this:
-//   You should copy/paste this into your project and use it much like examples/tiles.rs uses this
-//   file. When you do so you will need to adjust the code based on whether you're using the
-//   'atlas` feature in bevy_ecs_tilemap. The bevy_ecs_tilemap uses this as an example of how to
-//   use both single image tilesets and image collection tilesets. Since your project won't have
-//   the 'atlas' feature defined in your Cargo config, the expressions prefixed by the #[cfg(...)]
-//   macro will not compile in your project as-is. If your project depends on the bevy_ecs_tilemap
-//   'atlas' feature then move all of the expressions prefixed by #[cfg(not(feature = "atlas"))].
-//   Otherwise remove all of the expressions prefixed by #[cfg(feature = "atlas")].
-//
-// Functional limitations:
-//   * When the 'atlas' feature is enabled tilesets using a collection of images will be skipped.
-//   * Only finite tile layers are loaded. Infinite tile layers and object layers will be skipped.
-
 use std::collections::HashMap;
 use std::io::{Cursor, Error, ErrorKind, Read};
 use std::path::Path;
@@ -35,13 +21,6 @@ pub struct TiledMap {
     // but we need a way to from a Tileset to this texture
     // and I can't find an easier id for it (so far)
     pub tilemap_textures: HashMap<String, TilemapTexture>,
-
-    // The offset into the tileset_images for each tile id within each tileset.
-    // TODO: storing by name is pretty bad here
-    // but we need a way to from a Tileset to this texture
-    // and I can't find an easier id for it (so far)
-    #[cfg(not(feature = "atlas"))]
-    pub tile_image_offsets: HashMap<(String, tiled::TileId), u32>,
 }
 
 struct BytesResourceReader<'a, 'ctx> {
@@ -111,43 +90,11 @@ impl AssetLoader for TiledLoader {
         })?;
 
         let mut tilemap_textures = HashMap::default();
-        #[cfg(not(feature = "atlas"))]
-        let mut tile_image_offsets = HashMap::default();
-
-        for (tileset_index, tileset) in map.tilesets().iter().enumerate() {
+        for tileset in map.tilesets() {
             let tilemap_texture = match &tileset.image {
                 None => {
-                    #[cfg(feature = "atlas")]
-                    {
-                        info!("Skipping image collection tileset '{}' which is incompatible with atlas feature", tileset.name);
-                        continue;
-                    }
-
-                    #[cfg(not(feature = "atlas"))]
-                    {
-                        let mut tile_images: Vec<Handle<Image>> = Vec::new();
-                        for (tile_id, tile) in tileset.tiles() {
-                            if let Some(img) = &tile.image {
-                                // The load context path is the TMX file itself. If the file is at the root of the
-                                // assets/ directory structure then the tmx_dir will be empty, which is fine.
-                                let tmx_dir = load_context
-                                    .path()
-                                    .parent()
-                                    .expect("The asset load context was empty.");
-                                let tile_path = tmx_dir.join(&img.source);
-                                let asset_path = AssetPath::from(tile_path);
-                                info!("Loading tile image from {asset_path:?} as image ({tileset_index}, {tile_id})");
-                                let texture: Handle<Image> = load_context.load(asset_path.clone());
-                                tile_image_offsets.insert(
-                                    (tileset.name.clone(), tile_id),
-                                    tile_images.len() as u32,
-                                );
-                                tile_images.push(texture.clone());
-                            }
-                        }
-
-                        TilemapTexture::Vector(tile_images)
-                    }
+                    info!("Skipping image collection tileset '{}' which is incompatible with atlas feature", tileset.name);
+                    continue;
                 }
                 Some(img) => {
                     // The load context path is the TMX file itself. If the file is at the root of the
@@ -171,8 +118,6 @@ impl AssetLoader for TiledLoader {
             name: path.display().to_string(),
             map,
             tilemap_textures,
-            #[cfg(not(feature = "atlas"))]
-            tile_image_offsets,
         };
 
         info!("Loaded map: {}", path.display());

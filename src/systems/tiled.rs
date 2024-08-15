@@ -233,18 +233,12 @@ fn process_tile_layer(
 
                 let texture_index = match tilemap_texture {
                     TilemapTexture::Single(_) => layer_tile.id(),
-                    #[cfg(not(feature = "atlas"))]
-                    TilemapTexture::Vector(_) =>
-                        // TODO: this string clone is so bad :(
-                        *tiled_map.tile_image_offsets.get(&(tileset.name.clone(), layer_tile.id()))
-                        .expect("The offset into to image vector should have been saved during the initial load."),
-                    #[cfg(not(feature = "atlas"))]
-                    _ => unreachable!()
                 };
 
                 let tile_pos = TilePos { x, y };
                 let tile_entity = parent
-                    .spawn((TileBundle {
+                    .spawn((
+                        TileBundle {
                             position: tile_pos,
                             tilemap_id: TilemapId(layer_entity_id),
                             texture_index: TileTextureIndex(texture_index),
@@ -255,8 +249,8 @@ fn process_tile_layer(
                             },
                             ..Default::default()
                         },
-                        Name::new(format!("Tile ({},{})", x, y))),
-                    )
+                        Name::new(format!("Tile ({},{})", x, y)),
+                    ))
                     .id();
                 tile_storage.set(&tile_pos, tile_entity);
             }
@@ -330,7 +324,7 @@ fn process_object_layer(
     let mut tile_size = TilemapTileSize::default();
     let mut tile_spacing = TilemapSpacing::default();
 
-    layer_entity.with_children(|parent|  {
+    layer_entity.with_children(|parent| {
         for object in layer.objects() {
             let object_tile = match object.get_tile() {
                 Some(t) => t,
@@ -366,15 +360,8 @@ fn process_object_layer(
             };
 
             let texture_index = match tilemap_texture {
-                    TilemapTexture::Single(_) => object_tile.id(),
-                    #[cfg(not(feature = "atlas"))]
-                    TilemapTexture::Vector(_) =>
-                        // TODO: this string clone is so bad :(
-                        *tiled_map.tile_image_offsets.get(&(tileset.name.clone(), object_tile.id()))
-                        .expect("The offset into to image vector should have been saved during the initial load."),
-                    #[cfg(not(feature = "atlas"))]
-                    _ => unreachable!()
-                };
+                TilemapTexture::Single(_) => object_tile.id(),
+            };
 
             let (x, y) = match object.shape {
                 tiled::ObjectShape::Rect { width, height } => (object.x / width, object.y / height),
@@ -394,7 +381,8 @@ fn process_object_layer(
                 y: tiled_map.map.height - 1 - y as u32,
             };
             let tile_entity = parent
-                .spawn((TileBundle {
+                .spawn((
+                    TileBundle {
                         position: tile_pos,
                         tilemap_id: TilemapId(layer_entity_id),
                         texture_index: TileTextureIndex(texture_index),
@@ -405,8 +393,8 @@ fn process_object_layer(
                         },
                         ..Default::default()
                     },
-                    Name::new(format!("Object ({},{})", x, y))),
-                )
+                    Name::new(format!("Object ({},{})", x, y)),
+                ))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }

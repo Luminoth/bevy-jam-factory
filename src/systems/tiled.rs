@@ -1,8 +1,10 @@
+use std::str::FromStr;
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use crate::assets::tiled::*;
-use crate::components::{game::OnInGame, tiled::*};
+use crate::components::{game::OnInGame, objects::*, tiled::*};
 
 pub fn process_loaded_maps(
     mut commands: Commands,
@@ -129,11 +131,10 @@ fn process_loaded_map(
                         );
                     }
                     _ => {
-                        warn!(
-                            "Skipping layer {} because only tile layers are supported.",
+                        panic!(
+                            "Invalid layer {} - only Tile and Object layers are supported.",
                             layer.id()
                         );
-                        continue;
                     }
                 }
             }
@@ -154,11 +155,7 @@ fn process_tile_layer(
     debug!("Processing tile layer {} ({})", layer_index, layer_id);
 
     let tiled::TileLayer::Finite(layer) = layer else {
-        warn!(
-            "Skipping layer {} because only finite layers are supported.",
-            layer_id,
-        );
-        return;
+        panic!("Tile layer {} may not be infinite", layer_id,);
     };
 
     let map_size = TilemapSize {
@@ -198,19 +195,16 @@ fn process_tile_layer(
                 let mapped_x = x as i32;
                 let mapped_y = mapped_y as i32;
 
-                let layer_tile = match layer.get_tile(mapped_x, mapped_y) {
-                    Some(t) => t,
-                    None => {
-                        continue;
-                    }
-                };
+                let layer_tile = layer.get_tile(mapped_x, mapped_y).unwrap_or_else(|| {
+                    panic!("Tile layer {} missing tile at ({}, {})", layer_id, x, y)
+                });
 
                 let tileset = layer_tile.get_tileset();
 
-                let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset.name) else {
-                    warn!("Skipped creating layer with missing tilemap textures.");
-                    return;
-                };
+                let tilemap_texture = tiled_map
+                    .tilemap_textures
+                    .get(&tileset.name)
+                    .unwrap_or_else(|| panic!("Tile layer {} missing tilemap texture", layer_id));
 
                 if shared_tilemap_texture.is_none() {
                     shared_tilemap_texture = Some(tilemap_texture.clone());
@@ -226,10 +220,13 @@ fn process_tile_layer(
                     y: tileset.spacing as f32,
                 };
 
-                let layer_tile_data = match layer.get_tile_data(mapped_x, mapped_y) {
-                    Some(d) => d,
-                    None => continue,
-                };
+                let layer_tile_data =
+                    layer.get_tile_data(mapped_x, mapped_y).unwrap_or_else(|| {
+                        panic!(
+                            "Tile layer {} missing tile data at ({}, {})",
+                            layer_id, x, y
+                        )
+                    });
 
                 let texture_index = match tilemap_texture {
                     TilemapTexture::Single(_) => layer_tile.id(),
@@ -283,6 +280,33 @@ fn process_tile_layer(
         .insert(layer_index as u32, layer_entity_id);
 }
 
+fn require_object_string_property<'a>(
+    layer_id: u32,
+    object: &'a tiled::Object,
+    property: impl AsRef<str>,
+) -> &'a String {
+    let property_value = object.properties.get(property.as_ref()).unwrap_or_else(|| {
+        panic!(
+            "Object layer {} missing property '{}' for object {}",
+            layer_id,
+            property.as_ref(),
+            object.id(),
+        )
+    });
+
+    let tiled::PropertyValue::StringValue(value) = property_value else {
+        panic!(
+            "Object layer {} has invalid property '{}' {:?} for object {}",
+            layer_id,
+            property.as_ref(),
+            property_value,
+            object.id(),
+        );
+    };
+
+    value
+}
+
 #[allow(clippy::too_many_arguments)]
 fn process_object_layer(
     parent: &mut ChildBuilder,
@@ -326,19 +350,26 @@ fn process_object_layer(
 
     layer_entity.with_children(|parent| {
         for object in layer.objects() {
-            let object_tile = match object.get_tile() {
-                Some(t) => t,
-                None => {
-                    continue;
-                }
-            };
+            let object_tile = object.get_tile().unwrap_or_else(|| {
+                panic!(
+                    "Object layer {} missing tile for object {}",
+                    layer_id,
+                    object.id()
+                )
+            });
 
             let tileset = object_tile.get_tileset();
 
-            let Some(tilemap_texture) = tiled_map.tilemap_textures.get(&tileset.name) else {
-                warn!("Skipped creating layer with missing tilemap textures.");
-                return;
-            };
+            let tilemap_texture = tiled_map
+                .tilemap_textures
+                .get(&tileset.name)
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Object layer {} missing tilemap texture for object {}",
+                        layer_id,
+                        object.id()
+                    )
+                });
 
             if shared_tilemap_texture.is_none() {
                 shared_tilemap_texture = Some(tilemap_texture.clone());
@@ -354,10 +385,13 @@ fn process_object_layer(
                 y: tileset.spacing as f32,
             };
 
-            let object_tile_data = match object.tile_data() {
-                Some(d) => d,
-                None => continue,
-            };
+            let object_tile_data = object.tile_data().unwrap_or_else(|| {
+                panic!(
+                    "Object layer {} missing tile data for object {}",
+                    layer_id,
+                    object.id()
+                )
+            });
 
             let texture_index = match tilemap_texture {
                 TilemapTexture::Single(_) => object_tile.id(),
@@ -366,15 +400,24 @@ fn process_object_layer(
             let (x, y) = match object.shape {
                 tiled::ObjectShape::Rect { width, height } => (object.x / width, object.y / height),
                 _ => {
-                    warn!(
-                        "Skipped object {} in layer {} for unsupported shape {:?}",
-                        object.id(),
+                    panic!(
+                        "Object layer {} has unsupported shape {:?} for object {}",
                         layer_id,
-                        object.shape
+                        object.shape,
+                        object.id(),
                     );
-                    continue;
                 }
             };
+
+            let object_type_value = require_object_string_property(layer_id, &object, "ObjectType");
+            let object_type = ObjectType::from_str(object_type_value).unwrap_or_else(|_| {
+                panic!(
+                    "Object layer {} has invalid ObjectType {} for object {}",
+                    layer_id,
+                    object_type_value,
+                    object.id(),
+                )
+            });
 
             let tile_pos = TilePos {
                 x: x as u32,
@@ -394,6 +437,9 @@ fn process_object_layer(
                         ..Default::default()
                     },
                     Name::new(format!("Object ({},{})", x, y)),
+                    Object {
+                        r#type: object_type,
+                    },
                 ))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);

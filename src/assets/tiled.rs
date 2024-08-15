@@ -91,26 +91,24 @@ impl AssetLoader for TiledLoader {
 
         let mut tilemap_textures = HashMap::default();
         for tileset in map.tilesets() {
-            let tilemap_texture = match &tileset.image {
-                None => {
-                    info!("Skipping image collection tileset '{}' which is incompatible with atlas feature", tileset.name);
-                    continue;
-                }
-                Some(img) => {
-                    // The load context path is the TMX file itself. If the file is at the root of the
-                    // assets/ directory structure then the tmx_dir will be empty, which is fine.
-                    let tmx_dir = load_context
-                        .path()
-                        .parent()
-                        .expect("The asset load context was empty.");
-                    let tile_path = tmx_dir.join(&img.source);
-                    let asset_path = AssetPath::from(tile_path);
-                    let texture: Handle<Image> = load_context.load(asset_path.clone());
+            let tilemap_image = tileset.image.as_ref().unwrap_or_else(|| {
+                panic!(
+                    "Image collection in tileset '{}' is incompatible with atlas feature",
+                    tileset.name
+                )
+            });
 
-                    TilemapTexture::Single(texture.clone())
-                }
-            };
+            // The load context path is the TMX file itself. If the file is at the root of the
+            // assets/ directory structure then the tmx_dir will be empty, which is fine.
+            let tmx_dir = load_context
+                .path()
+                .parent()
+                .expect("The asset load context was empty.");
+            let tile_path = tmx_dir.join(&tilemap_image.source);
+            let asset_path = AssetPath::from(tile_path);
+            let texture: Handle<Image> = load_context.load(asset_path.clone());
 
+            let tilemap_texture = TilemapTexture::Single(texture.clone());
             tilemap_textures.insert(tileset.name.clone(), tilemap_texture);
         }
 

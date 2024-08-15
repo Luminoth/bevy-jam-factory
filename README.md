@@ -9,11 +9,11 @@
 
 ### Tile Properties
 
-* Buildable: bool
+*TODO*
 
 ### Object Properties
 
-* ObjectType
+* Object Class == ObjectType
   * Resources
 
 ## Tools
@@ -22,13 +22,13 @@
   * https://doc.mapeditor.org/en/stable/manual/introduction/
 * Bevy ECS Tilemap - https://crates.io/crates/bevy_ecs_tilemap
 
-## Tilemap Notes
+## Tileset Notes
 
 * Tutorials
   * https://www.youtube.com/watch?v=V7VjId-77BM
   * https://www.youtube.com/watch?v=eoO5s3-__sM
 * Process
-  * 256x256 document to place tiles onto (this is the TileMap)
+  * 256x256 document to place tiles onto (this is the Tileset)
     * 32x32 grid
     * Turn on Snap to Grid
   * 400x400 starting tile
@@ -40,19 +40,19 @@
       * This works better with an actual 32x32 tile
     * Can add Filter Mask - Map - Palletize
       * This works better with an actual 32x32 tile
-    * .. Transition textures
-  * Copy Paste tile layers onto tile map
+    * TODO: Transition textures
+  * Copy Paste tile layers onto tileset
     * Transform to 32x32
     * Move to align with grid
-  * Export tilemap to PNG
+  * Export tileset to PNG
 
-## Tiled Notes
+## Tilemap (Tiled) Notes
 
 * Set to "Insert Tile" mode to place Objects
   * "Select Object" mode is used to select and modify Objects
 * Only single image tilesets are supported ("atlas" feature is on in bevy_ecs_tilemap)
 * Only finite tile layers are supported
 
-## References
+## Sprite sheets
 
-* https://github.com/bevyengine/bevy/blob/main/examples/state/sub_states.rs
+* Same process as creating Tilesets

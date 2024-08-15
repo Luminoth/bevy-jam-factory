@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{prelude::*, render::camera::ScalingMode, window::PrimaryWindow};
 
 use bevy_egui::{egui, EguiContexts};
 
@@ -48,7 +48,7 @@ pub fn wait_for_assets(
     game_state.set(AppState::InGame);
 }
 
-pub fn enter(mut commands: Commands) {
+pub fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<PrimaryWindow>>) {
     info!("entering InGame state");
 
     let mut camera_bundle = Camera2dBundle::default();
@@ -62,6 +62,11 @@ pub fn enter(mut commands: Commands) {
         MainCamera,
         OnInGame,
     ));
+
+    // center the cursor so the camera doesn't start panning immediately
+    let mut window = window_query.single_mut();
+    let center_cursor_pos = Vec2::new(window.width() / 2.0, window.height() / 2.0);
+    window.set_cursor_position(Some(center_cursor_pos));
 }
 
 pub fn exit() {

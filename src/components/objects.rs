@@ -9,4 +9,5 @@ pub enum ObjectType {
 pub struct Object {
     #[allow(dead_code)]
     pub r#type: ObjectType,
+    // TODO: need property storage
 }

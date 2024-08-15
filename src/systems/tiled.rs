@@ -182,10 +182,8 @@ fn process_tile_layer(
     };
 
     let map_type = match tiled_map.map.orientation {
-        tiled::Orientation::Hexagonal => TilemapType::Hexagon(HexCoordSystem::Row),
-        tiled::Orientation::Isometric => TilemapType::Isometric(IsoCoordSystem::Diamond),
-        tiled::Orientation::Staggered => TilemapType::Isometric(IsoCoordSystem::Staggered),
         tiled::Orientation::Orthogonal => TilemapType::Square,
+        _ => panic!("Tile layer {} must be Orthogonal", layer_id),
     };
 
     let mut tile_storage = TileStorage::empty(map_size);
@@ -225,6 +223,7 @@ fn process_tile_layer(
                 if shared_tilemap_texture.is_none() {
                     shared_tilemap_texture = Some(tilemap_texture.clone());
                 }
+                // TODO: ensure the textures are the same texture
 
                 tile_size = TilemapTileSize {
                     x: tileset.tile_width as f32,
@@ -350,10 +349,8 @@ fn process_object_layer(
     };
 
     let map_type = match tiled_map.map.orientation {
-        tiled::Orientation::Hexagonal => TilemapType::Hexagon(HexCoordSystem::Row),
-        tiled::Orientation::Isometric => TilemapType::Isometric(IsoCoordSystem::Diamond),
-        tiled::Orientation::Staggered => TilemapType::Isometric(IsoCoordSystem::Staggered),
         tiled::Orientation::Orthogonal => TilemapType::Square,
+        _ => panic!("Object layer {} must be Orthogonal", layer_id),
     };
 
     let mut tile_storage = TileStorage::empty(map_size);
@@ -369,6 +366,14 @@ fn process_object_layer(
 
     layer_entity.with_children(|parent| {
         for object in layer.objects() {
+            if object.rotation != 0.0 {
+                panic!(
+                    "Object layer {} may not have rotated object {}",
+                    layer_id,
+                    object.id()
+                );
+            }
+
             let object_tile = object.get_tile().unwrap_or_else(|| {
                 panic!(
                     "Object layer {} missing tile for object {}",
@@ -396,6 +401,7 @@ fn process_object_layer(
             if shared_tilemap_texture.is_none() {
                 shared_tilemap_texture = Some(tilemap_texture.clone());
             }
+            // TODO: ensure the textures are the same texture
 
             tile_size = TilemapTileSize {
                 x: tileset.tile_width as f32,
@@ -460,11 +466,13 @@ fn process_object_layer(
                             y: object_tile_data.flip_v,
                             d: object_tile_data.flip_d,
                         },
+                        visible: TileVisible(object.visible),
                         ..Default::default()
                     },
                     Name::new(format!("Object ({},{})", x, y)),
                     Object {
                         r#type: object_type,
+                        // TODO: properties
                     },
                 ))
                 .id();

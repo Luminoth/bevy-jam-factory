@@ -295,34 +295,6 @@ fn process_tile_layer(
         .insert(layer_index as u32, layer_entity_id);
 }
 
-#[allow(dead_code)]
-fn require_object_string_property<'a>(
-    layer_id: u32,
-    object: &'a tiled::Object,
-    property: impl AsRef<str>,
-) -> &'a String {
-    let property_value = object.properties.get(property.as_ref()).unwrap_or_else(|| {
-        panic!(
-            "Object layer {} missing property '{}' for object {}",
-            layer_id,
-            property.as_ref(),
-            object.id(),
-        )
-    });
-
-    let tiled::PropertyValue::StringValue(value) = property_value else {
-        panic!(
-            "Object layer {} has invalid property '{}' {:?} for object {}",
-            layer_id,
-            property.as_ref(),
-            property_value,
-            object.id(),
-        );
-    };
-
-    value
-}
-
 // TODO: Objects should be allowed in multiples of the tile size
 // (so that we can have small and large objects as needed)
 #[allow(clippy::too_many_arguments)]

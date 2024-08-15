@@ -6,9 +6,22 @@ mod plugins;
 mod resources;
 mod state;
 mod systems;
+mod tiled;
+mod tilemap;
 
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
+
+#[inline]
+pub fn get_world_position_from_cursor_position(
+    window: &Window,
+    camera: &Camera,
+    camera_transform: &GlobalTransform,
+) -> Option<Vec2> {
+    window
+        .cursor_position()
+        .and_then(|cursor_position| camera.viewport_to_world_2d(camera_transform, cursor_position))
+}
 
 fn main() {
     let mut app = App::new();

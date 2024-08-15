@@ -10,7 +10,7 @@ use crate::components::{
 };
 use crate::state::AppState;
 
-// tile maps should be bigger than this
+// these should be less than (systems::tiled::MIN_TILEMAP_WIDTH / HEIGHT * systems::tiled::TILE_WIDTH / HEIGHT)
 const VIEW_WIDTH: f32 = 800.0;
 const VIEW_HEIGHT: f32 = 600.0;
 

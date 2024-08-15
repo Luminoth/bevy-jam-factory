@@ -6,6 +6,11 @@ use bevy_ecs_tilemap::prelude::*;
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, objects::*, tiled::*};
 
+const MIN_TILEMAP_WIDTH: u32 = 25;
+const MIN_TILEMAP_HEIGHT: u32 = 25;
+const TILE_WIDTH: u32 = 32;
+const TILE_HEIGHT: u32 = 32;
+
 pub fn process_loaded_maps(
     mut commands: Commands,
     mut map_events: EventReader<AssetEvent<TiledMap>>,
@@ -86,6 +91,14 @@ fn process_loaded_map(
 ) {
     debug!("Processing loaded map {}", tiled_map.name);
 
+    if tiled_map.map.width < MIN_TILEMAP_WIDTH || tiled_map.map.height < MIN_TILEMAP_HEIGHT {
+        panic!("Map {} is below the minimum size", tiled_map.name);
+    }
+
+    if tiled_map.map.tile_width != TILE_WIDTH || tiled_map.map.tile_height != TILE_HEIGHT {
+        panic!("Map {} tiles have invalid tile size", tiled_map.name);
+    }
+
     commands
         .spawn((
             SpatialBundle::default(),
@@ -155,7 +168,7 @@ fn process_tile_layer(
     debug!("Processing tile layer {} ({})", layer_index, layer_id);
 
     let tiled::TileLayer::Finite(layer) = layer else {
-        panic!("Tile layer {} may not be infinite", layer_id,);
+        panic!("Tile layer {} may not be infinite", layer_id);
     };
 
     let map_size = TilemapSize {
@@ -200,6 +213,9 @@ fn process_tile_layer(
                 });
 
                 let tileset = layer_tile.get_tileset();
+                if tileset.tile_width != TILE_WIDTH || tileset.tile_height != TILE_HEIGHT {
+                    panic!("Tileset {} tiles have invalid tile size", tileset.name);
+                }
 
                 let tilemap_texture = tiled_map
                     .tilemap_textures
@@ -280,6 +296,7 @@ fn process_tile_layer(
         .insert(layer_index as u32, layer_entity_id);
 }
 
+#[allow(dead_code)]
 fn require_object_string_property<'a>(
     layer_id: u32,
     object: &'a tiled::Object,
@@ -307,6 +324,8 @@ fn require_object_string_property<'a>(
     value
 }
 
+// TODO: Objects should be allowed in multiples of the tile size
+// (so that we can have small and large objects as needed)
 #[allow(clippy::too_many_arguments)]
 fn process_object_layer(
     parent: &mut ChildBuilder,
@@ -359,6 +378,9 @@ fn process_object_layer(
             });
 
             let tileset = object_tile.get_tileset();
+            if tileset.tile_width != TILE_WIDTH || tileset.tile_height != TILE_HEIGHT {
+                panic!("Tileset {} tiles have invalid tile size", tileset.name);
+            }
 
             let tilemap_texture = tiled_map
                 .tilemap_textures
@@ -398,7 +420,12 @@ fn process_object_layer(
             };
 
             let (x, y) = match object.shape {
-                tiled::ObjectShape::Rect { width, height } => (object.x / width, object.y / height),
+                tiled::ObjectShape::Rect { width, height } => {
+                    if width != TILE_WIDTH as f32 || height != TILE_HEIGHT as f32 {
+                        panic!("Object {} shape has invalid size", object.id());
+                    }
+                    (object.x / width, object.y / height)
+                }
                 _ => {
                     panic!(
                         "Object layer {} has unsupported shape {:?} for object {}",
@@ -409,12 +436,11 @@ fn process_object_layer(
                 }
             };
 
-            let object_type_value = require_object_string_property(layer_id, &object, "ObjectType");
-            let object_type = ObjectType::from_str(object_type_value).unwrap_or_else(|_| {
+            let object_type = ObjectType::from_str(&object.user_type).unwrap_or_else(|_| {
                 panic!(
-                    "Object layer {} has invalid ObjectType {} for object {}",
+                    "Object layer {} has invalid class {} for object {}",
                     layer_id,
-                    object_type_value,
+                    object.user_type,
                     object.id(),
                 )
             });

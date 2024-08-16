@@ -18,7 +18,7 @@ pub fn show_object_info(
         .get(object.0)
         .expect("Object tile missing Object!");
 
-    egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
+    egui::Window::new("Object Info").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {
             ui.label(format!("Got object: {:?}", object));
 

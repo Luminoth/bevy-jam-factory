@@ -8,10 +8,10 @@ use bevy::{
 use bevy_egui::{egui, EguiContexts};
 
 pub fn debug_ui(
-    mut contexts: EguiContexts,
-    //mut inspector: ResMut<WorldInspectorParams>,
     time: Res<Time>,
     diagnostics: Res<DiagnosticsStore>,
+    //mut inspector: ResMut<WorldInspectorParams>,
+    mut contexts: EguiContexts,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {

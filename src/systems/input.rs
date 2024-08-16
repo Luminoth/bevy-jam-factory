@@ -2,20 +2,18 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::components::{
     camera::{CameraTransformQuery, MainCamera},
-    objects::Object,
-    tiled::{TiledMapObjectLayer, TiledMapTileLayer},
+    tiled::TiledMapObjectLayer,
     tilemap::TileMapQuery,
 };
 use crate::get_world_position_from_cursor_position;
-use crate::resources::game::TileDrag;
+use crate::resources::game::{ObjectInfo, TileDrag};
 use crate::tilemap::get_tile_position;
 
 pub fn tile_info(
+    mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    object_query: Query<&Object>,
-    tile_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window = window_query.single();
@@ -23,37 +21,17 @@ pub fn tile_info(
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera, camera_transform)
     {
-        for tilemap in object_layer_query.iter() {
-            if let Some(tile_position) = get_tile_position(
-                world_position,
-                tilemap.size,
-                tilemap.grid_size,
-                tilemap.r#type,
-                tilemap.transform,
-            ) {
-                if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
-                    let object = object_query
-                        .get(tile_entity)
-                        .expect("Object tile missing Object!");
-
-                    info!("Got object: {:?}", object);
-                    return;
-                }
-            }
-        }
-
-        for tilemap in tile_layer_query.iter() {
-            if let Some(tile_position) = get_tile_position(
-                world_position,
-                tilemap.size,
-                tilemap.grid_size,
-                tilemap.r#type,
-                tilemap.transform,
-            ) {
-                if let Some(_tile_entity) = tilemap.storage.get(&tile_position) {
-                    info!("Got tile");
-                    return;
-                }
+        let tilemap = object_layer_query.single();
+        if let Some(tile_position) = get_tile_position(
+            world_position,
+            tilemap.size,
+            tilemap.grid_size,
+            tilemap.r#type,
+            tilemap.transform,
+        ) {
+            if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
+                commands.insert_resource(ObjectInfo(tile_entity));
+                return;
             }
         }
     }

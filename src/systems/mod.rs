@@ -6,6 +6,7 @@ pub mod main_menu;
 pub mod pause_menu;
 pub mod splash;
 pub mod tiled;
+pub mod ui;
 
 use bevy::prelude::*;
 

@@ -43,6 +43,13 @@ pub fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(SplashTimer(Timer::from_seconds(5.0, TimerMode::Once)));
 }
 
+pub fn exit(mut commands: Commands) {
+    info!("exiting Splash state");
+
+    commands.remove_resource::<ClearColor>();
+    commands.remove_resource::<SplashTimer>();
+}
+
 pub fn update(
     mut game_state: ResMut<NextState<AppState>>,
     time: Res<Time>,

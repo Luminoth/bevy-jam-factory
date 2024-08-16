@@ -11,6 +11,12 @@ pub fn enter(mut commands: Commands) {
     commands.spawn((Camera2dBundle::default(), OnMainMenu));
 }
 
+pub fn exit(mut commands: Commands) {
+    info!("exiting MainMenu state");
+
+    commands.remove_resource::<ClearColor>();
+}
+
 pub fn update(mut contexts: EguiContexts, mut game_state: ResMut<NextState<AppState>>) {
     egui::Window::new("Main Menu").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {

@@ -51,6 +51,8 @@ pub fn wait_for_assets(
 pub fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<PrimaryWindow>>) {
     info!("entering InGame state");
 
+    commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
+
     let mut camera_bundle = Camera2dBundle::default();
     camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
         width: VIEW_WIDTH,
@@ -69,6 +71,8 @@ pub fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<P
     window.set_cursor_position(Some(center_cursor_pos));
 }
 
-pub fn exit() {
+pub fn exit(mut commands: Commands) {
     info!("exiting InGame state");
+
+    commands.remove_resource::<ClearColor>();
 }

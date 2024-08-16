@@ -50,6 +50,11 @@ fn main() {
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
+    /*app.insert_resource(bevy_egui::EguiSettings {
+        scale_factor: 0.75,
+        ..Default::default()
+    });*/
+
     // TODO: move to a state init or something
     app.init_state::<state::AppState>()
         .add_sub_state::<state::IsPaused>()

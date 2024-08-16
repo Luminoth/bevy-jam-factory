@@ -31,7 +31,6 @@ pub fn tile_info(
         ) {
             if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
                 commands.insert_resource(ObjectInfo(tile_entity));
-                return;
             }
         }
     }

@@ -15,5 +15,5 @@ impl TileDrag {
     }
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug, Resource, Deref)]
 pub struct ObjectInfo(pub Entity);

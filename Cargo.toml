@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0"
 bevy = "0.14"
 bevy-inspector-egui = "0.25"
 bevy_ecs_tilemap = { version = "0.14", features = ["atlas"] }

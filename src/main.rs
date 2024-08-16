@@ -2,6 +2,7 @@
 
 mod assets;
 mod components;
+mod game;
 mod plugins;
 mod resources;
 mod state;

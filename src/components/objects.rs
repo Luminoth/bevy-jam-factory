@@ -1,20 +1,14 @@
 use bevy::prelude::*;
-
 use bevy_egui::egui::Ui;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, strum::EnumString, strum::Display)]
-pub enum ObjectType {
-    Resources,
-}
+use crate::game::ObjectData;
 
-#[derive(Debug, Component)]
-pub struct Object {
-    pub r#type: ObjectType,
-    // TODO: need property storage
-}
+#[derive(Debug, Component, Deref)]
+pub struct Object(pub ObjectData);
 
 impl Object {
     pub fn show_info(&self, ui: &mut Ui) {
-        ui.label(format!("Type: {}", self.r#type));
+        ui.label(format!("Object Type: {}", self.get_type()));
+        self.0.show_info(ui);
     }
 }

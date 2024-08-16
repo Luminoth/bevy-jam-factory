@@ -1,10 +1,9 @@
-use std::str::FromStr;
-
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, objects::*, tiled::*};
+use crate::game::ObjectData;
 
 const MIN_TILEMAP_WIDTH: u32 = 25;
 const MIN_TILEMAP_HEIGHT: u32 = 25;
@@ -414,14 +413,8 @@ fn process_object_layer(
                 }
             };
 
-            let object_type = ObjectType::from_str(&object.user_type).unwrap_or_else(|_| {
-                panic!(
-                    "Object layer {} has invalid class {} for object {}",
-                    layer_id,
-                    object.user_type,
-                    object.id(),
-                )
-            });
+            let object_data = ObjectData::new(layer_id, &object)
+                .unwrap_or_else(|err| panic!("Object {} failed to load: {}", object.id(), err,));
 
             let tile_pos = TilePos {
                 x: x as u32,
@@ -442,10 +435,7 @@ fn process_object_layer(
                         ..Default::default()
                     },
                     Name::new(format!("Object ({},{})", x, y)),
-                    Object {
-                        r#type: object_type,
-                        // TODO: properties
-                    },
+                    Object(object_data),
                 ))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);

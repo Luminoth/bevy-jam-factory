@@ -1,10 +1,10 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_ecs_tilemap::prelude::*;
 
 use crate::components::{
+    camera::{CameraTransformQuery, MainCamera},
     objects::Object,
     tiled::{TiledMapObjectLayer, TiledMapTileLayer},
-    MainCamera,
+    tilemap::TileMapQuery,
 };
 use crate::get_world_position_from_cursor_position;
 use crate::resources::game::TileDrag;
@@ -13,27 +13,9 @@ use crate::tilemap::get_tile_position;
 pub fn tile_info(
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    object_layer_query: Query<
-        (
-            &TilemapSize,
-            &TilemapGridSize,
-            &TilemapType,
-            &TileStorage,
-            &Transform,
-        ),
-        With<TiledMapObjectLayer>,
-    >,
+    object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
     object_query: Query<&Object>,
-    tile_layer_query: Query<
-        (
-            &TilemapSize,
-            &TilemapGridSize,
-            &TilemapType,
-            &TileStorage,
-            &Transform,
-        ),
-        With<TiledMapTileLayer>,
-    >,
+    tile_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window = window_query.single();
@@ -41,13 +23,15 @@ pub fn tile_info(
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera, camera_transform)
     {
-        for (map_size, grid_size, map_type, tile_storage, map_transform) in
-            object_layer_query.iter()
-        {
-            if let Some(tile_position) =
-                get_tile_position(world_position, map_size, grid_size, map_type, map_transform)
-            {
-                if let Some(tile_entity) = tile_storage.get(&tile_position) {
+        for tilemap in object_layer_query.iter() {
+            if let Some(tile_position) = get_tile_position(
+                world_position,
+                tilemap.size,
+                tilemap.grid_size,
+                tilemap.r#type,
+                tilemap.transform,
+            ) {
+                if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
                     let object = object_query
                         .get(tile_entity)
                         .expect("Object tile missing Object!");
@@ -58,12 +42,15 @@ pub fn tile_info(
             }
         }
 
-        for (map_size, grid_size, map_type, tile_storage, map_transform) in tile_layer_query.iter()
-        {
-            if let Some(tile_position) =
-                get_tile_position(world_position, map_size, grid_size, map_type, map_transform)
-            {
-                if let Some(_tile_entity) = tile_storage.get(&tile_position) {
+        for tilemap in tile_layer_query.iter() {
+            if let Some(tile_position) = get_tile_position(
+                world_position,
+                tilemap.size,
+                tilemap.grid_size,
+                tilemap.r#type,
+                tilemap.transform,
+            ) {
+                if let Some(_tile_entity) = tilemap.storage.get(&tile_position) {
                     info!("Got tile");
                     return;
                 }
@@ -75,13 +62,13 @@ pub fn tile_info(
 pub fn start_drag(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    camera_query: Query<CameraTransformQuery, With<MainCamera>>,
 ) {
-    let (camera, camera_transform) = camera_query.single();
+    let camera = camera_query.single();
     let window = window_query.single();
 
     if let Some(world_position) =
-        get_world_position_from_cursor_position(window, camera, camera_transform)
+        get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
     {
         info!("start drag at {}", world_position);
 
@@ -93,13 +80,13 @@ pub fn start_drag(
 pub fn stop_drag(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    camera_query: Query<CameraTransformQuery, With<MainCamera>>,
 ) {
-    let (camera, camera_transform) = camera_query.single();
+    let camera = camera_query.single();
     let window = window_query.single();
 
     if let Some(world_position) =
-        get_world_position_from_cursor_position(window, camera, camera_transform)
+        get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
     {
         info!("stop drag at {}", world_position);
 

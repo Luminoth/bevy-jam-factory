@@ -4,9 +4,9 @@ use bevy_egui::{egui, EguiContexts};
 
 use crate::assets::tiled::TiledMap;
 use crate::components::{
+    camera::MainCamera,
     game::OnInGame,
     tiled::{TiledMapBundle, TiledMapTileLayer},
-    MainCamera,
 };
 use crate::state::AppState;
 

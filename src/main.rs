@@ -39,7 +39,11 @@ fn main() {
             })
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
+        //bevy::diagnostic::LogDiagnosticsPlugin::default(),
         bevy::diagnostic::FrameTimeDiagnosticsPlugin,
+        bevy::diagnostic::EntityCountDiagnosticsPlugin,
+        //bevy::render::diagnostic::RenderDiagnosticsPlugin,
+        bevy::diagnostic::SystemInformationDiagnosticsPlugin,
         // third-party plugins
         TilemapPlugin,
         bevy_egui::EguiPlugin,
@@ -60,8 +64,6 @@ fn main() {
         .add_sub_state::<state::IsPaused>()
         .enable_state_scoped_entities::<state::IsPaused>();
 
-    // TODO: add debug menu stuff that includes displaying FPS
-
     app.add_plugins((
         plugins::TiledMapPlugin,
         plugins::SplashPlugin,
@@ -69,6 +71,12 @@ fn main() {
         plugins::PauseMenuPlugin,
         plugins::GamePlugin,
     ));
+
+    // TODO: move to a plugin
+    app.add_systems(
+        Update,
+        systems::debug::debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
+    );
 
     app.run();
 }

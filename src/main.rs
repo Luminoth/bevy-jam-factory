@@ -58,10 +58,16 @@ fn main() {
         TilemapPlugin,
         bevy_egui::EguiPlugin,
         // inspectors
-        bevy_inspector_egui::quick::WorldInspectorPlugin::new()
+        // TODO: why does the world inspector not pick up custom resource types?
+        // using register_type() on them doesn't seem to fix it
+        // TODO: might have outgrown the quick plugins: https://docs.rs/bevy-inspector-egui/0.25.2/bevy_inspector_egui/#use-case-2-manual-ui
+        bevy_inspector_egui::quick::WorldInspectorPlugin::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
         bevy_inspector_egui::quick::StateInspectorPlugin::<state::AppState>::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
+        bevy_inspector_egui::quick::ResourceInspectorPlugin::<resources::game::Inventory>::default(
+        )
+        .run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
     /*app.insert_resource(bevy_egui::EguiSettings {

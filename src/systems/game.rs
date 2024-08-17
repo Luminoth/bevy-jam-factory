@@ -8,6 +8,7 @@ use crate::components::{
     game::OnInGame,
     tiled::{TiledMapBundle, TiledMapTileLayer},
 };
+use crate::resources::game::Inventory;
 use crate::state::AppState;
 
 // these should be less than (systems::tiled::MIN_TILEMAP_WIDTH / HEIGHT * systems::tiled::TILE_WIDTH / HEIGHT)
@@ -69,10 +70,13 @@ pub fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<P
     let mut window = window_query.single_mut();
     let center_cursor_pos = Vec2::new(window.width() / 2.0, window.height() / 2.0);
     window.set_cursor_position(Some(center_cursor_pos));
+
+    commands.insert_resource(Inventory::default());
 }
 
 pub fn exit(mut commands: Commands) {
     info!("exiting InGame state");
 
+    commands.remove_resource::<Inventory>();
     commands.remove_resource::<ClearColor>();
 }

@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, objects::*, tiled::*};
-use crate::game::ObjectData;
+use crate::game::objects::ObjectData;
 
 const MIN_TILEMAP_WIDTH: u32 = 25;
 const MIN_TILEMAP_HEIGHT: u32 = 25;

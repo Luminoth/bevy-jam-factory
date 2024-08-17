@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::egui::Ui;
 
-use crate::game::ObjectData;
+use crate::game::objects::ObjectData;
 
 #[derive(Debug, Component, Deref)]
 pub struct Object(pub ObjectData);

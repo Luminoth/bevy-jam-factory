@@ -10,7 +10,7 @@ pub enum AppState {
     InGame,
 }
 
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates, Reflect)]
 #[source(AppState = AppState::InGame)]
 pub enum IsPaused {
     #[default]

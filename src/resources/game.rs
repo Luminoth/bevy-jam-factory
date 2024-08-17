@@ -2,6 +2,11 @@ use std::collections::HashSet;
 
 use bevy::prelude::*;
 
+use crate::game::inventory::InventoryData;
+
+#[derive(Debug, Default, Reflect, Resource, Deref)]
+pub struct Inventory(pub InventoryData);
+
 #[derive(Debug, Default, Resource)]
 pub struct TileDrag {
     pub tiles: HashSet<Entity>,

@@ -11,8 +11,8 @@ pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
 
 pub fn load_assets() {}
 
-pub fn setup(mut commands: Commands) {
-    create_inventory_ui(&mut commands);
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    create_inventory_ui(&mut commands, asset_server);
 }
 
 pub fn teardown() {}

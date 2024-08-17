@@ -4,7 +4,7 @@ use bevy_egui::{egui, EguiContexts};
 
 use crate::assets::tiled::TiledMap;
 use crate::components::{
-    camera::MainCamera,
+    camera::{MainCamera, UiCamera},
     game::OnInGame,
     tiled::{TiledMapBundle, TiledMapTileLayer},
 };
@@ -35,6 +35,9 @@ pub fn wait_for_assets(
     mut game_state: ResMut<NextState<AppState>>,
     tiledmap_query: Query<&TiledMapTileLayer>,
 ) {
+    // TODO: other "systems" can load assets that we need to wait for
+    // so this whole setup needs to be reworked
+
     egui::Window::new("Loading").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {
             ui.label("Loading assets ...");
@@ -63,6 +66,8 @@ pub fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<P
         camera_bundle,
         Name::new("Main Camera"),
         MainCamera,
+        UiCamera,
+        IsDefaultUiCamera,
         OnInGame,
     ));
 

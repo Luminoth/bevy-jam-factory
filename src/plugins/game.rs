@@ -2,7 +2,7 @@ use bevy::{input::common_conditions::*, prelude::*};
 
 use crate::components::game::OnInGame;
 use crate::state::{AppState, IsPaused};
-use crate::systems::{camera, cleanup_state, game, input, ui};
+use crate::systems::{camera, cleanup_state, game, input};
 
 pub struct GamePlugin;
 
@@ -24,7 +24,6 @@ impl Plugin for GamePlugin {
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing
                     // (eg. resource_exists::<DragOperation>)
                     input::drag.run_if(input_pressed(MouseButton::Left)),
-                    ui::show_object_info.run_if(ui::have_object_info),
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

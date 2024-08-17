@@ -3,10 +3,19 @@ use bevy_egui::{egui, EguiContexts};
 
 use crate::components::objects::Object;
 use crate::resources::game::ObjectInfo;
+use crate::ui::*;
 
 pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
     object.is_some()
 }
+
+pub fn load_assets() {}
+
+pub fn setup(mut commands: Commands) {
+    create_inventory_ui(&mut commands);
+}
+
+pub fn teardown() {}
 
 pub fn show_object_info(
     mut commands: Commands,

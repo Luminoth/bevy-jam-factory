@@ -9,6 +9,7 @@ mod state;
 mod systems;
 mod tiled;
 mod tilemap;
+mod ui;
 
 use bevy::{
     input::common_conditions::{input_just_released, input_toggle_active},
@@ -86,6 +87,7 @@ fn main() {
         plugins::MainMenuPlugin,
         plugins::PauseMenuPlugin,
         plugins::GamePlugin,
+        plugins::UiPlugin,
     ));
 
     // TODO: move to a plugin

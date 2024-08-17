@@ -3,6 +3,9 @@ use bevy::{ecs::query::QueryData, prelude::*};
 #[derive(Component)]
 pub struct MainCamera;
 
+#[derive(Component)]
+pub struct UiCamera;
+
 #[derive(QueryData)]
 #[query_data(derive(Debug))]
 pub struct CameraTransformQuery {

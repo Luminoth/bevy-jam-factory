@@ -13,7 +13,7 @@ const _PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 
 pub fn cursor_intersects_ui(
     window: &Window,
-    node_query: &Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
+    node_query: &Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
 ) -> bool {
     // TODO: this one isn't working
     window
@@ -21,13 +21,12 @@ pub fn cursor_intersects_ui(
         .map(|cursor_position| {
             node_query
                 .iter()
-                .filter(|(_, _, visibility)| *visibility == Visibility::Visible)
+                .filter(|(_, _, visibility)| visibility.get())
                 .any(|(node, transform, _)| {
                     let node_position = transform.translation().xy();
                     let half_size = 0.5 * node.size();
                     let min = node_position - half_size;
                     let max = node_position + half_size;
-                    println!("min: {}, max: {}, cursor: {}", min, max, cursor_position);
                     (min.x..max.x).contains(&cursor_position.x)
                         && (min.y..max.y).contains(&cursor_position.y)
                 })
@@ -36,7 +35,8 @@ pub fn cursor_intersects_ui(
 }
 
 pub fn cursor_intersects_egui(contexts: &mut EguiContexts) -> bool {
-    contexts.ctx_mut().is_pointer_over_area()
+    let context = contexts.ctx_mut();
+    context.is_pointer_over_area() || context.is_using_pointer()
 }
 
 pub fn create_inventory_ui(commands: &mut Commands, asset_server: Res<AssetServer>) {
@@ -53,6 +53,7 @@ pub fn create_inventory_ui(commands: &mut Commands, asset_server: Res<AssetServe
                 visibility: Visibility::Visible,
                 ..default()
             },
+            Name::new("Inventory UI"),
             NoCaptureInput,
             OnInGame,
         ))

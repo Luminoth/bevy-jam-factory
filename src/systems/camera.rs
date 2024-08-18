@@ -14,7 +14,7 @@ pub fn pan(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut camera_query: Query<CameraProjectionQueryMut, With<MainCamera>>,
     tilemap_query: Query<TileMapSizeQuery, With<TiledMapTileLayer>>,
-    node_query: Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
+    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
     mut contexts: EguiContexts,
 ) {
     let window = window_query.single();

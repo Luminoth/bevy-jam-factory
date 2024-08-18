@@ -17,7 +17,7 @@ pub fn tile_info(
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    node_query: Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
+    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
     mut contexts: EguiContexts,
 ) {
     let (camera, camera_transform) = camera_query.single();
@@ -49,7 +49,7 @@ pub fn start_drag(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    node_query: Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
+    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
     mut contexts: EguiContexts,
 ) {
     let camera = camera_query.single();
@@ -71,17 +71,22 @@ pub fn start_drag(
 
 pub fn stop_drag(
     mut commands: Commands,
+    tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    node_query: Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,
+    /*node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
+    mut contexts: EguiContexts,*/
 ) {
+    if tile_drag.is_none() {
+        return;
+    }
+
     let camera = camera_query.single();
     let window = window_query.single();
 
-    if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
+    /*if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
         return;
-    }
+    }*/
 
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
@@ -96,7 +101,7 @@ pub fn drag(
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    node_query: Query<(&Node, &GlobalTransform, &Visibility), Without<NoCaptureInput>>,
+    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
     mut contexts: EguiContexts,
 ) {
     let Some(mut tile_drag) = tile_drag else {

@@ -5,3 +5,4 @@ pub mod objects;
 pub mod splash;
 pub mod tiled;
 pub mod tilemap;
+pub mod ui;

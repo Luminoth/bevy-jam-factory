@@ -1,10 +1,8 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::EguiContexts;
 
 use crate::components::{
-    camera::*, tiled::TiledMapTileLayer, tilemap::TileMapSizeQuery, ui::NoCaptureInput,
+    camera::*, tiled::TiledMapTileLayer, tilemap::TileMapSizeQuery, ui::IsPointerCaptured,
 };
-use crate::ui::{cursor_intersects_egui, cursor_intersects_ui};
 
 const CAMERA_SPEED: f32 = 200.0;
 
@@ -14,16 +12,15 @@ pub fn pan(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut camera_query: Query<CameraProjectionQueryMut, With<MainCamera>>,
     tilemap_query: Query<TileMapSizeQuery, With<TiledMapTileLayer>>,
-    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,
+    capture_query: Query<&IsPointerCaptured>,
 ) {
+    if capture_query.single().0 {
+        return;
+    }
+
     let window = window_query.single();
     let window_movement_width = window.width() / 4.0;
     let window_movement_height = window.height() / 4.0;
-
-    if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
-        return;
-    }
 
     let mut camera = camera_query.single_mut();
     let view_half_width = camera.projection.area.width() / 2.0;

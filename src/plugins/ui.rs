@@ -10,6 +10,10 @@ impl Plugin for UiPlugin {
         app.add_systems(OnEnter(AppState::LoadAssets), ui::load_assets)
             .add_systems(OnEnter(AppState::InGame), ui::setup)
             .add_systems(
+                PreUpdate,
+                ui::update_pointer_capture.run_if(in_state(AppState::InGame)),
+            )
+            .add_systems(
                 Update,
                 (ui::show_object_info.run_if(ui::have_object_info),)
                     .run_if(in_state(IsPaused::Running)),

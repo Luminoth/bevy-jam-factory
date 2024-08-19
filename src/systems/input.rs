@@ -1,31 +1,28 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::EguiContexts;
 
 use crate::components::{
     camera::{CameraTransformQuery, MainCamera},
     tiled::TiledMapObjectLayer,
     tilemap::TileMapQuery,
-    ui::NoCaptureInput,
+    ui::IsPointerCaptured,
 };
 use crate::get_world_position_from_cursor_position;
 use crate::resources::game::{ObjectInfo, TileDrag};
 use crate::tilemap::get_tile_position;
-use crate::ui::{cursor_intersects_egui, cursor_intersects_ui};
 
 pub fn tile_info(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,
+    capture_query: Query<&IsPointerCaptured>,
 ) {
-    let (camera, camera_transform) = camera_query.single();
-    let window = window_query.single();
-
-    if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
+    if capture_query.single().0 {
         return;
     }
+
+    let (camera, camera_transform) = camera_query.single();
+    let window = window_query.single();
 
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera, camera_transform)
@@ -49,15 +46,14 @@ pub fn start_drag(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,
+    capture_query: Query<&IsPointerCaptured>,
 ) {
-    let camera = camera_query.single();
-    let window = window_query.single();
-
-    if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
+    if capture_query.single().0 {
         return;
     }
+
+    let camera = camera_query.single();
+    let window = window_query.single();
 
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
@@ -74,19 +70,18 @@ pub fn stop_drag(
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    /*node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,*/
+    //capture_query: Query<&IsPointerCaptured>,
 ) {
     if tile_drag.is_none() {
         return;
     }
 
-    let camera = camera_query.single();
-    let window = window_query.single();
-
-    /*if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
+    /*if capture_query.single().0 {
         return;
     }*/
+
+    let camera = camera_query.single();
+    let window = window_query.single();
 
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
@@ -101,19 +96,18 @@ pub fn drag(
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
-    mut contexts: EguiContexts,
+    capture_query: Query<&IsPointerCaptured>,
 ) {
     let Some(mut tile_drag) = tile_drag else {
         return;
     };
 
-    let (camera, camera_transform) = camera_query.single();
-    let window = window_query.single();
-
-    if cursor_intersects_ui(window, &node_query) || cursor_intersects_egui(&mut contexts) {
+    if capture_query.single().0 {
         return;
     }
+
+    let (camera, camera_transform) = camera_query.single();
+    let window = window_query.single();
 
     if let Some(world_position) =
         get_world_position_from_cursor_position(window, camera, camera_transform)

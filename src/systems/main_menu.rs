@@ -17,11 +17,19 @@ pub fn exit(mut commands: Commands) {
     commands.remove_resource::<ClearColor>();
 }
 
-pub fn update(mut contexts: EguiContexts, mut game_state: ResMut<NextState<AppState>>) {
+pub fn update(
+    mut exit: EventWriter<AppExit>,
+    mut game_state: ResMut<NextState<AppState>>,
+    mut contexts: EguiContexts,
+) {
     egui::Window::new("Main Menu").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {
             if ui.button("Start Game").clicked() {
                 game_state.set(AppState::LoadAssets);
+            }
+
+            if ui.button("Quit Game").clicked() {
+                exit.send(AppExit::Success);
             }
         });
     });

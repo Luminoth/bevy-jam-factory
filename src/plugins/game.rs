@@ -24,6 +24,7 @@ impl Plugin for GamePlugin {
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing
                     // (eg. resource_exists::<DragOperation>)
                     input::drag.run_if(input_pressed(MouseButton::Left)),
+                    game::quit_game.run_if(input_just_released(KeyCode::Escape)),
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

@@ -11,10 +11,7 @@ mod tiled;
 mod tilemap;
 mod ui;
 
-use bevy::{
-    input::common_conditions::{input_just_released, input_toggle_active},
-    prelude::*,
-};
+use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
 
 #[inline]
@@ -26,12 +23,6 @@ pub fn get_world_position_from_cursor_position(
     window
         .cursor_position()
         .and_then(|cursor_position| camera.viewport_to_world_2d(camera_transform, cursor_position))
-}
-
-pub fn quit_game(mut exit: EventWriter<AppExit>) {
-    info!("Quitting ...");
-
-    exit.send(AppExit::Success);
 }
 
 fn main() {
@@ -93,10 +84,7 @@ fn main() {
     // TODO: move to a plugin
     app.add_systems(
         Update,
-        (
-            systems::debug::debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
-            quit_game.run_if(input_just_released(KeyCode::Escape)),
-        ),
+        systems::debug::debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
     );
 
     app.run();

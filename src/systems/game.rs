@@ -85,3 +85,8 @@ pub fn exit(mut commands: Commands) {
     commands.remove_resource::<Inventory>();
     commands.remove_resource::<ClearColor>();
 }
+
+// TODO: this should be "pause_game"
+pub fn quit_game(mut game_state: ResMut<NextState<AppState>>) {
+    game_state.set(AppState::MainMenu);
+}

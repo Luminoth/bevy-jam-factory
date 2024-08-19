@@ -13,6 +13,7 @@ pub fn create_inventory_ui(
     window: &Window,
 ) {
     // TODO: we need to create a base "canvas" for all UI to live on that is the full size of the window
+    // and then a generic "ui window" that draws a title bar + close button + window content
 
     let half_width = window.width() / 2.0;
     let half_height = window.height() / 2.0;

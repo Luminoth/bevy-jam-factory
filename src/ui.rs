@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::components::{game::OnInGame, ui::UiWindow};
+use crate::components::{game::OnInGame, ui::*};
 
 const FONT: &str = "fonts/FiraSans-Bold.ttf";
 const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
@@ -12,9 +12,9 @@ const TITLE_FONT_SIZE: usize = 40;
 
 const BUTTON_WIDTH: usize = 150;
 const BUTTON_HEIGHT: usize = 50;
-const BUTTON_NORMAL: Color = Color::srgb(0.15, 0.15, 0.15);
-const _BUTTON_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
-const _BUTTON_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
+pub const BUTTON_NORMAL: Color = Color::srgb(0.15, 0.15, 0.15);
+pub const BUTTON_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
+pub const BUTTON_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
 const BUTTON_FONT_SIZE: usize = 40;
 
 fn create_ui_window(
@@ -67,6 +67,7 @@ fn create_ui_window(
                         ..default()
                     },
                     Name::new("Title Bar"),
+                    UiWindowTitleBar,
                 ))
                 .with_children(|parent| {
                     parent
@@ -94,17 +95,21 @@ fn create_ui_window(
                         });
 
                     parent
-                        .spawn(ButtonBundle {
-                            style: Style {
-                                width: Val::Px(TITLE_HEIGHT as f32),
-                                height: Val::Px(TITLE_HEIGHT as f32),
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    width: Val::Px(TITLE_HEIGHT as f32),
+                                    height: Val::Px(TITLE_HEIGHT as f32),
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                background_color: BUTTON_NORMAL.into(),
                                 ..default()
                             },
-                            background_color: BUTTON_NORMAL.into(),
-                            ..default()
-                        })
+                            Name::new("Close Button"),
+                            UiWindowCloseButton,
+                        ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
                                 "X",
@@ -133,6 +138,7 @@ fn create_ui_window(
                 ..default()
             },
             Name::new("Content"),
+            UiWindowContent,
         ))
         .id();
 

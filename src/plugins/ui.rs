@@ -7,6 +7,15 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (
+                ui::button_interaction,
+                ui::title_bar_interaction,
+                ui::close_button_interaction,
+            ),
+        );
+
         app.add_systems(OnEnter(AppState::LoadAssets), ui::load_assets)
             .add_systems(OnEnter(AppState::InGame), ui::setup)
             .add_systems(

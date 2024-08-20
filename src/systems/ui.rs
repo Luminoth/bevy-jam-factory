@@ -9,6 +9,64 @@ pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
     object.is_some()
 }
 
+pub fn button_interaction(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, mut color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                *color = BUTTON_PRESSED.into();
+            }
+            Interaction::Hovered => {
+                *color = BUTTON_HOVER.into();
+            }
+            Interaction::None => {
+                *color = BUTTON_NORMAL.into();
+            }
+        }
+    }
+}
+
+pub fn title_bar_interaction(
+    mut interaction_query: Query<
+        (&Interaction, &mut Transform),
+        (Changed<Interaction>, With<UiWindowTitleBar>),
+    >,
+) {
+    for (interaction, mut _transform) in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                info!("press title bar");
+            }
+            Interaction::None => {
+                // TODO: this isn't release
+                info!("release title bar");
+            }
+            _ => (),
+        }
+    }
+}
+
+pub fn close_button_interaction(
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<UiWindowCloseButton>)>,
+) {
+    for interaction in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                info!("press close button");
+            }
+            Interaction::None => {
+                // TODO: this isn't release
+                info!("release close button");
+            }
+            _ => (),
+        }
+    }
+}
+
 pub fn update_pointer_capture(
     mut capture_query: Query<&mut IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,

@@ -12,7 +12,7 @@ pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
 pub fn update_pointer_capture(
     mut capture_query: Query<&mut IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    node_query: Query<(&Node, &GlobalTransform, &ViewVisibility), Without<NoCaptureInput>>,
+    ui_window_query: Query<(&Node, &GlobalTransform, &ViewVisibility), With<UiWindow>>,
     mut contexts: EguiContexts,
 ) {
     let mut is_pointer_captured = capture_query.single_mut();
@@ -22,7 +22,7 @@ pub fn update_pointer_capture(
     is_pointer_captured.0 = window
         .cursor_position()
         .map(|cursor_position| {
-            node_query
+            ui_window_query
                 .iter()
                 .filter(|(_, _, visibility)| visibility.get())
                 .any(|(node, transform, _)| {

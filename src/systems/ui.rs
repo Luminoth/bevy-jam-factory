@@ -5,10 +5,6 @@ use crate::components::{game::OnInGame, objects::Object, ui::*};
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;
 
-pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
-    object.is_some()
-}
-
 pub fn button_interaction(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
@@ -65,6 +61,10 @@ pub fn close_button_interaction(
             _ => (),
         }
     }
+}
+
+pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
+    object.is_some()
 }
 
 pub fn update_pointer_capture(

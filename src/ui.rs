@@ -66,6 +66,7 @@ fn create_ui_window(
                         },
                         ..default()
                     },
+                    Interaction::default(),
                     Name::new("Title Bar"),
                     UiWindowTitleBar,
                 ))

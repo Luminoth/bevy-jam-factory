@@ -2,9 +2,13 @@ use bevy::prelude::*;
 
 use crate::components::{game::OnInGame, ui::UiWindow};
 
+const FONT: &str = "fonts/FiraSans-Bold.ttf";
+const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+
 const WINDOW_BACKGROUND: Color = Color::srgba(0.15, 0.15, 0.15, 0.8);
-const TITLE_HEIGHT: usize = 30;
+const TITLE_HEIGHT: usize = 40;
 const TITLE_BACKGROUND: Color = Color::srgb(0.1, 0.1, 0.1);
+const TITLE_FONT_SIZE: usize = 40;
 
 const BUTTON_WIDTH: usize = 150;
 const BUTTON_HEIGHT: usize = 50;
@@ -12,9 +16,6 @@ const BUTTON_NORMAL: Color = Color::srgb(0.15, 0.15, 0.15);
 const _BUTTON_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
 const _BUTTON_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
 const BUTTON_FONT_SIZE: usize = 40;
-
-const FONT: &str = "fonts/FiraSans-Bold.ttf";
-const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 fn create_ui_window(
     commands: &mut Commands,
@@ -60,24 +61,60 @@ fn create_ui_window(
                         style: Style {
                             width: Val::Px(content_size.0 as f32),
                             height: Val::Px(TITLE_HEIGHT as f32),
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
+                            flex_direction: FlexDirection::Row,
                             ..default()
                         },
-                        background_color: TITLE_BACKGROUND.into(),
                         ..default()
                     },
                     Name::new("Title Bar"),
                 ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        name,
-                        TextStyle {
-                            font: asset_server.load(FONT),
-                            font_size: BUTTON_FONT_SIZE as f32,
-                            color: FONT_COLOR,
-                        },
-                    ));
+                    parent
+                        .spawn(NodeBundle {
+                            style: Style {
+                                width: Val::Px(content_size.0 as f32 - TITLE_HEIGHT as f32),
+                                height: Val::Px(TITLE_HEIGHT as f32),
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..default()
+                            },
+                            background_color: TITLE_BACKGROUND.into(),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                name,
+                                TextStyle {
+                                    font: asset_server.load(FONT),
+                                    font_size: TITLE_FONT_SIZE as f32,
+                                    color: FONT_COLOR,
+                                },
+                            ));
+                        });
+
+                    parent
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                width: Val::Px(TITLE_HEIGHT as f32),
+                                height: Val::Px(TITLE_HEIGHT as f32),
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: BUTTON_NORMAL.into(),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "X",
+                                TextStyle {
+                                    font: asset_server.load(FONT),
+                                    font_size: BUTTON_FONT_SIZE as f32,
+                                    color: FONT_COLOR,
+                                },
+                            ));
+                        });
                 });
         })
         .id();

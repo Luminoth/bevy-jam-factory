@@ -76,6 +76,7 @@ fn main() {
 
     app.add_plugins((
         plugins::TiledMapPlugin,
+        plugins::TiledPickingBackend,
         plugins::SplashPlugin,
         plugins::MainMenuPlugin,
         plugins::PauseMenuPlugin,

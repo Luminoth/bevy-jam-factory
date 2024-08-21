@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::ui::button::*;
 
 #[allow(clippy::type_complexity)]
-pub fn update_buttons(
+pub fn update(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>),

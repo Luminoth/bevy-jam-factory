@@ -22,8 +22,13 @@ fn tiled_picking(
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
     mut output: EventWriter<PointerHits>,
 ) {
-    let (camera_entity, camera, camera_transform) = camera_query.single();
-    let window = window_query.single();
+    let Ok(window) = window_query.get_single() else {
+        return;
+    };
+
+    let Ok((camera_entity, camera, camera_transform)) = camera_query.get_single() else {
+        return;
+    };
 
     for (pointer_id, pointer_location) in
         pointers.iter().filter_map(|(pointer, pointer_location)| {

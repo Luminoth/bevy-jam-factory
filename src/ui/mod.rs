@@ -3,6 +3,7 @@ pub mod window;
 
 use bevy::prelude::*;
 
+use crate::components::ui::*;
 use button::*;
 use window::*;
 
@@ -14,7 +15,15 @@ pub fn create_inventory_ui(
     asset_server: Res<AssetServer>,
     window: &Window,
 ) {
-    let content_id = create_window(commands, &asset_server, window, (400, 200), "Inventory");
+    let content_id = create_window(
+        commands,
+        &asset_server,
+        window,
+        (400, 200),
+        "Inventory",
+        false,
+        InventoryWindow,
+    );
     commands.entity(content_id).with_children(|parent| {
         create_button(parent, &asset_server, "Button");
     });

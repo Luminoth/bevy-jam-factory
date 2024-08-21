@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use crate::state::{AppState, IsPaused};
 use crate::systems::ui;
@@ -17,7 +17,10 @@ impl Plugin for UiPlugin {
             )
             .add_systems(
                 Update,
-                (ui::show_object_info.run_if(ui::have_object_info),)
+                (
+                    ui::show_object_info.run_if(ui::have_object_info),
+                    ui::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),
+                )
                     .run_if(in_state(IsPaused::Running)),
             )
             .add_systems(OnExit(AppState::InGame), ui::teardown);

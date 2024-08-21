@@ -77,3 +77,7 @@ pub fn show_object_info(
         });
     });
 }
+
+pub fn show_inventory(mut window_query: Query<&mut Visibility, With<InventoryWindow>>) {
+    *window_query.single_mut() = Visibility::Visible;
+}

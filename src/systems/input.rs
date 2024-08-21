@@ -1,19 +1,16 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::components::{
-    camera::{CameraTransformQuery, MainCamera},
-    ui::IsPointerCaptured,
-};
+use crate::components::camera::{CameraTransformQuery, MainCamera};
 use crate::get_world_position_from_cursor_position;
-use crate::resources::game::TileDrag;
+use crate::resources::{game::TileDrag, ui::IsPointerCaptured};
 
 pub fn start_drag(
     mut commands: Commands,
+    is_pointer_captured: Res<IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    capture_query: Query<&IsPointerCaptured>,
 ) {
-    if capture_query.single().0 {
+    if is_pointer_captured.0 {
         return;
     }
 
@@ -32,16 +29,16 @@ pub fn start_drag(
 
 pub fn stop_drag(
     mut commands: Commands,
+    //is_pointer_captured: Res<IsPointerCaptured>,
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<CameraTransformQuery, With<MainCamera>>,
-    //capture_query: Query<&IsPointerCaptured>,
 ) {
     if tile_drag.is_none() {
         return;
     }
 
-    /*if capture_query.single().0 {
+    /*if is_pointer_captured.0 {
         return;
     }*/
 
@@ -58,16 +55,16 @@ pub fn stop_drag(
 }
 
 pub fn drag(
+    is_pointer_captured: Res<IsPointerCaptured>,
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    capture_query: Query<&IsPointerCaptured>,
 ) {
     let Some(mut tile_drag) = tile_drag else {
         return;
     };
 
-    if capture_query.single().0 {
+    if is_pointer_captured.0 {
         return;
     }
 

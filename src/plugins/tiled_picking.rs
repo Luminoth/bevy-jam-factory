@@ -5,8 +5,6 @@ use crate::components::{camera::MainCamera, tiled::TiledMapObjectLayer, tilemap:
 use crate::get_world_position_from_cursor_position;
 use crate::tilemap::get_tile_position;
 
-// TODO: this is currently plugged in but unused, it feels kind of wrong the way it's working
-
 #[derive(Clone)]
 pub struct TiledPickingBackend;
 impl Plugin for TiledPickingBackend {

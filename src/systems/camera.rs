@@ -1,20 +1,19 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::components::{
-    camera::*, tiled::TiledMapTileLayer, tilemap::TileMapSizeQuery, ui::IsPointerCaptured,
-};
+use crate::components::{camera::*, tiled::TiledMapTileLayer, tilemap::TileMapSizeQuery};
+use crate::resources::ui::IsPointerCaptured;
 
 const CAMERA_SPEED: f32 = 200.0;
 
 pub fn pan(
+    is_pointer_captured: Res<IsPointerCaptured>,
     _keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut camera_query: Query<CameraProjectionQueryMut, With<MainCamera>>,
     tilemap_query: Query<TileMapSizeQuery, With<TiledMapTileLayer>>,
-    capture_query: Query<&IsPointerCaptured>,
 ) {
-    if capture_query.single().0 {
+    if is_pointer_captured.0 {
         return;
     }
 

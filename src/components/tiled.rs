@@ -5,7 +5,6 @@ use bevy_ecs_tilemap::prelude::*;
 
 use crate::assets::tiled::*;
 
-/// Stores a list of tiled layers.
 #[derive(Component, Default)]
 pub struct TiledLayersStorage {
     pub storage: HashMap<u32, Entity>,

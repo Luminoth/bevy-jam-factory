@@ -7,7 +7,7 @@ use crate::game::inventory::InventoryData;
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);
 
-#[derive(Debug, Default, Resource)]
+#[derive(Debug, Default, Reflect, Resource)]
 pub struct TileDrag {
     pub tiles: HashSet<Entity>,
 }
@@ -20,5 +20,5 @@ impl TileDrag {
     }
 }
 
-#[derive(Debug, Resource, Deref)]
+#[derive(Debug, Reflect, Resource, Deref)]
 pub struct ObjectInfo(pub Entity);

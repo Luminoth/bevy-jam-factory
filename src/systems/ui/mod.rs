@@ -3,8 +3,8 @@ pub mod button;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::{egui, EguiContexts};
 
-use crate::components::{game::OnInGame, objects::Object, ui::*};
-use crate::resources::game::ObjectInfo;
+use crate::components::{objects::Object, ui::*};
+use crate::resources::{game::ObjectInfo, ui::*};
 use crate::ui::*;
 
 pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
@@ -12,12 +12,11 @@ pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
 }
 
 pub fn update_pointer_capture(
-    mut capture_query: Query<&mut IsPointerCaptured>,
+    mut is_pointer_captured: ResMut<IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     ui_window_query: Query<(&Node, &GlobalTransform, &ViewVisibility), With<UiWindow>>,
     mut contexts: EguiContexts,
 ) {
-    let mut is_pointer_captured = capture_query.single_mut();
     let window = window_query.single();
     let context = contexts.ctx_mut();
 
@@ -53,10 +52,12 @@ pub fn setup(
     create_object_info_ui(&mut commands, &asset_server, window);
     create_inventory_ui(&mut commands, &asset_server, window);
 
-    commands.spawn((IsPointerCaptured(false), OnInGame));
+    commands.init_resource::<IsPointerCaptured>();
 }
 
-pub fn teardown() {}
+pub fn teardown(mut commands: Commands) {
+    commands.remove_resource::<IsPointerCaptured>();
+}
 
 pub fn show_egui_object_info(
     mut commands: Commands,

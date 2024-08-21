@@ -5,7 +5,7 @@ use crate::components::{game::OnInGame, objects::Object, ui::*};
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;
 
-pub fn button_interaction(
+pub fn update_buttons(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>),
@@ -22,43 +22,6 @@ pub fn button_interaction(
             Interaction::None => {
                 *color = BUTTON_NORMAL.into();
             }
-        }
-    }
-}
-
-pub fn title_bar_interaction(
-    mut interaction_query: Query<
-        (&Interaction, &mut Transform),
-        (Changed<Interaction>, With<UiWindowTitleBar>),
-    >,
-) {
-    for (interaction, mut _transform) in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                info!("press title bar");
-            }
-            Interaction::None => {
-                // TODO: this isn't release
-                info!("release title bar");
-            }
-            _ => (),
-        }
-    }
-}
-
-pub fn close_button_interaction(
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<UiWindowCloseButton>)>,
-) {
-    for interaction in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                info!("press close button");
-            }
-            Interaction::None => {
-                // TODO: this isn't release
-                info!("release close button");
-            }
-            _ => (),
         }
     }
 }

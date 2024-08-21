@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_mod_picking::prelude::*;
 
 use crate::components::{game::OnInGame, ui::*};
 
@@ -66,24 +67,26 @@ fn create_ui_window(
                         },
                         ..default()
                     },
-                    Interaction::default(),
                     Name::new("Title Bar"),
-                    UiWindowTitleBar,
                 ))
                 .with_children(|parent| {
                     parent
-                        .spawn(NodeBundle {
-                            style: Style {
-                                width: Val::Px(content_size.0 as f32 - TITLE_HEIGHT as f32),
-                                height: Val::Px(TITLE_HEIGHT as f32),
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
+                        .spawn((
+                            NodeBundle {
+                                style: Style {
+                                    width: Val::Px(content_size.0 as f32 - TITLE_HEIGHT as f32),
+                                    height: Val::Px(TITLE_HEIGHT as f32),
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    ..default()
+                                },
+                                background_color: TITLE_BACKGROUND.into(),
                                 ..default()
                             },
-                            background_color: TITLE_BACKGROUND.into(),
-                            ..default()
-                        })
+                            On::<Pointer<Drag>>::run(move || info!("Title bar drag!")),
+                            UiWindowTitleBar,
+                        ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
                                 name,
@@ -109,6 +112,7 @@ fn create_ui_window(
                                 ..default()
                             },
                             Name::new("Close Button"),
+                            On::<Pointer<Click>>::run(move || info!("Close button clicked!")),
                             UiWindowCloseButton,
                         ))
                         .with_children(|parent| {
@@ -154,19 +158,22 @@ pub fn create_button(
     content: impl Into<String>,
 ) {
     parent
-        .spawn(ButtonBundle {
-            style: Style {
-                width: Val::Px(BUTTON_WIDTH as f32),
-                height: Val::Px(BUTTON_HEIGHT as f32),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    width: Val::Px(BUTTON_WIDTH as f32),
+                    height: Val::Px(BUTTON_HEIGHT as f32),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                border_color: BorderColor(Color::BLACK),
+                border_radius: BorderRadius::MAX,
+                background_color: BUTTON_NORMAL.into(),
                 ..default()
             },
-            border_color: BorderColor(Color::BLACK),
-            border_radius: BorderRadius::MAX,
-            background_color: BUTTON_NORMAL.into(),
-            ..default()
-        })
+            On::<Pointer<Click>>::run(move || info!("Button clicked!")),
+        ))
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 content.into(),

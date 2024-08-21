@@ -14,7 +14,8 @@ pub fn create_button(
     parent: &mut ChildBuilder,
     asset_server: &Res<AssetServer>,
     content: impl Into<String>,
-) {
+    on_click: On<Pointer<Click>>,
+) -> Entity {
     parent
         .spawn((
             ButtonBundle {
@@ -30,16 +31,20 @@ pub fn create_button(
                 background_color: BUTTON_NORMAL.into(),
                 ..default()
             },
-            On::<Pointer<Click>>::run(move || info!("Button clicked!")),
+            on_click,
         ))
         .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                content.into(),
-                TextStyle {
-                    font: asset_server.load(FONT),
-                    font_size: BUTTON_FONT_SIZE as f32,
-                    color: FONT_COLOR,
-                },
+            parent.spawn((
+                TextBundle::from_section(
+                    content.into(),
+                    TextStyle {
+                        font: asset_server.load(FONT),
+                        font_size: BUTTON_FONT_SIZE as f32,
+                        color: FONT_COLOR,
+                    },
+                ),
+                Pickable::IGNORE,
             ));
-        });
+        })
+        .id()
 }

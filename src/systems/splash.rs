@@ -4,6 +4,7 @@ use bevy_egui::{egui, EguiContexts};
 use crate::components::splash::*;
 use crate::resources::splash::*;
 use crate::state::AppState;
+use crate::ui::*;
 
 pub fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     info!("entering Splash state");
@@ -16,29 +17,17 @@ pub fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     // TODO: fade-in / fade-out
     // TODO: multiple splash screens (PIGSquad, Bevy)
 
-    commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    width: Val::Percent(100.0),
-                    ..default()
-                },
+    let canvas = create_canvas(&mut commands, "Main Menu");
+    commands.entity(canvas).with_children(|parent| {
+        parent.spawn(ImageBundle {
+            style: Style {
+                width: Val::Px(200.0),
                 ..default()
             },
-            OnSplashScreen,
-        ))
-        .with_children(|parent| {
-            parent.spawn(ImageBundle {
-                style: Style {
-                    width: Val::Px(200.0),
-                    ..default()
-                },
-                image: UiImage::new(image),
-                ..default()
-            });
+            image: UiImage::new(image),
+            ..default()
         });
+    });
 
     commands.insert_resource(SplashTimer(Timer::from_seconds(5.0, TimerMode::Once)));
 }

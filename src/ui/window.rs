@@ -89,8 +89,19 @@ where
                             background_color: TITLE_BACKGROUND.into(),
                             ..default()
                         },
-                        On::<Pointer<Drag>>::run(move || info!("Title bar drag!")),
-                        UiWindowTitleBar(/*ui_window*/),
+                        On::<Pointer<Drag>>::run(
+                            |event: Listener<Pointer<Drag>>,
+                             mut window_query: Query<&mut Transform, With<UiWindow>>,
+                             titlebar_query: Query<&UiWindowTitleBar>| {
+                                let titlebar = titlebar_query.get(event.target).unwrap();
+                                let mut window_transform = window_query.get_mut(titlebar.0).unwrap();
+
+                                // TODO: this isn't working ?
+                                info!("dragging window by {}", event.delta);
+                                window_transform.translation += event.delta.extend(0.0);
+                            },
+                        ),
+                        UiWindowTitleBar(ui_window),
                     ))
                     .with_children(|parent| {
                         parent.spawn((TextBundle::from_section(

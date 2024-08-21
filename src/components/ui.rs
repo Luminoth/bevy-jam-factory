@@ -4,7 +4,7 @@ use bevy::prelude::*;
 pub struct UiWindow;
 
 #[derive(Debug, Component)]
-pub struct UiWindowTitleBar(/*pub Entity*/);
+pub struct UiWindowTitleBar(pub Entity);
 
 #[derive(Debug, Component)]
 pub struct UiWindowCloseButton(pub Entity);

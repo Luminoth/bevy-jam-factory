@@ -73,7 +73,7 @@ where
                     ..default()
                 },
                 Name::new("Title Bar"),
-                     Pickable::IGNORE,
+                Pickable::IGNORE,
             ))
             .with_children(|parent| {
                 parent
@@ -94,6 +94,13 @@ where
                             |event: Listener<Pointer<Drag>>,
                              mut window_query: Query<&mut Style, With<UiWindow>>,
                              titlebar_query: Query<&UiWindowTitleBar>| {
+                                if event.target != event.listener() {
+                                    return;
+                                }
+                                if event.button != PointerButton::Primary {
+                                    return;
+                                }
+
                                 let titlebar = titlebar_query.get(event.target).unwrap();
                                 let mut window_style = window_query.get_mut(titlebar.0).unwrap();
 
@@ -137,6 +144,13 @@ where
                             |event: Listener<Pointer<Click>>,
                              mut window_query: Query<&mut Visibility, With<UiWindow>>,
                              close_button_query: Query<&UiWindowCloseButton>| {
+                                if event.target != event.listener() {
+                                    return;
+                                }
+                                if event.button != PointerButton::Primary {
+                                    return;
+                                }
+
                                 let close_button = close_button_query.get(event.target).unwrap();
                                 let mut window_visibility = window_query.get_mut(close_button.0).unwrap();
                                 *window_visibility = Visibility::Hidden;

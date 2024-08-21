@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, objects::*, tiled::*};
 use crate::game::objects::ObjectData;
+use crate::resources::game::ObjectInfo;
 
 const MIN_TILEMAP_WIDTH: u32 = 25;
 const MIN_TILEMAP_HEIGHT: u32 = 25;
@@ -436,6 +438,19 @@ fn process_object_layer(
                     },
                     Name::new(format!("Object ({},{})", x, y)),
                     Object(object_data),
+                    PickableBundle::default(),
+                    On::<Pointer<Click>>::run(
+                        |event: Listener<Pointer<Click>>, mut commands: Commands| {
+                            if event.target != event.listener() {
+                                return;
+                            }
+                            if event.button != PointerButton::Secondary {
+                                return;
+                            }
+
+                            commands.insert_resource(ObjectInfo(event.target));
+                        },
+                    ),
                 ))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);

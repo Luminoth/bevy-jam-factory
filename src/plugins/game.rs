@@ -18,7 +18,6 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     camera::pan,
-                    input::tile_info.run_if(input_just_released(MouseButton::Right)),
                     input::start_drag.run_if(input_just_pressed(MouseButton::Left)),
                     input::stop_drag.run_if(input_just_released(MouseButton::Left)),
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing

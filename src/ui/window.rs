@@ -1,24 +1,15 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::components::{game::OnInGame, ui::*};
-
-const FONT: &str = "fonts/FiraSans-Bold.ttf";
-const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+use super::{button::*, *};
+use crate::components::ui::*;
 
 const WINDOW_BACKGROUND: Color = Color::srgba(0.15, 0.15, 0.15, 0.8);
 const TITLE_HEIGHT: usize = 40;
 const TITLE_BACKGROUND: Color = Color::srgb(0.1, 0.1, 0.1);
 const TITLE_FONT_SIZE: usize = 40;
 
-const BUTTON_WIDTH: usize = 150;
-const BUTTON_HEIGHT: usize = 50;
-pub const BUTTON_NORMAL: Color = Color::srgb(0.15, 0.15, 0.15);
-pub const BUTTON_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
-pub const BUTTON_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
-const BUTTON_FONT_SIZE: usize = 40;
-
-fn create_ui_window(
+pub fn create_window(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     window: &Window,
@@ -53,7 +44,6 @@ fn create_ui_window(
             },
             Name::new(format!("UiWindow - {}", name)),
             UiWindow,
-            OnInGame,
         ))
         .with_children(|parent| {
             parent
@@ -150,49 +140,4 @@ fn create_ui_window(
     commands.entity(ui_window).push_children(&[content]);
 
     content
-}
-
-pub fn create_button(
-    parent: &mut ChildBuilder,
-    asset_server: &Res<AssetServer>,
-    content: impl Into<String>,
-) {
-    parent
-        .spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(BUTTON_WIDTH as f32),
-                    height: Val::Px(BUTTON_HEIGHT as f32),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                border_color: BorderColor(Color::BLACK),
-                border_radius: BorderRadius::MAX,
-                background_color: BUTTON_NORMAL.into(),
-                ..default()
-            },
-            On::<Pointer<Click>>::run(move || info!("Button clicked!")),
-        ))
-        .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                content.into(),
-                TextStyle {
-                    font: asset_server.load(FONT),
-                    font_size: BUTTON_FONT_SIZE as f32,
-                    color: FONT_COLOR,
-                },
-            ));
-        });
-}
-
-pub fn create_inventory_ui(
-    commands: &mut Commands,
-    asset_server: Res<AssetServer>,
-    window: &Window,
-) {
-    let content_id = create_ui_window(commands, &asset_server, window, (400, 200), "Inventory");
-    commands.entity(content_id).with_children(|parent| {
-        create_button(parent, &asset_server, "Button");
-    });
 }

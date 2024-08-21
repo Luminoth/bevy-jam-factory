@@ -15,7 +15,11 @@ impl Plugin for MainMenuPlugin {
             )
             .add_systems(
                 OnExit(AppState::MainMenu),
-                (main_menu::exit, cleanup_state::<OnMainMenu>),
+                (
+                    main_menu::exit,
+                    cleanup_state::<OnMainMenu>,
+                    cleanup_state::<Node>,
+                ),
             );
     }
 }

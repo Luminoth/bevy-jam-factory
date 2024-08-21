@@ -30,7 +30,7 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 OnExit(AppState::InGame),
-                (game::exit, cleanup_state::<OnInGame>),
+                (game::exit, cleanup_state::<OnInGame>, cleanup_state::<Node>),
             );
     }
 }

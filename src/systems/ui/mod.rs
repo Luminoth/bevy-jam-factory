@@ -1,3 +1,5 @@
+pub mod button;
+
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::{egui, EguiContexts};
 
@@ -5,31 +7,11 @@ use crate::components::{game::OnInGame, objects::Object, ui::*};
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;
 
-pub fn update_buttons(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<Button>),
-    >,
-) {
-    for (interaction, mut color) in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                *color = BUTTON_PRESSED.into();
-            }
-            Interaction::Hovered => {
-                *color = BUTTON_HOVER.into();
-            }
-            Interaction::None => {
-                *color = BUTTON_NORMAL.into();
-            }
-        }
-    }
-}
-
 pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
     object.is_some()
 }
 
+// TODO: this should be moved to a picking backend
 pub fn update_pointer_capture(
     mut capture_query: Query<&mut IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,

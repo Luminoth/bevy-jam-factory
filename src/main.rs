@@ -13,6 +13,7 @@ mod ui;
 
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
+use bevy_mod_picking::prelude::*;
 
 #[inline]
 pub fn get_world_position_from_cursor_position(
@@ -47,6 +48,7 @@ fn main() {
         //bevy::render::diagnostic::RenderDiagnosticsPlugin,
         bevy::diagnostic::SystemInformationDiagnosticsPlugin,
         // third-party plugins
+        DefaultPickingPlugins,
         TilemapPlugin,
         bevy_egui::EguiPlugin,
         // inspectors

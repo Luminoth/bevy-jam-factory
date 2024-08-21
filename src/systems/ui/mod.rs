@@ -70,7 +70,7 @@ pub fn show_egui_object_info(
 
     egui::Window::new("Object Info").show(contexts.ctx_mut(), |ui| {
         ui.vertical(|ui| {
-            object.show_info(ui);
+            object.show_egui_info(ui);
 
             if ui.button("Close").clicked() {
                 commands.remove_resource::<ObjectInfo>();

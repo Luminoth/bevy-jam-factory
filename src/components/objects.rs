@@ -7,7 +7,7 @@ use crate::game::objects::ObjectData;
 pub struct Object(pub ObjectData);
 
 impl Object {
-    pub fn show_info(&self, ui: &mut Ui) {
+    pub fn show_egui_info(&self, ui: &mut Ui) {
         ui.label(format!("Object Type: {}", self.get_type()));
         self.0.show_info(ui);
     }

@@ -55,7 +55,7 @@ impl ObjectData {
         }
     }
 
-    pub fn show_info(&self, ui: &mut Ui) {
+    pub fn show_egui_info(&self, ui: &mut Ui) {
         match self {
             Self::Resources(r#type, amount) => {
                 ui.label(format!("Resource Type: {}", r#type));

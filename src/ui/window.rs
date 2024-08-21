@@ -40,6 +40,7 @@ where
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::Center,
+                    position_type: PositionType::Absolute,
                     left: Val::Px(window_half_width - half_width),
                     top: Val::Px(window_half_height - half_height),
                     ..default()
@@ -91,14 +92,18 @@ where
                         },
                         On::<Pointer<Drag>>::run(
                             |event: Listener<Pointer<Drag>>,
-                             mut window_query: Query<&mut Transform, With<UiWindow>>,
+                             mut window_query: Query<&mut Style, With<UiWindow>>,
                              titlebar_query: Query<&UiWindowTitleBar>| {
                                 let titlebar = titlebar_query.get(event.target).unwrap();
-                                let mut window_transform = window_query.get_mut(titlebar.0).unwrap();
+                                let mut window_style = window_query.get_mut(titlebar.0).unwrap();
 
-                                // TODO: this isn't working ?
-                                info!("dragging window by {}", event.delta);
-                                window_transform.translation += event.delta.extend(0.0);
+                                if let Val::Px(left) = &mut window_style.left {
+                                    *left += event.delta.x;
+                                }
+
+                                if let Val::Px(top) = &mut window_style.top {
+                                    *top += event.delta.y;
+                                }
                             },
                         ),
                         UiWindowTitleBar(ui_window),

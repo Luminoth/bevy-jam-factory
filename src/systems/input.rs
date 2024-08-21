@@ -10,8 +10,9 @@ use crate::get_world_position_from_cursor_position;
 use crate::resources::game::{ObjectInfo, TileDrag};
 use crate::tilemap::get_tile_position;
 
-// TODO: show / hide inventory with I
+// TODO: show inventory with I
 
+// TODO: this should be moved to a picking backend
 pub fn tile_info(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,

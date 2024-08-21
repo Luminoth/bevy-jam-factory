@@ -11,7 +11,6 @@ pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
     object.is_some()
 }
 
-// TODO: this should be moved to a picking backend
 pub fn update_pointer_capture(
     mut capture_query: Query<&mut IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,

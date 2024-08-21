@@ -50,14 +50,15 @@ pub fn setup(
 ) {
     let window = window_query.single();
 
-    create_inventory_ui(&mut commands, asset_server, window);
+    create_object_info_ui(&mut commands, &asset_server, window);
+    create_inventory_ui(&mut commands, &asset_server, window);
 
     commands.spawn((IsPointerCaptured(false), OnInGame));
 }
 
 pub fn teardown() {}
 
-pub fn show_object_info(
+pub fn show_egui_object_info(
     mut commands: Commands,
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
@@ -76,6 +77,10 @@ pub fn show_object_info(
             }
         });
     });
+}
+
+pub fn _show_object_info(mut window_query: Query<&mut Visibility, With<ObjectInfoWindow>>) {
+    *window_query.single_mut() = Visibility::Visible;
 }
 
 pub fn show_inventory(mut window_query: Query<&mut Visibility, With<InventoryWindow>>) {

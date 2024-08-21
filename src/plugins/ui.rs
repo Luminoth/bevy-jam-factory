@@ -18,7 +18,8 @@ impl Plugin for UiPlugin {
             .add_systems(
                 Update,
                 (
-                    ui::show_object_info.run_if(ui::have_object_info),
+                    ui::show_egui_object_info.run_if(ui::have_object_info),
+                    //ui::show_object_info.run_if(ui::have_object_info),
                     ui::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),
                 )
                     .run_if(in_state(IsPaused::Running)),

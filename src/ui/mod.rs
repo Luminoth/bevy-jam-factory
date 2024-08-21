@@ -30,14 +30,33 @@ pub fn create_canvas(commands: &mut Commands, name: impl Into<String>) -> Entity
         .id()
 }
 
-pub fn create_inventory_ui(
+pub fn create_object_info_ui(
     commands: &mut Commands,
-    asset_server: Res<AssetServer>,
+    asset_server: &Res<AssetServer>,
     window: &Window,
 ) {
     let content_id = create_window(
         commands,
-        &asset_server,
+        asset_server,
+        window,
+        (400, 200),
+        "Object Info",
+        false,
+        ObjectInfoWindow,
+    );
+    commands.entity(content_id).with_children(|_parent| {
+        // TODO:
+    });
+}
+
+pub fn create_inventory_ui(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    window: &Window,
+) {
+    let content_id = create_window(
+        commands,
+        asset_server,
         window,
         (400, 200),
         "Inventory",
@@ -47,7 +66,7 @@ pub fn create_inventory_ui(
     commands.entity(content_id).with_children(|parent| {
         create_button(
             parent,
-            &asset_server,
+            asset_server,
             "Button",
             On::<Pointer<Click>>::run(move || info!("Button clicked!")),
         );

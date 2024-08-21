@@ -17,4 +17,7 @@ pub struct UiWindowContent;
 pub struct IsPointerCaptured(pub bool);
 
 #[derive(Debug, Component)]
+pub struct ObjectInfoWindow;
+
+#[derive(Debug, Component)]
 pub struct InventoryWindow;

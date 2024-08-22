@@ -4,6 +4,8 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::{egui, EguiContexts};
 
 use crate::components::{objects::Object, ui::*};
+use crate::events::ui::*;
+use crate::game::objects::ObjectData;
 use crate::resources::{game::ObjectInfo, ui::*};
 use crate::ui::*;
 
@@ -78,6 +80,32 @@ pub fn show_egui_object_info(
             }
         });
     });
+}
+
+pub fn update_object_info_ui_handler(
+    mut events: EventReader<UpdateObjectInfoUIEvent>,
+    object: Res<ObjectInfo>,
+    object_query: Query<&Object>,
+    mut resources_section: Query<&mut Visibility, With<ObjectInfoResources>>,
+) {
+    if events.is_empty() {
+        return;
+    }
+
+    let object = object_query
+        .get(object.0)
+        .expect("Object tile missing Object!");
+
+    match object.0 {
+        ObjectData::Resources(_, _) => {
+            // TODO: update everything else
+
+            let mut visibility = resources_section.single_mut();
+            *visibility = Visibility::Visible;
+        }
+    }
+
+    events.clear();
 }
 
 pub fn _show_object_info(mut window_query: Query<&mut Visibility, With<ObjectInfoWindow>>) {

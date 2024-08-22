@@ -16,4 +16,7 @@ pub struct UiWindowContent;
 pub struct ObjectInfoWindow;
 
 #[derive(Debug, Component)]
+pub struct ObjectInfoResources;
+
+#[derive(Debug, Component)]
 pub struct InventoryWindow;

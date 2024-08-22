@@ -44,8 +44,21 @@ pub fn create_object_info_ui(
         false,
         ObjectInfoWindow,
     );
-    commands.entity(content_id).with_children(|_parent| {
-        // TODO:
+    commands.entity(content_id).with_children(|parent| {
+        // Resources
+        parent.spawn((
+            NodeBundle {
+                style: Style {
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                visibility: Visibility::Hidden,
+                ..default()
+            },
+            Name::new("Resources"),
+            ObjectInfoResources,
+        ));
     });
 }
 

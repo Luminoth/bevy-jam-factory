@@ -4,6 +4,7 @@ use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, objects::*, tiled::*};
+use crate::events::ui::UpdateObjectInfoUIEvent;
 use crate::game::objects::ObjectData;
 use crate::resources::game::ObjectInfo;
 
@@ -440,7 +441,9 @@ fn process_object_layer(
                     Object(object_data),
                     PickableBundle::default(),
                     On::<Pointer<Click>>::run(
-                        |event: Listener<Pointer<Click>>, mut commands: Commands| {
+                        |event: Listener<Pointer<Click>>,
+                         mut commands: Commands,
+                         mut object_info_events: EventWriter<UpdateObjectInfoUIEvent>| {
                             if event.target != event.listener() {
                                 return;
                             }
@@ -448,7 +451,10 @@ fn process_object_layer(
                                 return;
                             }
 
+                            // TODO: if we're sending this in an event,
+                            // do we even need the resource? just send the entity in the event?
                             commands.insert_resource(ObjectInfo(event.target));
+                            object_info_events.send(UpdateObjectInfoUIEvent);
                         },
                     ),
                 ))

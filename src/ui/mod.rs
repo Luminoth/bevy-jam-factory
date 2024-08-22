@@ -85,9 +85,12 @@ pub fn create_object_info_ui(
         });
 
         // Resources
-        // TODO: this needs to start hidden
         create_column_container(parent)
-            .insert((Name::new("Resources"), ObjectInfoResources))
+            .insert((
+                Visibility::Hidden,
+                Name::new("Resources"),
+                ObjectInfoResources,
+            ))
             .with_children(|parent| {
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, asset_server, "Resource Type:", 14.0, FONT_COLOR);

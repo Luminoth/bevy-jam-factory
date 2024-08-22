@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use super::*;
+use super::{label::*, *};
 
 const BUTTON_WIDTH: usize = 150;
 const BUTTON_HEIGHT: usize = 50;
 pub const BUTTON_NORMAL: Color = Color::srgb(0.15, 0.15, 0.15);
 pub const BUTTON_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
 pub const BUTTON_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
-pub const BUTTON_FONT_SIZE: usize = 40;
+const BUTTON_FONT_SIZE: usize = 32;
 
 pub fn create_button(
     parent: &mut ChildBuilder,
@@ -34,17 +34,13 @@ pub fn create_button(
             on_click,
         ))
         .with_children(|parent| {
-            parent.spawn((
-                TextBundle::from_section(
-                    content.into(),
-                    TextStyle {
-                        font: asset_server.load(FONT),
-                        font_size: BUTTON_FONT_SIZE as f32,
-                        color: FONT_COLOR,
-                    },
-                ),
-                Pickable::IGNORE,
-            ));
+            create_label(
+                parent,
+                asset_server,
+                content.into(),
+                BUTTON_FONT_SIZE as f32,
+                FONT_COLOR,
+            );
         })
         .id()
 }

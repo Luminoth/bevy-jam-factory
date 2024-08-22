@@ -3,8 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
-use crate::components::{game::OnInGame, objects::*, tiled::*};
-use crate::events::ui::UpdateObjectInfoUIEvent;
+use crate::components::{game::OnInGame, objects::*, tiled::*, ui::ObjectInfoWindow};
 use crate::game::objects::ObjectData;
 use crate::resources::game::ObjectInfo;
 
@@ -423,42 +422,46 @@ fn process_object_layer(
                 x: x as u32,
                 y: tiled_map.map.height - 1 - y as u32,
             };
-            let tile_entity = parent
-                .spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(layer_entity_id),
-                        texture_index: TileTextureIndex(texture_index),
-                        flip: TileFlip {
-                            x: object_tile_data.flip_h,
-                            y: object_tile_data.flip_v,
-                            d: object_tile_data.flip_d,
-                        },
-                        visible: TileVisible(object.visible),
-                        ..Default::default()
-                    },
-                    Name::new(format!("Object ({},{})", x, y)),
-                    Object(object_data),
-                    PickableBundle::default(),
-                    On::<Pointer<Click>>::run(
-                        |event: Listener<Pointer<Click>>,
-                         mut commands: Commands,
-                         mut object_info_events: EventWriter<UpdateObjectInfoUIEvent>| {
-                            if event.target != event.listener() {
-                                return;
-                            }
-                            if event.button != PointerButton::Secondary {
-                                return;
-                            }
+            let tile_entity =
+                parent
+                    .spawn(
+                        (
+                            TileBundle {
+                                position: tile_pos,
+                                tilemap_id: TilemapId(layer_entity_id),
+                                texture_index: TileTextureIndex(texture_index),
+                                flip: TileFlip {
+                                    x: object_tile_data.flip_h,
+                                    y: object_tile_data.flip_v,
+                                    d: object_tile_data.flip_d,
+                                },
+                                visible: TileVisible(object.visible),
+                                ..Default::default()
+                            },
+                            Name::new(format!("Object ({},{})", x, y)),
+                            Object(object_data),
+                            PickableBundle::default(),
+                            On::<Pointer<Click>>::run(
+                                |event: Listener<Pointer<Click>>,
+                                 mut commands: Commands,
+                                 mut window_query: Query<
+                                    &mut Visibility,
+                                    With<ObjectInfoWindow>,
+                                >| {
+                                    if event.target != event.listener() {
+                                        return;
+                                    }
+                                    if event.button != PointerButton::Secondary {
+                                        return;
+                                    }
 
-                            // TODO: if we're sending this in an event,
-                            // do we even need the resource? just send the entity in the event?
-                            commands.insert_resource(ObjectInfo(event.target));
-                            object_info_events.send(UpdateObjectInfoUIEvent);
-                        },
-                    ),
-                ))
-                .id();
+                                    commands.insert_resource(ObjectInfo(event.target));
+                                    *window_query.single_mut() = Visibility::Visible;
+                                },
+                            ),
+                        ),
+                    )
+                    .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
     });

@@ -1,16 +1,23 @@
 pub mod button;
 
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::EguiContexts;
 
 use crate::components::{objects::Object, ui::*};
-use crate::events::ui::*;
 use crate::game::objects::ObjectData;
 use crate::resources::{game::ObjectInfo, ui::*};
 use crate::ui::*;
 
-pub fn have_object_info(object: Option<Res<ObjectInfo>>) -> bool {
-    object.is_some()
+pub fn should_update_object_info_ui(
+    object: Option<Res<ObjectInfo>>,
+    window_query: Query<&ViewVisibility, With<ObjectInfoWindow>>,
+) -> bool {
+    let window_visible = window_query
+        .get_single()
+        .map(|visible| visible.get())
+        .unwrap_or_default();
+
+    object.is_some() && window_visible
 }
 
 pub fn update_pointer_capture(
@@ -61,55 +68,25 @@ pub fn teardown(mut commands: Commands) {
     commands.remove_resource::<IsPointerCaptured>();
 }
 
-pub fn show_egui_object_info(
-    mut commands: Commands,
-    object: Res<ObjectInfo>,
-    object_query: Query<&Object>,
-    mut contexts: EguiContexts,
-) {
-    let object = object_query
-        .get(object.0)
-        .expect("Object tile missing Object!");
-
-    egui::Window::new("Object Info").show(contexts.ctx_mut(), |ui| {
-        ui.vertical(|ui| {
-            object.show_egui_info(ui);
-
-            if ui.button("Close").clicked() {
-                commands.remove_resource::<ObjectInfo>();
-            }
-        });
-    });
-}
-
-pub fn update_object_info_ui_handler(
-    mut events: EventReader<UpdateObjectInfoUIEvent>,
+pub fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
     mut resources_section: Query<&mut Visibility, With<ObjectInfoResources>>,
 ) {
-    if events.is_empty() {
-        return;
-    }
-
     let object = object_query
         .get(object.0)
         .expect("Object tile missing Object!");
 
     match object.0 {
         ObjectData::Resources(_, _) => {
-            // TODO: update everything else
+            // TODO: update Resource Type
+
+            // TODO: update Resource Amount
 
             let mut visibility = resources_section.single_mut();
-            *visibility = Visibility::Visible;
+            *visibility = Visibility::Inherited;
         }
     }
-
-    events.clear();
-}
-
-pub fn _show_object_info(mut window_query: Query<&mut Visibility, With<ObjectInfoWindow>>) {
-    *window_query.single_mut() = Visibility::Visible;
 }
 
 pub fn show_inventory(mut window_query: Query<&mut Visibility, With<InventoryWindow>>) {

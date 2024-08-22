@@ -17,8 +17,7 @@ pub fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     // TODO: fade-in / fade-out
     // TODO: multiple splash screens (PIGSquad, Bevy)
 
-    let canvas = create_canvas(&mut commands, "Main Menu");
-    commands.entity(canvas).with_children(|parent| {
+    create_canvas(&mut commands, "Main Menu").with_children(|parent| {
         parent.spawn(ImageBundle {
             style: Style {
                 width: Val::Px(200.0),

@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use bevy::prelude::*;
-use bevy_egui::egui::Ui;
 
 use crate::tiled::*;
 
@@ -49,18 +48,9 @@ impl ObjectData {
         }
     }
 
-    pub fn get_type(&self) -> ObjectType {
+    pub fn _get_type(&self) -> ObjectType {
         match self {
             Self::Resources(..) => ObjectType::Resources,
-        }
-    }
-
-    pub fn show_egui_info(&self, ui: &mut Ui) {
-        match self {
-            Self::Resources(r#type, amount) => {
-                ui.label(format!("Resource Type: {}", r#type));
-                ui.label(format!("Amount: {}", amount));
-            }
         }
     }
 }

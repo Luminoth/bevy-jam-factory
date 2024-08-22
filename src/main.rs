@@ -2,7 +2,6 @@
 
 mod assets;
 mod components;
-mod events;
 mod game;
 mod plugins;
 mod resources;

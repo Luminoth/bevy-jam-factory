@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use super::{button::*, *};
+use super::{button::*, label::*, *};
 use crate::components::ui::*;
 
 const WINDOW_BACKGROUND: Color = Color::srgba(0.15, 0.15, 0.15, 0.8);
@@ -116,14 +116,7 @@ where
                         UiWindowTitleBar(ui_window),
                     ))
                     .with_children(|parent| {
-                        parent.spawn((TextBundle::from_section(
-                            name,
-                            TextStyle {
-                                font: asset_server.load(FONT),
-                                font_size: TITLE_FONT_SIZE as f32,
-                                color: FONT_COLOR,
-                            },
-                        ),      Pickable::IGNORE,));
+                        create_label(parent, asset_server, name, TITLE_FONT_SIZE as f32, FONT_COLOR);
                     });
 
                 parent
@@ -136,6 +129,9 @@ where
                                 align_items: AlignItems::Center,
                                 ..default()
                             },
+                            // TODO: we can't make this any other color
+                            // because the button::update system forces it back
+                            // and that's probably not the best thing to be doing
                             background_color: BUTTON_NORMAL.into(),
                             ..default()
                         },
@@ -159,16 +155,7 @@ where
                         UiWindowCloseButton(ui_window),
                     ))
                     .with_children(|parent| {
-                        parent.spawn((TextBundle::from_section(
-                            "X",
-                            TextStyle {
-                                font: asset_server.load(FONT),
-                                font_size: BUTTON_FONT_SIZE as f32,
-                                color: FONT_COLOR,
-                            },
-                        ),
-                        Pickable::IGNORE,
-                        ));
+                        create_label(parent, asset_server, "X", 24.0, FONT_COLOR);
                     });
             });
     });
@@ -188,6 +175,7 @@ where
             },
             Name::new("Content"),
             UiWindowContent,
+            Pickable::IGNORE,
         ))
         .id();
 

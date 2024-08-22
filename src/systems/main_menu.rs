@@ -11,8 +11,7 @@ pub fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
     commands.spawn((Camera2dBundle::default(), OnMainMenu));
 
-    let canvas = create_canvas(&mut commands, "Main Menu");
-    commands.entity(canvas).with_children(|parent| {
+    create_canvas(&mut commands, "Main Menu").with_children(|parent| {
         create_button(
             parent,
             &asset_server,

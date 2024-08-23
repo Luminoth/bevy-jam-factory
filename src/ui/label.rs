@@ -11,7 +11,6 @@ pub fn create_label<'a>(
     color: Color,
 ) -> EntityCommands<'a> {
     parent.spawn((
-        TextBundle::default(),
         TextBundle::from_section(
             content.into(),
             TextStyle {

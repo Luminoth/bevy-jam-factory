@@ -13,10 +13,7 @@ use window::*;
 pub const FONT: &str = "fonts/FiraSans-Bold.ttf";
 pub const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
-pub fn create_canvas<'a>(
-    commands: &'a mut Commands,
-    name: impl Into<String>,
-) -> EntityCommands<'a> {
+pub fn create_canvas<'a>(commands: &'a mut Commands, name: impl AsRef<str>) -> EntityCommands<'a> {
     commands.spawn((
         NodeBundle {
             style: Style {
@@ -29,7 +26,7 @@ pub fn create_canvas<'a>(
             },
             ..default()
         },
-        Name::new(name.into()),
+        Name::new(format!("Ui Canvas - {}", name.as_ref())),
         Pickable::IGNORE,
     ))
 }
@@ -45,6 +42,7 @@ pub fn create_column_container<'a>(parent: &'a mut ChildBuilder) -> EntityComman
             },
             ..default()
         },
+        Name::new("Column"),
         Pickable::IGNORE,
     ))
 }
@@ -60,6 +58,7 @@ pub fn create_row_container<'a>(parent: &'a mut ChildBuilder) -> EntityCommands<
             },
             ..default()
         },
+        Name::new("Row"),
         Pickable::IGNORE,
     ))
 }
@@ -80,8 +79,15 @@ pub fn create_object_info_ui(
     );
     commands.entity(content_id).with_children(|parent| {
         create_row_container(parent).with_children(|parent| {
+            create_label(parent, asset_server, "Object ID:", 14.0, FONT_COLOR);
+            create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR)
+                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectId));
+        });
+
+        create_row_container(parent).with_children(|parent| {
             create_label(parent, asset_server, "Object Type:", 14.0, FONT_COLOR);
-            create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR);
+            create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR)
+                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectType));
         });
 
         // Resources
@@ -94,12 +100,15 @@ pub fn create_object_info_ui(
             .with_children(|parent| {
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, asset_server, "Resource Type:", 14.0, FONT_COLOR);
-                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR);
+                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR).insert(
+                        ObjectInfoResourcesDataUI(ObjectInfoResourcesData::ResourceType),
+                    );
                 });
 
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, asset_server, "Amount:", 14.0, FONT_COLOR);
-                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR);
+                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR)
+                        .insert(ObjectInfoResourcesDataUI(ObjectInfoResourcesData::Amount));
                 });
             });
     });

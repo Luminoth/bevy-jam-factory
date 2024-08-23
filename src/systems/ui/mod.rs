@@ -71,19 +71,43 @@ pub fn teardown(mut commands: Commands) {
 pub fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
-    mut resources_section: Query<&mut Visibility, With<ObjectInfoResources>>,
+    mut text_set: ParamSet<(
+        Query<(&mut Text, &ObjectInfoDataUI)>,
+        Query<(&mut Text, &ObjectInfoResourcesDataUI)>,
+    )>,
+    mut resources_section_query: Query<&mut Visibility, With<ObjectInfoResources>>,
 ) {
     let object = object_query
         .get(object.0)
         .expect("Object tile missing Object!");
 
-    match object.0 {
-        ObjectData::Resources(_, _) => {
-            // TODO: update Resource Type
+    // TODO: we should only update the fields that have changed
 
-            // TODO: update Resource Amount
+    for (mut text, data) in text_set.p0().iter_mut() {
+        match data.0 {
+            ObjectInfoData::ObjectId => {
+                text.sections.get_mut(0).unwrap().value = format!("{}", object.get_id());
+            }
+            ObjectInfoData::ObjectType => {
+                text.sections.get_mut(0).unwrap().value = format!("{}", object.get_type());
+            }
+        }
+    }
 
-            let mut visibility = resources_section.single_mut();
+    match &object.0 {
+        ObjectData::Resources { r#type, amount, .. } => {
+            for (mut text, data) in text_set.p1().iter_mut() {
+                match data.0 {
+                    ObjectInfoResourcesData::ResourceType => {
+                        text.sections.get_mut(0).unwrap().value = format!("{}", r#type);
+                    }
+                    ObjectInfoResourcesData::Amount => {
+                        text.sections.get_mut(0).unwrap().value = format!("{}", amount);
+                    }
+                }
+            }
+
+            let mut visibility = resources_section_query.single_mut();
             *visibility = Visibility::Inherited;
         }
     }

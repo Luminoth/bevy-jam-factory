@@ -16,7 +16,11 @@ pub enum ObjectType {
 
 #[derive(Debug, Clone, PartialEq, Eq, strum::Display)]
 pub enum ObjectData {
-    Resources(ResourceType, u32),
+    Resources {
+        id: u32,
+        r#type: ResourceType,
+        amount: u32,
+    },
 }
 
 impl ObjectData {
@@ -43,14 +47,24 @@ impl ObjectData {
 
                 let amount = require_object_int_property(object, "Amount")?.max(0);
 
-                Ok(Self::Resources(resource_type, amount as u32))
+                Ok(Self::Resources {
+                    id: object.id(),
+                    r#type: resource_type,
+                    amount: amount as u32,
+                })
             }
         }
     }
 
-    pub fn _get_type(&self) -> ObjectType {
+    pub fn get_id(&self) -> u32 {
         match self {
-            Self::Resources(..) => ObjectType::Resources,
+            Self::Resources { id, .. } => *id,
+        }
+    }
+
+    pub fn get_type(&self) -> ObjectType {
+        match self {
+            Self::Resources { .. } => ObjectType::Resources,
         }
     }
 }

@@ -90,6 +90,7 @@ where
                             background_color: TITLE_BACKGROUND.into(),
                             ..default()
                         },
+                        Name::new("Title"),
                         On::<Pointer<Drag>>::run(
                             |event: Listener<Pointer<Drag>>,
                              mut window_query: Query<&mut Style, With<UiWindow>>,

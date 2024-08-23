@@ -19,6 +19,7 @@ pub fn create_label<'a>(
                 color: color,
             },
         ),
+        Name::new("Label"),
         Pickable::IGNORE,
     ))
 }

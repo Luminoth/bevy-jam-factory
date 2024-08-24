@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use super::{button::*, label::*, *};
-use crate::components::ui::*;
+use crate::plugins::*;
 
 const WINDOW_BACKGROUND: Color = Color::srgba(0.15, 0.15, 0.15, 0.8);
 const TITLE_HEIGHT: usize = 40;

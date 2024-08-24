@@ -1,10 +1,21 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::PrimaryWindow};
 use bevy_egui::EguiContexts;
 
-use crate::components::ui::UiWindow;
 use crate::state::{AppState, IsPaused};
 use crate::systems::ui;
 use crate::ui::*;
+
+#[derive(Debug, Component)]
+pub struct UiWindow;
+
+#[derive(Debug, Component)]
+pub struct UiWindowTitleBar(pub Entity);
+
+#[derive(Debug, Component)]
+pub struct UiWindowCloseButton(pub Entity);
+
+#[derive(Debug, Component)]
+pub struct UiWindowContent;
 
 #[derive(Debug, Default, Reflect, Resource, Deref, DerefMut)]
 pub struct IsPointerCaptured(pub bool);

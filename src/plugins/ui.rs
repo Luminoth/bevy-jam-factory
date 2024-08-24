@@ -29,7 +29,7 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_assets)
+        app.add_systems(PreStartup, load_assets)
             .add_systems(
                 PreUpdate,
                 update_pointer_capture.run_if(in_state(AppState::InGame)),

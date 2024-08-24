@@ -5,7 +5,7 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
-use crate::components::{game::OnInGame, objects::*, ui::ObjectInfoWindow};
+use crate::components::{game::OnInGame, game_ui::ObjectInfoWindow, objects::*};
 use crate::game::objects::ObjectData;
 use crate::resources::game::ObjectInfo;
 

@@ -1,8 +1,8 @@
 pub mod camera;
 pub mod debug;
 pub mod game;
+pub mod game_ui;
 pub mod input;
-pub mod ui;
 
 use bevy::prelude::*;
 

@@ -1,8 +1,7 @@
-use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::PrimaryWindow};
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::EguiContexts;
 
-use crate::state::{AppState, IsPaused};
-use crate::systems::ui;
+use crate::state::AppState;
 use crate::ui::*;
 
 #[derive(Debug, Component)]
@@ -25,23 +24,11 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (update_button,));
-
-        app.add_systems(OnEnter(AppState::LoadAssets), ui::load_assets)
-            .add_systems(OnEnter(AppState::InGame), ui::setup)
-            .add_systems(
-                PreUpdate,
-                update_pointer_capture.run_if(in_state(AppState::InGame)),
-            )
-            .add_systems(
-                Update,
-                (
-                    ui::update_object_info_ui.run_if(ui::should_update_object_info_ui),
-                    ui::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),
-                )
-                    .run_if(in_state(IsPaused::Running)),
-            )
-            .add_systems(OnExit(AppState::InGame), ui::teardown);
+        app.add_systems(
+            PreUpdate,
+            update_pointer_capture.run_if(in_state(AppState::InGame)),
+        )
+        .add_systems(Update, (update_button,));
     }
 }
 

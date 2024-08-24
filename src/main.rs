@@ -77,11 +77,12 @@ fn main() {
     app.add_plugins((
         plugins::TiledMapPlugin,
         plugins::TiledPickingBackend,
+        plugins::UiPlugin,
+        plugins::GameUiPlugin,
         plugins::SplashPlugin,
         plugins::MainMenuPlugin,
         plugins::PauseMenuPlugin,
         plugins::GamePlugin,
-        plugins::UiPlugin,
     ));
 
     // TODO: move to a plugin

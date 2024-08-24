@@ -6,7 +6,7 @@ use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::components::{game::OnInGame, game_ui::ObjectInfoWindow, objects::*};
-use crate::game::objects::ObjectData;
+use crate::data::objects::ObjectData;
 use crate::resources::game::ObjectInfo;
 
 #[derive(Debug, Default, Component)]

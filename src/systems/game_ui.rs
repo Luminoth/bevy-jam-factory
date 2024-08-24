@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::components::{game_ui::*, objects::Object};
-use crate::game::objects::ObjectData;
+use crate::data::objects::ObjectData;
 use crate::plugins::{IsPointerCaptured, UiAssets};
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;

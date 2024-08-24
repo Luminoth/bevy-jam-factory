@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use bevy::prelude::*;
 
-use crate::game::inventory::InventoryData;
+use crate::data::inventory::InventoryData;
 
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);

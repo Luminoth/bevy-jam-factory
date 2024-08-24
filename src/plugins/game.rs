@@ -4,6 +4,7 @@ use crate::components::game::OnInGame;
 use crate::state::{AppState, IsPaused};
 use crate::systems::{camera, cleanup_state, game, input};
 
+#[derive(Debug, Default)]
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {

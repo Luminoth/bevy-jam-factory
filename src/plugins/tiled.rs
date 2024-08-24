@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::assets::tiled::*;
 use crate::systems::tiled;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct TiledMapPlugin;
 
 impl Plugin for TiledMapPlugin {

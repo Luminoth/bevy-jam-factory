@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::state::IsPaused;
 
+#[derive(Debug, Default)]
 pub struct PauseMenuPlugin;
 
 impl Plugin for PauseMenuPlugin {

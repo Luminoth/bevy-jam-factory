@@ -3,6 +3,7 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use crate::state::{AppState, IsPaused};
 use crate::systems::ui;
 
+#[derive(Debug, Default)]
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {

@@ -8,6 +8,7 @@ use crate::ui::{create_button, create_canvas};
 #[derive(Debug, Component)]
 pub struct OnMainMenu;
 
+#[derive(Debug, Default)]
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {

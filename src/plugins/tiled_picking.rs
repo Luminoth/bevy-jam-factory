@@ -5,8 +5,9 @@ use crate::components::{camera::MainCamera, tiled::TiledMapObjectLayer, tilemap:
 use crate::get_world_position_from_cursor_position;
 use crate::tilemap::get_tile_position;
 
-#[derive(Clone)]
+#[derive(Debug, Default)]
 pub struct TiledPickingBackend;
+
 impl Plugin for TiledPickingBackend {
     fn build(&self, app: &mut App) {
         app.add_systems(PreUpdate, tiled_picking.in_set(PickSet::Backend));

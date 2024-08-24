@@ -1,12 +1,36 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 
-use crate::components::{game_ui::*, objects::Object};
+use crate::components::objects::Object;
 use crate::data::objects::ObjectData;
-use crate::plugins::{IsPointerCaptured, UiAssets};
 use crate::resources::game::ObjectInfo;
-use crate::ui::*;
 
-pub fn should_update_object_info_ui(
+#[derive(Debug, Component)]
+pub struct ObjectInfoWindow;
+
+#[allow(dead_code)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ObjectInfoData {
+    ObjectId,
+    ObjectType,
+}
+
+#[derive(Debug, Component)]
+pub struct ObjectInfoDataUI(pub ObjectInfoData);
+
+#[derive(Debug, Component)]
+pub struct ObjectInfoResources;
+
+#[allow(dead_code)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ObjectInfoResourcesData {
+    ResourceType,
+    Amount,
+}
+
+#[derive(Debug, Component)]
+pub struct ObjectInfoResourcesDataUI(pub ObjectInfoResourcesData);
+
+pub(super) fn should_update_object_info_ui(
     object: Option<Res<ObjectInfo>>,
     window_query: Query<&ViewVisibility, With<ObjectInfoWindow>>,
 ) -> bool {
@@ -18,27 +42,8 @@ pub fn should_update_object_info_ui(
     object.is_some() && window_visible
 }
 
-pub fn load_assets() {}
-
-pub fn setup(
-    mut commands: Commands,
-    ui_assets: Res<UiAssets>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-) {
-    let window = window_query.single();
-
-    create_object_info_ui(&mut commands, &ui_assets, window);
-    create_inventory_ui(&mut commands, &ui_assets, window);
-
-    commands.init_resource::<IsPointerCaptured>();
-}
-
-pub fn teardown(mut commands: Commands) {
-    commands.remove_resource::<IsPointerCaptured>();
-}
-
 #[allow(clippy::type_complexity)]
-pub fn update_object_info_ui(
+pub(super) fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
     mut text_set: ParamSet<(
@@ -81,8 +86,4 @@ pub fn update_object_info_ui(
             *visibility = Visibility::Inherited;
         }
     }
-}
-
-pub fn show_inventory(mut window_query: Query<&mut Visibility, With<InventoryWindow>>) {
-    *window_query.single_mut() = Visibility::Visible;
 }

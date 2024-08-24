@@ -3,9 +3,9 @@ pub mod object_info;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::PrimaryWindow};
 
-use crate::plugins::{IsPointerCaptured, UiAssets};
-use crate::state::{AppState, IsPaused};
+use crate::plugins::{IsPaused, IsPointerCaptured, UiAssets};
 use crate::ui::*;
+use crate::AppState;
 
 #[derive(Debug, Default)]
 pub struct GameUiPlugin;

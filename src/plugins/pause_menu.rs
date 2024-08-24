@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::state::IsPaused;
+use crate::plugins::IsPaused;
 
 #[derive(Debug, Default)]
 pub struct PauseMenuPlugin;

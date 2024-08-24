@@ -1,8 +1,8 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::EguiContexts;
 
-use crate::state::AppState;
 use crate::ui::*;
+use crate::AppState;
 
 #[derive(Debug, Component)]
 pub struct UiWindow;

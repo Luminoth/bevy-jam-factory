@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
-use crate::components::objects::Object;
 use crate::data::objects::ObjectData;
-use crate::resources::game::ObjectInfo;
+use crate::plugins::{objects::Object, ObjectInfo};
 
 #[derive(Debug, Component)]
 pub struct ObjectInfoWindow;

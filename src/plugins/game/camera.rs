@@ -1,14 +1,41 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{ecs::query::QueryData, prelude::*, window::PrimaryWindow};
 
-use crate::components::camera::*;
 use crate::plugins::{IsPointerCaptured, TiledMapTileLayer};
 use crate::tilemap::TileMapSizeQuery;
 
-// TODO: this should either be a plugin or be part of the game plugin
+#[derive(Component)]
+pub struct MainCamera;
+
+#[derive(Component)]
+pub struct UiCamera;
+
+#[derive(QueryData)]
+#[query_data(derive(Debug))]
+pub struct CameraTransformQuery {
+    pub camera: &'static Camera,
+    pub transform: &'static Transform,
+    pub global_transform: &'static GlobalTransform,
+}
+
+#[derive(QueryData)]
+#[query_data(derive(Debug))]
+pub struct CameraProjectionQuery {
+    pub transform: &'static Transform,
+    pub global_transform: &'static GlobalTransform,
+    pub projection: &'static OrthographicProjection,
+}
+
+#[derive(QueryData)]
+#[query_data(mutable, derive(Debug))]
+pub struct CameraProjectionQueryMut {
+    pub transform: &'static mut Transform,
+    pub global_transform: &'static GlobalTransform,
+    pub projection: &'static OrthographicProjection,
+}
 
 const CAMERA_SPEED: f32 = 200.0;
 
-pub fn pan(
+pub(super) fn pan(
     is_pointer_captured: Res<IsPointerCaptured>,
     _keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,

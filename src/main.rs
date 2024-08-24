@@ -1,12 +1,8 @@
 #![deny(warnings)]
 
 mod assets;
-mod components;
 mod data;
 mod plugins;
-mod resources;
-mod state;
-mod systems;
 mod tiled;
 mod tilemap;
 mod ui;
@@ -14,6 +10,16 @@ mod ui;
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States, Reflect)]
+pub enum AppState {
+    //#[default]
+    Splash,
+    #[default]
+    MainMenu,
+    LoadAssets,
+    InGame,
+}
 
 #[inline]
 pub fn get_world_position_from_cursor_position(
@@ -24,6 +30,15 @@ pub fn get_world_position_from_cursor_position(
     window
         .cursor_position()
         .and_then(|cursor_position| camera.viewport_to_world_2d(camera_transform, cursor_position))
+}
+
+pub fn cleanup_state<T>(mut commands: Commands, query: Query<Entity, With<T>>)
+where
+    T: Component,
+{
+    for e in &query {
+        commands.entity(e).despawn_recursive();
+    }
 }
 
 fn main() {
@@ -57,11 +72,10 @@ fn main() {
         // TODO: might have outgrown the quick plugins: https://docs.rs/bevy-inspector-egui/0.25.2/bevy_inspector_egui/#use-case-2-manual-ui
         bevy_inspector_egui::quick::WorldInspectorPlugin::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
-        bevy_inspector_egui::quick::StateInspectorPlugin::<state::AppState>::default()
+        bevy_inspector_egui::quick::StateInspectorPlugin::<AppState>::default()
             .run_if(input_toggle_active(false, KeyCode::Backquote)),
-        bevy_inspector_egui::quick::ResourceInspectorPlugin::<resources::game::Inventory>::default(
-        )
-        .run_if(input_toggle_active(false, KeyCode::Backquote)),
+        bevy_inspector_egui::quick::ResourceInspectorPlugin::<plugins::Inventory>::default()
+            .run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
     /*app.insert_resource(bevy_egui::EguiSettings {
@@ -70,9 +84,7 @@ fn main() {
     });*/
 
     // TODO: move to a state init or something
-    app.init_state::<state::AppState>()
-        .add_sub_state::<state::IsPaused>()
-        .enable_state_scoped_entities::<state::IsPaused>();
+    app.init_state::<AppState>();
 
     app.add_plugins((
         plugins::TiledMapPlugin,

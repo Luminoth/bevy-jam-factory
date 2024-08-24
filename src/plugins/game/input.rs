@@ -1,13 +1,11 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::components::camera::{CameraTransformQuery, MainCamera};
+use super::camera::{CameraTransformQuery, MainCamera};
+use super::TileDrag;
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::IsPointerCaptured;
-use crate::resources::game::TileDrag;
 
-// TODO: this should either be a plugin or be part of the game plugin
-
-pub fn start_drag(
+pub(super) fn start_drag(
     mut commands: Commands,
     is_pointer_captured: Res<IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,
@@ -30,7 +28,7 @@ pub fn start_drag(
     }
 }
 
-pub fn stop_drag(
+pub(super) fn stop_drag(
     mut commands: Commands,
     //is_pointer_captured: Res<IsPointerCaptured>,
     tile_drag: Option<ResMut<TileDrag>>,
@@ -57,7 +55,7 @@ pub fn stop_drag(
     }
 }
 
-pub fn drag(
+pub(super) fn drag(
     is_pointer_captured: Res<IsPointerCaptured>,
     tile_drag: Option<ResMut<TileDrag>>,
     window_query: Query<&Window, With<PrimaryWindow>>,

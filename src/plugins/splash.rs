@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use crate::state::AppState;
-use crate::systems::cleanup_state;
+use crate::cleanup_state;
 use crate::ui::create_canvas;
+use crate::AppState;
 
 #[derive(Debug, Component)]
 pub struct OnSplashScreen;

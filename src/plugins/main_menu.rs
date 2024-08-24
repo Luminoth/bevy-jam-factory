@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::cleanup_state;
 use crate::plugins::UiAssets;
-use crate::state::AppState;
-use crate::systems::cleanup_state;
 use crate::ui::{create_button, create_canvas};
+use crate::AppState;
 
 #[derive(Debug, Component)]
 pub struct OnMainMenu;

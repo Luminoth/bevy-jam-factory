@@ -5,10 +5,10 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
-use crate::components::{game::OnInGame, objects::*};
 use crate::data::objects::ObjectData;
-use crate::plugins::game_ui::object_info::ObjectInfoWindow;
-use crate::resources::game::ObjectInfo;
+use crate::plugins::{
+    game::OnInGame, game_ui::object_info::ObjectInfoWindow, objects::*, ObjectInfo,
+};
 
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {

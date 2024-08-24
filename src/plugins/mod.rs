@@ -1,3 +1,4 @@
+mod audio;
 mod debug;
 mod game;
 mod game_ui;
@@ -8,6 +9,7 @@ mod tiled;
 mod tiled_picking;
 mod ui;
 
+pub use audio::*;
 pub use debug::*;
 pub use game::*;
 pub use game_ui::*;

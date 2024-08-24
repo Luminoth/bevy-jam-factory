@@ -5,12 +5,12 @@ pub mod objects;
 use std::collections::HashSet;
 
 use bevy::{
-    audio::Volume, input::common_conditions::*, prelude::*, render::camera::ScalingMode,
-    window::PrimaryWindow,
+    input::common_conditions::*, prelude::*, render::camera::ScalingMode, window::PrimaryWindow,
 };
 use bevy_egui::{egui, EguiContexts};
 
 use crate::assets::tiled::TiledMap;
+use crate::audio::start_music;
 use crate::cleanup_state;
 use crate::data::inventory::InventoryData;
 use crate::plugins::{TiledMapBundle, TiledMapTileLayer};
@@ -26,9 +26,6 @@ pub enum IsPaused {
 
 #[derive(Debug, Component)]
 pub struct OnInGame;
-
-#[derive(Debug, Component)]
-pub struct BackgroundMusic;
 
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);
@@ -87,8 +84,9 @@ const VIEW_WIDTH: f32 = 800.0;
 const VIEW_HEIGHT: f32 = 600.0;
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // TODO: this should just load the asset
+    // we should spawn the bundle in enter()
     let map_handle: Handle<TiledMap> = asset_server.load("map.tmx");
-
     commands.spawn((
         TiledMapBundle {
             tiled_map: map_handle,
@@ -98,17 +96,12 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         OnInGame,
     ));
 
-    commands.spawn((
-        AudioBundle {
-            source: asset_server.load("music/Windless Slopes.ogg"),
-            settings: PlaybackSettings {
-                volume: Volume::new(0.25),
-                ..PlaybackSettings::LOOP
-            },
-        },
-        BackgroundMusic,
-        OnInGame,
-    ));
+    // TODO: this should just load the asset
+    // we should start the music in enter()
+    start_music(
+        &mut commands,
+        asset_server.load("music/Windless Slopes.ogg"),
+    );
 
     info!("Waiting for assets ...");
 }

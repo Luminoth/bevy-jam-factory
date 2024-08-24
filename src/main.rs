@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
 mod assets;
+mod audio;
 mod data;
 mod plugins;
 mod tiled;
@@ -90,6 +91,7 @@ fn main() {
         plugins::TiledMapPlugin,
         plugins::TiledPickingBackend,
         plugins::UiPlugin,
+        plugins::AudioPlugin,
         plugins::GameUiPlugin,
         plugins::SplashPlugin,
         plugins::MainMenuPlugin,

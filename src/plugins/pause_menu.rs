@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::plugins::{BackgroundMusic, IsPaused, UiAssets};
+use crate::plugins::{IsPaused, Music, UiAssets};
 use crate::ui::{create_button, create_canvas};
 use crate::AppState;
 
@@ -66,7 +66,7 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
 
 fn enter(
     mut window_query: Query<&mut Visibility, With<PauseMenu>>,
-    mut _music_query: Query<&mut PlaybackSettings, With<BackgroundMusic>>,
+    mut _music_query: Query<&mut PlaybackSettings, With<Music>>,
 ) {
     info!("entering Paused state");
 
@@ -77,7 +77,7 @@ fn enter(
 
 fn exit(
     mut window_query: Query<&mut Visibility, With<PauseMenu>>,
-    mut _music_query: Query<&mut PlaybackSettings, With<BackgroundMusic>>,
+    mut _music_query: Query<&mut PlaybackSettings, With<Music>>,
 ) {
     info!("exiting Paused state");
 

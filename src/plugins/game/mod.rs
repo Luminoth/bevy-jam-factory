@@ -67,7 +67,7 @@ impl Plugin for GamePlugin {
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing
                     // (eg. resource_exists::<DragOperation>)
                     input::drag.run_if(input_pressed(MouseButton::Left)),
-                    quit_game.run_if(input_just_released(KeyCode::Escape)),
+                    pause_game.run_if(input_just_released(KeyCode::Escape)),
                 )
                     .run_if(in_state(IsPaused::Running)),
             )
@@ -153,7 +153,6 @@ fn exit(mut commands: Commands) {
     commands.remove_resource::<ClearColor>();
 }
 
-// TODO: this should be "pause_game"
-fn quit_game(mut game_state: ResMut<NextState<AppState>>) {
-    game_state.set(AppState::MainMenu);
+fn pause_game(mut pause_state: ResMut<NextState<IsPaused>>) {
+    pause_state.set(IsPaused::Paused);
 }

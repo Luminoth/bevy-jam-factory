@@ -68,6 +68,7 @@ pub fn teardown(mut commands: Commands) {
     commands.remove_resource::<IsPointerCaptured>();
 }
 
+#[allow(clippy::type_complexity)]
 pub fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,

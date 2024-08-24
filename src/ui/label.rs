@@ -16,7 +16,7 @@ pub fn create_label<'a>(
             TextStyle {
                 font: asset_server.load(FONT),
                 font_size: size,
-                color: color,
+                color,
             },
         ),
         Name::new("Label"),

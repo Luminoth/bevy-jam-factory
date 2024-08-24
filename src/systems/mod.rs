@@ -2,7 +2,6 @@ pub mod camera;
 pub mod debug;
 pub mod game;
 pub mod input;
-pub mod tiled;
 pub mod ui;
 
 use bevy::prelude::*;

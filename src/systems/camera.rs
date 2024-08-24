@@ -1,6 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::components::{camera::*, tiled::TiledMapTileLayer, tilemap::TileMapSizeQuery};
+use crate::components::{camera::*, tilemap::TileMapSizeQuery};
+use crate::plugins::TiledMapTileLayer;
 use crate::resources::ui::IsPointerCaptured;
 
 const CAMERA_SPEED: f32 = 200.0;

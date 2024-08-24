@@ -6,8 +6,8 @@ use crate::assets::tiled::TiledMap;
 use crate::components::{
     camera::{MainCamera, UiCamera},
     game::OnInGame,
-    tiled::{TiledMapBundle, TiledMapTileLayer},
 };
+use crate::plugins::{TiledMapBundle, TiledMapTileLayer};
 use crate::resources::game::Inventory;
 use crate::state::AppState;
 

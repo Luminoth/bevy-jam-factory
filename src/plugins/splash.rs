@@ -1,13 +1,15 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use crate::resources::splash::*;
 use crate::state::AppState;
 use crate::systems::cleanup_state;
 use crate::ui::create_canvas;
 
 #[derive(Debug, Component)]
 pub struct OnSplashScreen;
+
+#[derive(Debug, Reflect, Resource, Deref, DerefMut)]
+pub struct SplashTimer(pub Timer);
 
 #[derive(Debug, Default)]
 pub struct SplashPlugin;

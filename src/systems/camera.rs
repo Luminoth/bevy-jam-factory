@@ -1,7 +1,8 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::components::{camera::*, tilemap::TileMapSizeQuery};
+use crate::components::camera::*;
 use crate::plugins::{IsPointerCaptured, TiledMapTileLayer};
+use crate::tilemap::TileMapSizeQuery;
 
 // TODO: this should either be a plugin or be part of the game plugin
 

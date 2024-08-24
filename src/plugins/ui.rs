@@ -16,6 +16,11 @@ pub struct UiWindowCloseButton(pub Entity);
 #[derive(Debug, Component)]
 pub struct UiWindowContent;
 
+#[derive(Debug, Default, Reflect, Resource)]
+pub struct UiAssets {
+    pub font: Handle<Font>,
+}
+
 #[derive(Debug, Default, Reflect, Resource, Deref, DerefMut)]
 pub struct IsPointerCaptured(pub bool);
 
@@ -24,12 +29,19 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            PreUpdate,
-            update_pointer_capture.run_if(in_state(AppState::InGame)),
-        )
-        .add_systems(Update, (update_button,));
+        app.add_systems(Startup, load_assets)
+            .add_systems(
+                PreUpdate,
+                update_pointer_capture.run_if(in_state(AppState::InGame)),
+            )
+            .add_systems(Update, (update_button,));
     }
+}
+
+fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(UiAssets {
+        font: asset_server.load(FONT),
+    });
 }
 
 #[allow(clippy::type_complexity)]

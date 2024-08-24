@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::components::{game_ui::*, objects::Object};
 use crate::game::objects::ObjectData;
-use crate::plugins::IsPointerCaptured;
+use crate::plugins::{IsPointerCaptured, UiAssets};
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;
 
@@ -22,13 +22,13 @@ pub fn load_assets() {}
 
 pub fn setup(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    ui_assets: Res<UiAssets>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.single();
 
-    create_object_info_ui(&mut commands, &asset_server, window);
-    create_inventory_ui(&mut commands, &asset_server, window);
+    create_object_info_ui(&mut commands, &ui_assets, window);
+    create_inventory_ui(&mut commands, &ui_assets, window);
 
     commands.init_resource::<IsPointerCaptured>();
 }

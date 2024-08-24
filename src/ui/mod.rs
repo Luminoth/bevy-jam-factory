@@ -6,6 +6,7 @@ use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
 
 use crate::components::game_ui;
+use crate::plugins::UiAssets;
 pub use button::*;
 pub use label::*;
 pub use window::*;
@@ -63,14 +64,10 @@ pub fn create_row_container<'a>(parent: &'a mut ChildBuilder) -> EntityCommands<
     ))
 }
 
-pub fn create_object_info_ui(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    window: &Window,
-) {
+pub fn create_object_info_ui(commands: &mut Commands, ui_assets: &Res<UiAssets>, window: &Window) {
     let content_id = create_window(
         commands,
-        asset_server,
+        ui_assets,
         window,
         (400, 200),
         "Object Info",
@@ -79,14 +76,14 @@ pub fn create_object_info_ui(
     );
     commands.entity(content_id).with_children(|parent| {
         create_row_container(parent).with_children(|parent| {
-            create_label(parent, asset_server, "Object ID:", 14.0, FONT_COLOR);
-            create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR)
+            create_label(parent, ui_assets, "Object ID:", 14.0, FONT_COLOR);
+            create_label(parent, ui_assets, "N/A", 14.0, FONT_COLOR)
                 .insert(game_ui::ObjectInfoDataUI(game_ui::ObjectInfoData::ObjectId));
         });
 
         create_row_container(parent).with_children(|parent| {
-            create_label(parent, asset_server, "Object Type:", 14.0, FONT_COLOR);
-            create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR).insert(
+            create_label(parent, ui_assets, "Object Type:", 14.0, FONT_COLOR);
+            create_label(parent, ui_assets, "N/A", 14.0, FONT_COLOR).insert(
                 game_ui::ObjectInfoDataUI(game_ui::ObjectInfoData::ObjectType),
             );
         });
@@ -100,8 +97,8 @@ pub fn create_object_info_ui(
             ))
             .with_children(|parent| {
                 create_row_container(parent).with_children(|parent| {
-                    create_label(parent, asset_server, "Resource Type:", 14.0, FONT_COLOR);
-                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR).insert(
+                    create_label(parent, ui_assets, "Resource Type:", 14.0, FONT_COLOR);
+                    create_label(parent, ui_assets, "N/A", 14.0, FONT_COLOR).insert(
                         game_ui::ObjectInfoResourcesDataUI(
                             game_ui::ObjectInfoResourcesData::ResourceType,
                         ),
@@ -109,8 +106,8 @@ pub fn create_object_info_ui(
                 });
 
                 create_row_container(parent).with_children(|parent| {
-                    create_label(parent, asset_server, "Amount:", 14.0, FONT_COLOR);
-                    create_label(parent, asset_server, "N/A", 14.0, FONT_COLOR).insert(
+                    create_label(parent, ui_assets, "Amount:", 14.0, FONT_COLOR);
+                    create_label(parent, ui_assets, "N/A", 14.0, FONT_COLOR).insert(
                         game_ui::ObjectInfoResourcesDataUI(
                             game_ui::ObjectInfoResourcesData::Amount,
                         ),
@@ -120,14 +117,10 @@ pub fn create_object_info_ui(
     });
 }
 
-pub fn create_inventory_ui(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    window: &Window,
-) {
+pub fn create_inventory_ui(commands: &mut Commands, ui_assets: &Res<UiAssets>, window: &Window) {
     let content_id = create_window(
         commands,
-        asset_server,
+        ui_assets,
         window,
         (400, 200),
         "Inventory",
@@ -137,7 +130,7 @@ pub fn create_inventory_ui(
     commands.entity(content_id).with_children(|parent| {
         create_button(
             parent,
-            asset_server,
+            ui_assets,
             "Button",
             On::<Pointer<Click>>::run(move || info!("Button clicked!")),
         );

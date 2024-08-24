@@ -11,7 +11,7 @@ const TITLE_FONT_SIZE: usize = 40;
 
 pub fn create_window<C>(
     commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
+    ui_assets: &Res<UiAssets>,
     window: &Window,
     content_size: (usize, usize),
     name: impl Into<String>,
@@ -117,7 +117,7 @@ where
                         UiWindowTitleBar(ui_window),
                     ))
                     .with_children(|parent| {
-                        create_label(parent, asset_server, name, TITLE_FONT_SIZE as f32, FONT_COLOR);
+                        create_label(parent, ui_assets, name, TITLE_FONT_SIZE as f32, FONT_COLOR);
                     });
 
                 parent
@@ -156,7 +156,7 @@ where
                         UiWindowCloseButton(ui_window),
                     ))
                     .with_children(|parent| {
-                        create_label(parent, asset_server, "X", 24.0, FONT_COLOR);
+                        create_label(parent, ui_assets, "X", 24.0, FONT_COLOR);
                     });
             });
     });

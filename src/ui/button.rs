@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use super::{label::*, *};
+use crate::plugins::UiAssets;
 
 const BUTTON_WIDTH: usize = 150;
 const BUTTON_HEIGHT: usize = 50;
@@ -12,7 +13,7 @@ const BUTTON_FONT_SIZE: usize = 32;
 
 pub fn create_button(
     parent: &mut ChildBuilder,
-    asset_server: &Res<AssetServer>,
+    ui_assets: &Res<UiAssets>,
     content: impl Into<String>,
     on_click: On<Pointer<Click>>,
 ) -> Entity {
@@ -36,7 +37,7 @@ pub fn create_button(
         .with_children(|parent| {
             create_label(
                 parent,
-                asset_server,
+                ui_assets,
                 content.into(),
                 BUTTON_FONT_SIZE as f32,
                 FONT_COLOR,

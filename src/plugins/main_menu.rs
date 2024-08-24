@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::plugins::UiAssets;
 use crate::state::AppState;
 use crate::systems::cleanup_state;
 use crate::ui::{create_button, create_canvas};
@@ -21,7 +22,7 @@ impl Plugin for MainMenuPlugin {
     }
 }
 
-fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
     info!("entering MainMenu state");
 
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
@@ -30,7 +31,7 @@ fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     create_canvas(&mut commands, "Main Menu").with_children(|parent| {
         create_button(
             parent,
-            &asset_server,
+            &ui_assets,
             "Start Game",
             On::<Pointer<Click>>::run(
                 |event: Listener<Pointer<Click>>, mut game_state: ResMut<NextState<AppState>>| {
@@ -48,7 +49,7 @@ fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         create_button(
             parent,
-            &asset_server,
+            &ui_assets,
             "Quit Game",
             On::<Pointer<Click>>::run(
                 |event: Listener<Pointer<Click>>, mut exit: EventWriter<AppExit>| {

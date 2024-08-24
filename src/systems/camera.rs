@@ -1,8 +1,9 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::components::{camera::*, tilemap::TileMapSizeQuery};
-use crate::plugins::TiledMapTileLayer;
-use crate::resources::ui::IsPointerCaptured;
+use crate::plugins::{IsPointerCaptured, TiledMapTileLayer};
+
+// TODO: this should either be a plugin or be part of the game plugin
 
 const CAMERA_SPEED: f32 = 200.0;
 

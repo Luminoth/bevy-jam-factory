@@ -1,12 +1,12 @@
-pub mod button;
-
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::EguiContexts;
 
 use crate::components::{objects::Object, ui::*};
 use crate::game::objects::ObjectData;
-use crate::resources::{game::ObjectInfo, ui::*};
+use crate::plugins::IsPointerCaptured;
+use crate::resources::game::ObjectInfo;
 use crate::ui::*;
+
+// TODO: this should either be a plugin or be part of the game plugin
 
 pub fn should_update_object_info_ui(
     object: Option<Res<ObjectInfo>>,
@@ -18,35 +18,6 @@ pub fn should_update_object_info_ui(
         .unwrap_or_default();
 
     object.is_some() && window_visible
-}
-
-pub fn update_pointer_capture(
-    mut is_pointer_captured: ResMut<IsPointerCaptured>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-    ui_window_query: Query<(&Node, &GlobalTransform, &ViewVisibility), With<UiWindow>>,
-    mut contexts: EguiContexts,
-) {
-    let window = window_query.single();
-    let context = contexts.ctx_mut();
-
-    is_pointer_captured.0 = window
-        .cursor_position()
-        .map(|cursor_position| {
-            ui_window_query
-                .iter()
-                .filter(|(_, _, visibility)| visibility.get())
-                .any(|(node, transform, _)| {
-                    let node_position = transform.translation().xy();
-                    let half_size = 0.5 * node.size();
-                    let min = node_position - half_size;
-                    let max = node_position + half_size;
-                    (min.x..max.x).contains(&cursor_position.x)
-                        && (min.y..max.y).contains(&cursor_position.y)
-                })
-        })
-        .unwrap_or_default()
-        || context.is_pointer_over_area()
-        || context.is_using_pointer();
 }
 
 pub fn load_assets() {}

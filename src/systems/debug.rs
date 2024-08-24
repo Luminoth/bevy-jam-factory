@@ -7,6 +7,8 @@ use bevy::{
 };
 use bevy_egui::{egui, EguiContexts};
 
+// TODO: this should be a plugin
+
 pub fn debug_ui(
     time: Res<Time>,
     diagnostics: Res<DiagnosticsStore>,

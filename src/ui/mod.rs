@@ -1,14 +1,14 @@
-pub mod button;
-pub mod label;
-pub mod window;
+mod button;
+mod label;
+mod window;
 
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
 
 use crate::components::ui::*;
-use button::*;
-use label::*;
-use window::*;
+pub use button::*;
+pub use label::*;
+pub use window::*;
 
 pub const FONT: &str = "fonts/FiraSans-Bold.ttf";
 pub const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);

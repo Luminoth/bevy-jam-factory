@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ui::button::*;
+use crate::ui::*;
 
 #[allow(clippy::type_complexity)]
 pub fn update(

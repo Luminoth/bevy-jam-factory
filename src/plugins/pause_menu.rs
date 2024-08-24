@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::plugins::{IsPaused, UiAssets};
+use crate::plugins::{BackgroundMusic, IsPaused, UiAssets};
 use crate::ui::{create_button, create_canvas};
 use crate::AppState;
 
@@ -20,6 +20,7 @@ impl Plugin for PauseMenuPlugin {
 }
 
 fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
+    // TODO: this canvas should be transparent grey
     create_canvas(&mut commands, "Pause Menu")
         .insert(PauseMenu)
         .with_children(|parent| {
@@ -63,14 +64,24 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
         });
 }
 
-fn enter(mut window_query: Query<&mut Visibility, With<PauseMenu>>) {
+fn enter(
+    mut window_query: Query<&mut Visibility, With<PauseMenu>>,
+    mut _music_query: Query<&mut PlaybackSettings, With<BackgroundMusic>>,
+) {
     info!("entering Paused state");
 
     *window_query.single_mut() = Visibility::Visible;
+
+    // TODO: duck the music
 }
 
-fn exit(mut window_query: Query<&mut Visibility, With<PauseMenu>>) {
+fn exit(
+    mut window_query: Query<&mut Visibility, With<PauseMenu>>,
+    mut _music_query: Query<&mut PlaybackSettings, With<BackgroundMusic>>,
+) {
     info!("exiting Paused state");
 
     *window_query.single_mut() = Visibility::Hidden;
+
+    // TODO: restore the music
 }

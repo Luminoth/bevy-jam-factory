@@ -5,7 +5,8 @@ pub mod objects;
 use std::collections::HashSet;
 
 use bevy::{
-    input::common_conditions::*, prelude::*, render::camera::ScalingMode, window::PrimaryWindow,
+    audio::Volume, input::common_conditions::*, prelude::*, render::camera::ScalingMode,
+    window::PrimaryWindow,
 };
 use bevy_egui::{egui, EguiContexts};
 
@@ -25,6 +26,9 @@ pub enum IsPaused {
 
 #[derive(Debug, Component)]
 pub struct OnInGame;
+
+#[derive(Debug, Component)]
+pub struct BackgroundMusic;
 
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);
@@ -91,6 +95,18 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         Name::new("Tiled Map"),
+        OnInGame,
+    ));
+
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("music/Windless Slopes.ogg"),
+            settings: PlaybackSettings {
+                volume: Volume::new(0.25),
+                ..PlaybackSettings::LOOP
+            },
+        },
+        BackgroundMusic,
         OnInGame,
     ));
 

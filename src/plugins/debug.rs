@@ -3,13 +3,25 @@ use bevy::{
         DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
         SystemInformationDiagnosticsPlugin,
     },
+    input::common_conditions::input_toggle_active,
     prelude::*,
 };
 use bevy_egui::{egui, EguiContexts};
 
-// TODO: this should be a plugin
+#[derive(Debug, Default)]
+pub struct DebugPlugin;
 
-pub fn debug_ui(
+impl Plugin for DebugPlugin {
+    fn build(&self, app: &mut App) {
+        // TODO: move to a plugin
+        app.add_systems(
+            Update,
+            debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
+        );
+    }
+}
+
+fn debug_ui(
     time: Res<Time>,
     diagnostics: Res<DiagnosticsStore>,
     //mut inspector: ResMut<WorldInspectorParams>,

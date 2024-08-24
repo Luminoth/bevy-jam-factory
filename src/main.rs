@@ -83,13 +83,8 @@ fn main() {
         plugins::MainMenuPlugin,
         plugins::PauseMenuPlugin,
         plugins::GamePlugin,
+        plugins::DebugPlugin,
     ));
-
-    // TODO: move to a plugin
-    app.add_systems(
-        Update,
-        systems::debug::debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
-    );
 
     app.run();
 }

@@ -6,8 +6,6 @@ use crate::plugins::IsPointerCaptured;
 use crate::resources::game::ObjectInfo;
 use crate::ui::*;
 
-// TODO: this should either be a plugin or be part of the game plugin
-
 pub fn should_update_object_info_ui(
     object: Option<Res<ObjectInfo>>,
     window_query: Query<&ViewVisibility, With<ObjectInfoWindow>>,

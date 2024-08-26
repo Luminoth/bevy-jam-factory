@@ -7,10 +7,6 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use crate::plugins::{IsPaused, IsPointerCaptured};
 use crate::AppState;
 
-// TODO: we need a way to store "current" values for things
-// in non-strings so that we can fast compare
-// and only update UI for things that changed
-
 #[derive(Debug, Default)]
 pub struct GameUiPlugin;
 

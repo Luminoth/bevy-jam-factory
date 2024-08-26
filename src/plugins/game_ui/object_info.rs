@@ -24,7 +24,7 @@ pub struct ObjectInfoResources;
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ObjectInfoResourcesData {
     ResourceType,
-    Amount,
+    Amount(u32),
 }
 
 #[derive(Debug, Component)]
@@ -76,8 +76,9 @@ pub(super) fn setup_window(
 
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, &ui_assets, "Amount:", 14.0, FONT_COLOR);
-                    create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                        .insert(ObjectInfoResourcesDataUI(ObjectInfoResourcesData::Amount));
+                    create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR).insert(
+                        ObjectInfoResourcesDataUI(ObjectInfoResourcesData::Amount(0)),
+                    );
                 });
             });
     });
@@ -95,13 +96,16 @@ pub(super) fn should_update_object_info_ui(
     object.is_some() && window_visible
 }
 
+// TODO: this running constantly while the UI is shown isn't great
+// we should use an event or something to just update it when something changes
+// (or update it once entirely on show, and then only update dynamic stuff while open)
 #[allow(clippy::type_complexity)]
 pub(super) fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
     mut text_set: ParamSet<(
         Query<(&mut Text, &ObjectInfoDataUI)>,
-        Query<(&mut Text, &ObjectInfoResourcesDataUI)>,
+        Query<(&mut Text, &mut ObjectInfoResourcesDataUI)>,
     )>,
     mut resources_section_query: Query<&mut Visibility, With<ObjectInfoResources>>,
 ) {
@@ -109,28 +113,32 @@ pub(super) fn update_object_info_ui(
         .get(object.0)
         .expect("Object tile missing Object!");
 
-    // TODO: we should only update the fields that have changed
-
     for (mut text, data) in text_set.p0().iter_mut() {
         match data.0 {
             ObjectInfoData::ObjectId => {
-                text.sections.get_mut(0).unwrap().value = format!("{}", object.get_id());
+                // TODO: only update if changed
+                text.sections.get_mut(0).unwrap().value = object.get_id().to_string();
             }
             ObjectInfoData::ObjectType => {
-                text.sections.get_mut(0).unwrap().value = format!("{}", object.get_type());
+                // TODO: only update if changed
+                text.sections.get_mut(0).unwrap().value = object.get_type().to_string();
             }
         }
     }
 
     match &object.0 {
         ObjectData::Resources { r#type, amount, .. } => {
-            for (mut text, data) in text_set.p1().iter_mut() {
-                match data.0 {
+            for (mut text, mut data) in text_set.p1().iter_mut() {
+                match &mut data.0 {
                     ObjectInfoResourcesData::ResourceType => {
-                        text.sections.get_mut(0).unwrap().value = format!("{}", r#type);
+                        // TODO: only update if changed
+                        text.sections.get_mut(0).unwrap().value = r#type.to_string();
                     }
-                    ObjectInfoResourcesData::Amount => {
-                        text.sections.get_mut(0).unwrap().value = format!("{}", amount);
+                    ObjectInfoResourcesData::Amount(prev) => {
+                        if *prev != *amount {
+                            text.sections.get_mut(0).unwrap().value = amount.to_string();
+                            *prev = *amount;
+                        }
                     }
                 }
             }

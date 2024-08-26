@@ -14,14 +14,16 @@ pub struct InventoryContent;
 #[derive(Debug, Component)]
 pub struct InventoryResourcesIron;
 
+#[allow(dead_code)]
 #[derive(Debug, Component)]
-pub struct InventoryResourcesIronAmount;
+pub struct InventoryResourcesIronAmount(pub u32);
 
 #[derive(Debug, Component)]
 pub struct InventoryItemsHarvesters;
 
+#[allow(dead_code)]
 #[derive(Debug, Component)]
-pub struct InventoryItemsHarvestersAmount;
+pub struct InventoryItemsHarvestersAmount(pub u32);
 
 pub(super) fn setup_window(
     mut commands: Commands,
@@ -84,7 +86,7 @@ pub(super) fn setup_window(
                                     .with_children(|parent| {
                                         create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                                            .insert(InventoryResourcesIronAmount);
+                                            .insert(InventoryResourcesIronAmount(0));
                                     });
                             });
 
@@ -109,7 +111,7 @@ pub(super) fn setup_window(
                                             FONT_COLOR,
                                         );
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                                            .insert(InventoryItemsHarvestersAmount);
+                                            .insert(InventoryItemsHarvestersAmount(0));
                                     });
                             });
                     });

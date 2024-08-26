@@ -11,6 +11,7 @@ mod ui;
 use bevy::{input::common_conditions::input_toggle_active, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
+use bevy_simple_scroll_view::ScrollViewPlugin;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States, Reflect)]
 pub enum AppState {
@@ -66,6 +67,7 @@ fn main() {
         // third-party plugins
         DefaultPickingPlugins,
         TilemapPlugin,
+        ScrollViewPlugin,
         bevy_egui::EguiPlugin,
         // inspectors
         // TODO: why does the world inspector not pick up custom resource types?

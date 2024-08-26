@@ -4,6 +4,7 @@ mod window;
 
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
+use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
 use crate::plugins::UiAssets;
 use crate::plugins::{inventory, object_info};
@@ -129,11 +130,33 @@ pub fn create_inventory_ui(commands: &mut Commands, ui_assets: &Res<UiAssets>, w
         inventory::InventoryWindow,
     );
     commands.entity(content_id).with_children(|parent| {
-        create_button(
-            parent,
-            ui_assets,
-            "Button",
-            On::<Pointer<Click>>::run(move || info!("Button clicked!")),
-        );
+        parent
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        width: Val::Percent(80.0),
+                        margin: UiRect::all(Val::Px(15.0)),
+                        ..default()
+                    },
+                    ..default()
+                },
+                Name::new("Scroll View"),
+                ScrollView::default(),
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    NodeBundle {
+                        style: Style {
+                            flex_direction: bevy::ui::FlexDirection::Column,
+                            width: Val::Percent(100.0),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Name::new("Scroll Content"),
+                    ScrollableContent::default(),
+                    inventory::InventoryContent,
+                ));
+            });
     });
 }

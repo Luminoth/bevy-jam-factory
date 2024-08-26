@@ -13,6 +13,7 @@ bevy_ecs_tilemap = { version = "0.14", features = ["atlas"] }
 bevy_egui = "0.28"
 # enable backend_egui here so that egui elements block what's below them
 bevy_mod_picking = { version = "0.20", features = ["backend_egui"] }
+bevy_simple_scroll_view = "0.2"
 futures-lite = "2.3"
 strum = { version = "0.26", features = ["derive"] }
 thiserror = "1.0"

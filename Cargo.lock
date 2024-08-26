@@ -381,6 +381,7 @@ dependencies = [
  "bevy_ecs_tilemap",
  "bevy_egui",
  "bevy_mod_picking",
+ "bevy_simple_scroll_view",
  "futures-lite",
  "strum",
  "thiserror",
@@ -1224,6 +1225,15 @@ dependencies = [
  "serde",
  "thiserror",
  "uuid",
+]
+
+[[package]]
+name = "bevy_simple_scroll_view"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2974e0d8fba2c1f3d13faef2875cd3b98f024319369c238e55ac9b09a1a9ee8"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

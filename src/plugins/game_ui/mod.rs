@@ -35,6 +35,7 @@ impl Plugin for GameUiPlugin {
                     object_info::update_object_info_ui
                         .run_if(object_info::should_update_object_info_ui),
                     inventory::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),
+                    inventory::inventory_updated_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

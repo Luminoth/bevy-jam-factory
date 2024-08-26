@@ -1,5 +1,6 @@
 pub mod camera;
 pub mod input;
+pub mod items;
 pub mod objects;
 
 use std::collections::HashSet;
@@ -41,6 +42,9 @@ impl GameAssets {
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);
 
+#[derive(Debug, Default, Event)]
+pub struct InventoryUpdatedEvent;
+
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct TileDrag {
     pub tiles: HashSet<Entity>,
@@ -64,6 +68,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_sub_state::<IsPaused>()
             .enable_state_scoped_entities::<IsPaused>()
+            .add_event::<InventoryUpdatedEvent>()
             .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
                 Update,
@@ -135,6 +140,7 @@ fn enter(
     mut commands: Commands,
     audio_assets: Res<AudioAssets>,
     game_assets: Res<GameAssets>,
+    mut inventory_update_events: EventWriter<InventoryUpdatedEvent>,
     mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     info!("entering InGame state");
@@ -163,6 +169,7 @@ fn enter(
     start_music(&mut commands, audio_assets.music.clone());
 
     commands.insert_resource(Inventory::default());
+    inventory_update_events.send_default();
 
     commands.spawn((
         TiledMapBundle {

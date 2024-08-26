@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::tiled::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
 pub enum ResourceType {
     Iron,
 }

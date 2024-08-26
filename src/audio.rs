@@ -2,6 +2,9 @@ use bevy::{audio::Volume, prelude::*};
 
 use crate::plugins::*;
 
+// TODO: these might be better as events so that the callers
+// don't need to know anything about the queries?
+
 pub fn start_music(commands: &mut Commands, source: Handle<AudioSource>) {
     commands.spawn((
         AudioBundle {

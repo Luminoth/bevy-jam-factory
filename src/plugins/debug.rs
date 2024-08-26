@@ -8,7 +8,7 @@ use bevy::{
 };
 use bevy_egui::{egui, EguiContexts};
 
-use crate::plugins::LogTextContent;
+use crate::plugins::game_ui::log::LogTextContent;
 
 #[derive(Debug, Default)]
 pub struct DebugPlugin;

@@ -1,7 +1,8 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::data::objects::ObjectData;
-use crate::plugins::{objects::Object, ObjectInfo};
+use crate::plugins::{objects::Object, ObjectInfo, UiAssets};
+use crate::ui::*;
 
 #[derive(Debug, Component)]
 pub struct ObjectInfoWindow;
@@ -28,6 +29,59 @@ pub enum ObjectInfoResourcesData {
 
 #[derive(Debug, Component)]
 pub struct ObjectInfoResourcesDataUI(pub ObjectInfoResourcesData);
+
+pub(super) fn setup_window(
+    mut commands: Commands,
+    ui_assets: Res<UiAssets>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = window_query.single();
+
+    let content_id = create_window(
+        &mut commands,
+        &ui_assets,
+        window,
+        (400, 200),
+        "Object Info",
+        false,
+        ObjectInfoWindow,
+    );
+    commands.entity(content_id).with_children(|parent| {
+        create_row_container(parent).with_children(|parent| {
+            create_label(parent, &ui_assets, "Object ID:", 14.0, FONT_COLOR);
+            create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectId));
+        });
+
+        create_row_container(parent).with_children(|parent| {
+            create_label(parent, &ui_assets, "Object Type:", 14.0, FONT_COLOR);
+            create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectType));
+        });
+
+        // Resources
+        create_column_container(parent)
+            .insert((
+                Visibility::Hidden,
+                Name::new("Resources"),
+                ObjectInfoResources,
+            ))
+            .with_children(|parent| {
+                create_row_container(parent).with_children(|parent| {
+                    create_label(parent, &ui_assets, "Resource Type:", 14.0, FONT_COLOR);
+                    create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR).insert(
+                        ObjectInfoResourcesDataUI(ObjectInfoResourcesData::ResourceType),
+                    );
+                });
+
+                create_row_container(parent).with_children(|parent| {
+                    create_label(parent, &ui_assets, "Amount:", 14.0, FONT_COLOR);
+                    create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                        .insert(ObjectInfoResourcesDataUI(ObjectInfoResourcesData::Amount));
+                });
+            });
+    });
+}
 
 pub(super) fn should_update_object_info_ui(
     object: Option<Res<ObjectInfo>>,

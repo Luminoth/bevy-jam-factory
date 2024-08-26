@@ -55,7 +55,9 @@ pub(super) fn pan(
     let view_half_width = camera.projection.area.width() / 2.0;
     let view_half_height = camera.projection.area.height() / 2.0;
 
-    let tilemap = tilemap_query.single();
+    let Ok(tilemap) = tilemap_query.get_single() else {
+        return;
+    };
     let map_half_width = (tilemap.size.x as f32 * tilemap.grid_size.x) / 2.0;
     let map_half_height = (tilemap.size.y as f32 * tilemap.grid_size.y) / 2.0;
 

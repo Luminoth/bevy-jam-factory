@@ -13,7 +13,7 @@ use crate::assets::tiled::TiledMap;
 use crate::audio::start_music;
 use crate::cleanup_state;
 use crate::data::inventory::InventoryData;
-use crate::plugins::{TiledMapBundle, TiledMapTileLayer};
+use crate::plugins::{AudioAssets, TiledMapBundle};
 use crate::AppState;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates, Reflect)]
@@ -26,6 +26,17 @@ pub enum IsPaused {
 
 #[derive(Debug, Component)]
 pub struct OnInGame;
+
+#[derive(Debug, Default, Reflect, Resource)]
+pub struct GameAssets {
+    pub map: Handle<TiledMap>,
+}
+
+impl GameAssets {
+    pub fn is_loaded(&self, map_assets: &Res<Assets<TiledMap>>) -> bool {
+        map_assets.contains(&self.map)
+    }
+}
 
 #[derive(Debug, Default, Reflect, Resource, Deref)]
 pub struct Inventory(pub InventoryData);
@@ -84,24 +95,13 @@ const VIEW_WIDTH: f32 = 800.0;
 const VIEW_HEIGHT: f32 = 600.0;
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // TODO: this should just load the asset
-    // we should spawn the bundle in enter()
-    let map_handle: Handle<TiledMap> = asset_server.load("map.tmx");
-    commands.spawn((
-        TiledMapBundle {
-            tiled_map: map_handle,
-            ..Default::default()
-        },
-        Name::new("Tiled Map"),
-        OnInGame,
-    ));
+    commands.insert_resource(AudioAssets {
+        music: asset_server.load("music/Windless Slopes.ogg"),
+    });
 
-    // TODO: this should just load the asset
-    // we should start the music in enter()
-    start_music(
-        &mut commands,
-        asset_server.load("music/Windless Slopes.ogg"),
-    );
+    commands.insert_resource(GameAssets {
+        map: asset_server.load("map.tmx"),
+    });
 
     info!("Waiting for assets ...");
 }
@@ -109,7 +109,10 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn wait_for_assets(
     mut contexts: EguiContexts,
     mut game_state: ResMut<NextState<AppState>>,
-    tiledmap_query: Query<&TiledMapTileLayer>,
+    game_assets: Res<GameAssets>,
+    map_assets: Res<Assets<TiledMap>>,
+    game_audio_assets: Res<AudioAssets>,
+    audio_assets: Res<Assets<AudioSource>>,
 ) {
     // TODO: other "systems" can load assets that we need to wait for
     // so this whole setup needs to be reworked
@@ -120,7 +123,7 @@ fn wait_for_assets(
         });
     });
 
-    if tiledmap_query.is_empty() {
+    if !game_assets.is_loaded(&map_assets) || !game_audio_assets.is_loaded(&audio_assets) {
         return;
     }
 
@@ -128,7 +131,12 @@ fn wait_for_assets(
     game_state.set(AppState::InGame);
 }
 
-fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<PrimaryWindow>>) {
+fn enter(
+    mut commands: Commands,
+    audio_assets: Res<AudioAssets>,
+    game_assets: Res<GameAssets>,
+    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
+) {
     info!("entering InGame state");
 
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
@@ -152,7 +160,18 @@ fn enter(mut commands: Commands, mut window_query: Query<&mut Window, With<Prima
     let center_cursor_pos = Vec2::new(window.width() / 2.0, window.height() / 2.0);
     window.set_cursor_position(Some(center_cursor_pos));
 
+    start_music(&mut commands, audio_assets.music.clone());
+
     commands.insert_resource(Inventory::default());
+
+    commands.spawn((
+        TiledMapBundle {
+            tiled_map: game_assets.map.clone(),
+            ..Default::default()
+        },
+        Name::new("Tiled Map"),
+        OnInGame,
+    ));
 }
 
 fn exit(mut commands: Commands) {

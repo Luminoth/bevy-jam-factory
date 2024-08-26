@@ -177,6 +177,10 @@ fn enter(
 fn exit(mut commands: Commands) {
     info!("exiting InGame state");
 
+    commands.remove_resource::<GameAssets>();
+    commands.remove_resource::<AudioAssets>();
+    commands.remove_resource::<ObjectInfo>();
+    commands.remove_resource::<TileDrag>();
     commands.remove_resource::<Inventory>();
     commands.remove_resource::<ClearColor>();
 }

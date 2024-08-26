@@ -1,13 +1,7 @@
 use std::str::FromStr;
 
-use bevy::prelude::*;
-
+use super::resources::*;
 use crate::tiled::*;
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
-pub enum ResourceType {
-    Iron,
-}
 
 #[derive(Debug, Clone, PartialEq, Eq, strum::EnumString, strum::Display)]
 pub enum ObjectType {

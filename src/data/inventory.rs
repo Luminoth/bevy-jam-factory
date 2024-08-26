@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 
 use super::items::ItemType;
-use super::objects::ResourceType;
+use super::resources::ResourceType;
 
 #[derive(Debug, Default, Reflect)]
 pub struct InventoryData {

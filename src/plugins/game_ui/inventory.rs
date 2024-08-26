@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
-use crate::data::{items::ItemType, objects::ResourceType};
+use crate::data::{items::ItemType, resources::ResourceType};
 use crate::plugins::{Inventory, InventoryUpdatedEvent, UiAssets};
 use crate::ui::*;
 

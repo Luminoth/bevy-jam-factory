@@ -135,7 +135,7 @@ pub(super) fn update_object_info_ui(
                         text.sections.get_mut(0).unwrap().value = r#type.to_string();
                     }
                     ObjectInfoResourcesData::Amount(prev) => {
-                        if *prev != *amount {
+                        if *amount != *prev {
                             text.sections.get_mut(0).unwrap().value = amount.to_string();
                             *prev = *amount;
                         }

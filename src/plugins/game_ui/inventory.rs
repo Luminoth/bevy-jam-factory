@@ -12,18 +12,18 @@ pub struct InventoryWindow;
 pub struct InventoryContent;
 
 #[derive(Debug, Component)]
-pub struct InventoryResourcesIron;
+pub struct InventoryResourcesUI(pub ResourceType);
 
 #[allow(dead_code)]
 #[derive(Debug, Component)]
-pub struct InventoryResourcesIronAmount(pub u32);
+pub struct InventoryResourcesAmountUI(pub ResourceType, pub u32);
 
 #[derive(Debug, Component)]
-pub struct InventoryItemsHarvesters;
+pub struct InventoryItemUI(pub ItemType);
 
 #[allow(dead_code)]
 #[derive(Debug, Component)]
-pub struct InventoryItemsHarvestersAmount(pub u32);
+pub struct InventoryItemAmountUI(pub ItemType, pub u32);
 
 pub(super) fn setup_window(
     mut commands: Commands,
@@ -81,12 +81,15 @@ pub(super) fn setup_window(
                                     .insert((
                                         Visibility::Hidden,
                                         Name::new("Iron"),
-                                        InventoryResourcesIron,
+                                        InventoryResourcesUI(ResourceType::Iron),
                                     ))
                                     .with_children(|parent| {
                                         create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                                            .insert(InventoryResourcesIronAmount(0));
+                                            .insert(InventoryResourcesAmountUI(
+                                                ResourceType::Iron,
+                                                0,
+                                            ));
                                     });
                             });
 
@@ -100,7 +103,7 @@ pub(super) fn setup_window(
                                     .insert((
                                         Visibility::Hidden,
                                         Name::new("Harvesters"),
-                                        InventoryItemsHarvesters,
+                                        InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
                                         create_label(
@@ -111,7 +114,7 @@ pub(super) fn setup_window(
                                             FONT_COLOR,
                                         );
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                                            .insert(InventoryItemsHarvestersAmount(0));
+                                            .insert(InventoryItemAmountUI(ItemType::Harvester, 0));
                                     });
                             });
                     });
@@ -126,7 +129,14 @@ pub(super) fn show_inventory(mut window_query: Query<&mut Visibility, With<Inven
 pub(super) fn inventory_updated_handler(
     mut events: EventReader<InventoryUpdatedEvent>,
     inventory: Res<Inventory>,
-    window_query: Query<&InventoryWindow>,
+    mut visibility_set: ParamSet<(
+        Query<(&mut Visibility, &InventoryResourcesUI)>,
+        Query<(&mut Visibility, &InventoryItemUI)>,
+    )>,
+    mut text_set: ParamSet<(
+        Query<(&mut Text, &mut InventoryResourcesAmountUI)>,
+        Query<(&mut Text, &mut InventoryItemAmountUI)>,
+    )>,
 ) {
     if events.is_empty() {
         return;
@@ -134,19 +144,37 @@ pub(super) fn inventory_updated_handler(
 
     info!("Inventory updated");
 
-    let _window = window_query.single();
-
-    for (resource_type, amount) in &inventory.resources {
-        // TODO: updat the UI
-        match resource_type {
-            ResourceType::Iron => info!("Iron: {}", amount),
+    for (mut visibility, resources) in visibility_set.p0().iter_mut() {
+        if inventory.resources.contains_key(&resources.0) {
+            *visibility = Visibility::Inherited;
         }
     }
 
-    for (item_type, amount) in &inventory.items {
-        // TODO: update the UI
-        match item_type {
-            ItemType::Harvester => info!("Harvesters: {}", amount),
+    for (mut text, mut resources) in text_set.p0().iter_mut() {
+        if inventory.resources.contains_key(&resources.0) {
+            if let Some(amount) = inventory.resources.get(&resources.0) {
+                if *amount != resources.1 {
+                    text.sections.get_mut(0).unwrap().value = amount.to_string();
+                    resources.1 = *amount;
+                }
+            }
+        }
+    }
+
+    for (mut visibility, item) in visibility_set.p1().iter_mut() {
+        if inventory.items.contains_key(&item.0) {
+            *visibility = Visibility::Inherited;
+        }
+    }
+
+    for (mut text, mut item) in text_set.p1().iter_mut() {
+        if inventory.items.contains_key(&item.0) {
+            if let Some(amount) = inventory.items.get(&item.0) {
+                if *amount != item.1 {
+                    text.sections.get_mut(0).unwrap().value = amount.to_string();
+                    item.1 = *amount;
+                }
+            }
         }
     }
 

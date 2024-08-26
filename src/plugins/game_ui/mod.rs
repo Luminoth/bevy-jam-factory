@@ -2,10 +2,25 @@ pub mod inventory;
 pub mod object_info;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::PrimaryWindow};
+use bevy_mod_picking::prelude::*;
 
 use crate::plugins::{IsPaused, IsPointerCaptured, UiAssets};
 use crate::ui::*;
 use crate::AppState;
+
+#[derive(Debug, Component)]
+pub struct LogWindow;
+
+#[derive(Debug, Component)]
+pub struct LogText;
+
+#[derive(Debug, Default, Reflect, Resource)]
+pub struct LogTextContent(String);
+
+// TODO: finish up being able to log stuff
+// (log when music is toggled as an example)
+// also need to be able to interact below the log window
+// (eg. fully ignore picking with it)
 
 #[derive(Debug, Default)]
 pub struct GameUiPlugin;
@@ -35,6 +50,32 @@ fn setup(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.single();
+
+    commands.init_resource::<LogTextContent>();
+
+    let log_id = create_fixed_window(
+        &mut commands,
+        ((window.width() - 400.0) as usize, 0),
+        (400, 200),
+        "Log",
+        true,
+        LogWindow,
+    );
+    commands.entity(log_id).with_children(|parent| {
+        parent.spawn((
+            TextBundle::from_section(
+                "",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 12.0,
+                    color: FONT_COLOR,
+                },
+            ),
+            Name::new("Log"),
+            Pickable::IGNORE,
+            LogText,
+        ));
+    });
 
     create_object_info_ui(&mut commands, &ui_assets, window);
     create_inventory_ui(&mut commands, &ui_assets, window);

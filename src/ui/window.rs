@@ -184,3 +184,70 @@ where
 
     content
 }
+
+pub fn create_fixed_window<C>(
+    commands: &mut Commands,
+    position: (usize, usize),
+    content_size: (usize, usize),
+    name: impl Into<String>,
+    visible: bool,
+    tag: C,
+) -> Entity
+where
+    C: Component,
+{
+    let name = name.into();
+
+    let ui_window = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Px(content_size.0 as f32),
+                    height: Val::Px((content_size.1) as f32),
+                    border: UiRect::all(Val::Px(5.0)),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Start,
+                    justify_content: JustifyContent::Center,
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(position.0 as f32),
+                    top: Val::Px(position.1 as f32),
+                    ..default()
+                },
+                background_color: WINDOW_BACKGROUND.into(),
+                visibility: if visible {
+                    Visibility::Visible
+                } else {
+                    Visibility::Hidden
+                },
+                ..default()
+            },
+            Name::new(format!("UiWindow - {}", name)),
+            Pickable::IGNORE,
+            UiWindow,
+            tag,
+        ))
+        .id();
+
+    let content = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Px(content_size.0 as f32),
+                    height: Val::Px(content_size.1 as f32),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            Name::new("Content"),
+            UiWindowContent,
+            Pickable::IGNORE,
+        ))
+        .id();
+
+    commands.entity(ui_window).push_children(&[content]);
+
+    content
+}

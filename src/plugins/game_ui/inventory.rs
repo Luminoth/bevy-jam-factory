@@ -11,6 +11,18 @@ pub struct InventoryWindow;
 #[derive(Debug, Component)]
 pub struct InventoryContent;
 
+#[derive(Debug, Component)]
+pub struct InventoryResourcesIron;
+
+#[derive(Debug, Component)]
+pub struct InventoryResourcesIronAmount;
+
+#[derive(Debug, Component)]
+pub struct InventoryItemsHarvesters;
+
+#[derive(Debug, Component)]
+pub struct InventoryItemsHarvestersAmount;
+
 pub(super) fn setup_window(
     mut commands: Commands,
     ui_assets: Res<UiAssets>,
@@ -56,7 +68,50 @@ pub(super) fn setup_window(
                         ScrollableContent::default(),
                         InventoryContent,
                     ))
-                    .with_children(|_parent| {
+                    .with_children(|parent| {
+                        // Resources
+                        create_column_container(parent)
+                            .insert(Name::new("Resources"))
+                            .with_children(|parent| {
+                                create_label(parent, &ui_assets, "Resources", 24.0, FONT_COLOR);
+
+                                create_row_container(parent)
+                                    .insert((
+                                        Visibility::Hidden,
+                                        Name::new("Iron"),
+                                        InventoryResourcesIron,
+                                    ))
+                                    .with_children(|parent| {
+                                        create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
+                                        create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                                            .insert(InventoryResourcesIronAmount);
+                                    });
+                            });
+
+                        // Items
+                        create_column_container(parent)
+                            .insert(Name::new("Items"))
+                            .with_children(|parent| {
+                                create_label(parent, &ui_assets, "Items", 24.0, FONT_COLOR);
+
+                                create_row_container(parent)
+                                    .insert((
+                                        Visibility::Hidden,
+                                        Name::new("Harvesters"),
+                                        InventoryItemsHarvesters,
+                                    ))
+                                    .with_children(|parent| {
+                                        create_label(
+                                            parent,
+                                            &ui_assets,
+                                            "Harvesters:",
+                                            14.0,
+                                            FONT_COLOR,
+                                        );
+                                        create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                                            .insert(InventoryItemsHarvestersAmount);
+                                    });
+                            });
                     });
             });
     });

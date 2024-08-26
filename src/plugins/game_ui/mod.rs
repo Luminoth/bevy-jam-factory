@@ -15,7 +15,7 @@ pub struct LogWindow;
 pub struct LogText;
 
 #[derive(Debug, Default, Reflect, Resource)]
-pub struct LogTextContent(String);
+pub struct LogTextContent(pub String);
 
 // TODO: finish up being able to log stuff
 // (log when music is toggled as an example)

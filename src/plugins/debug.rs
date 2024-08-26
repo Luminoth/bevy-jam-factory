@@ -8,6 +8,8 @@ use bevy::{
 };
 use bevy_egui::{egui, EguiContexts};
 
+use crate::plugins::LogTextContent;
+
 #[derive(Debug, Default)]
 pub struct DebugPlugin;
 
@@ -24,6 +26,7 @@ impl Plugin for DebugPlugin {
 fn debug_ui(
     time: Res<Time>,
     diagnostics: Res<DiagnosticsStore>,
+    log: Res<LogTextContent>,
     //mut inspector: ResMut<WorldInspectorParams>,
     mut contexts: EguiContexts,
 ) {
@@ -58,6 +61,8 @@ fn debug_ui(
                     .and_then(|count| count.value())
                     .unwrap_or_default()
             ));
+            ui.label("Log:");
+            ui.label(log.0.to_string())
 
             /*if ui.button("Inspector").clicked() {
                 inspector.enabled = !inspector.enabled;

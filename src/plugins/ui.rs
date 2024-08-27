@@ -1,6 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::EguiContexts;
 
+use crate::audio::play_oneshot_audio;
 use crate::ui::*;
 use crate::AppState;
 
@@ -19,6 +20,8 @@ pub struct UiWindowContent;
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct UiAssets {
     pub font: Handle<Font>,
+    pub button_hover_sound: Handle<AudioSource>,
+    pub button_pressed_sound: Handle<AudioSource>,
 }
 
 #[derive(Debug, Default, Reflect, Resource, Deref, DerefMut)]
@@ -41,11 +44,15 @@ impl Plugin for UiPlugin {
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(UiAssets {
         font: asset_server.load(FONT),
+        button_hover_sound: asset_server.load("sounds/ui/button-hover.mp3"),
+        button_pressed_sound: asset_server.load("sounds/ui/button-click.mp3"),
     });
 }
 
 #[allow(clippy::type_complexity)]
 fn update_button(
+    mut commands: Commands,
+    ui_assets: Res<UiAssets>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>),
@@ -55,9 +62,11 @@ fn update_button(
         match *interaction {
             Interaction::Pressed => {
                 *color = BUTTON_PRESSED.into();
+                play_oneshot_audio(&mut commands, ui_assets.button_pressed_sound.clone());
             }
             Interaction::Hovered => {
                 *color = BUTTON_HOVER.into();
+                play_oneshot_audio(&mut commands, ui_assets.button_hover_sound.clone());
             }
             Interaction::None => {
                 *color = BUTTON_NORMAL.into();

@@ -126,6 +126,7 @@ pub(super) fn show_inventory(mut window_query: Query<&mut Visibility, With<Inven
     *window_query.single_mut() = Visibility::Visible;
 }
 
+#[allow(clippy::type_complexity)]
 pub(super) fn inventory_updated_handler(
     mut events: EventReader<InventoryUpdatedEvent>,
     inventory: Res<Inventory>,

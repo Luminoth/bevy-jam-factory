@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.14"
+bevy = { version = "0.14", features = ["mp3"] }
 bevy-inspector-egui = "0.25"
 bevy_ecs_tilemap = { version = "0.14", features = ["atlas"] }
 bevy_egui = "0.28"

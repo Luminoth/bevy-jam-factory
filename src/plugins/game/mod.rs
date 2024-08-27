@@ -101,6 +101,7 @@ const VIEW_HEIGHT: f32 = 600.0;
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(AudioAssets {
+        // TODO: is there a way to make this streaming?
         music: asset_server.load("music/Windless Slopes.ogg"),
     });
 

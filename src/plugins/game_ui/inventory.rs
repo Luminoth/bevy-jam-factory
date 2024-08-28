@@ -84,6 +84,7 @@ pub(super) fn setup_window(
                                         InventoryResourcesUI(ResourceType::Iron),
                                     ))
                                     .with_children(|parent| {
+                                        create_image(parent, ui_assets.missing_image.clone());
                                         create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
                                             .insert(InventoryResourcesAmountUI(
@@ -106,6 +107,7 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
+                                        create_image(parent, ui_assets.missing_image.clone());
                                         create_label(
                                             parent,
                                             &ui_assets,

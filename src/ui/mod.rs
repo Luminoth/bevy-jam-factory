@@ -1,4 +1,5 @@
 mod button;
+mod image;
 mod label;
 mod window;
 
@@ -6,6 +7,7 @@ use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
 
 pub use button::*;
+pub use image::*;
 pub use label::*;
 pub use window::*;
 

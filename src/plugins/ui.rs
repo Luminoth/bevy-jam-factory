@@ -19,6 +19,7 @@ pub struct UiWindowContent;
 
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct UiAssets {
+    pub missing_image: Handle<Image>,
     pub font: Handle<Font>,
     pub button_hover_sound: Handle<AudioSource>,
     pub button_pressed_sound: Handle<AudioSource>,
@@ -43,6 +44,9 @@ impl Plugin for UiPlugin {
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(UiAssets {
+        // TODO: we should probably generate this rather than load it
+        // (what if the missing image is missing??)
+        missing_image: asset_server.load("missing.png"),
         font: asset_server.load(FONT),
         button_hover_sound: asset_server.load("sounds/ui/button-hover.mp3"),
         button_pressed_sound: asset_server.load("sounds/ui/button-click.mp3"),

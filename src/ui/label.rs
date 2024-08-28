@@ -1,7 +1,6 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
 
-use super::*;
 use crate::plugins::UiAssets;
 
 pub fn create_label<'a>(

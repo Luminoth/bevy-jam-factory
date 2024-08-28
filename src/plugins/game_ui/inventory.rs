@@ -26,29 +26,85 @@ pub struct InventoryItemUI(pub ItemType);
 #[derive(Debug, Component)]
 pub struct InventoryItemAmountUI(pub ItemType, pub u32);
 
+#[derive(Debug, Component)]
+pub struct InventoryItemImage;
+
+#[derive(Debug, Component)]
+pub struct InventoryDragImage;
+
+#[allow(clippy::type_complexity)]
+fn start_drag_inventory_item(
+    event: Listener<Pointer<DragStart>>,
+    item_image_query: Query<
+        &GlobalTransform,
+        (With<InventoryItemImage>, Without<InventoryDragImage>),
+    >,
+    mut drag_image_query: Query<
+        (&mut Visibility, &mut Style),
+        (With<InventoryDragImage>, Without<InventoryItemImage>),
+    >,
+) {
+    if !check_drag_start_event(&event, PointerButton::Primary) {
+        return;
+    }
+
+    let (mut image_visibility, mut image_style) = drag_image_query.single_mut();
+    *image_visibility = Visibility::Visible;
+
+    let item_image_transform = item_image_query.get(event.target).unwrap();
+    let half_width = if let Val::Px(width) = image_style.width {
+        width / 2.0
+    } else {
+        0.0
+    };
+    let half_height = if let Val::Px(height) = image_style.height {
+        height / 2.0
+    } else {
+        0.0
+    };
+
+    if let Val::Px(left) = &mut image_style.left {
+        *left = item_image_transform.translation().x - half_width;
+    }
+
+    if let Val::Px(top) = &mut image_style.top {
+        *top = item_image_transform.translation().y - half_height;
+    }
+}
+
 fn drag_inventory_item(
     event: Listener<Pointer<Drag>>,
-    // TODO: this would find the "dragged" image
-    //mut window_query: Query<&mut Style, With<UiWindow>>,
-    ui_image_query: Query<&UiImage>,
+    mut drag_image_query: Query<&mut Style, With<InventoryDragImage>>,
 ) {
     if !check_drag_event(&event, PointerButton::Primary) {
         return;
     }
 
-    let _image = ui_image_query.get(event.target).unwrap();
+    let mut image_style = drag_image_query.single_mut();
 
-    info!("drag inventory item: {}", event.delta);
-
-    /*let mut window_style = window_query.get_mut(titlebar.0).unwrap();
-
-    if let Val::Px(left) = &mut window_style.left {
+    if let Val::Px(left) = &mut image_style.left {
         *left += event.delta.x;
     }
 
-    if let Val::Px(top) = &mut window_style.top {
+    if let Val::Px(top) = &mut image_style.top {
         *top += event.delta.y;
-    }*/
+    }
+
+    // TODO: send an event that the game can listen for
+}
+
+fn end_drag_inventory_item(
+    event: Listener<Pointer<DragEnd>>,
+    mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
+) {
+    if !check_drag_end_event(&event, PointerButton::Primary) {
+        return;
+    }
+
+    let mut image_visibility = drag_image_query.single_mut();
+    *image_visibility = Visibility::Hidden;
+
+    // TODO: send an event that the game can listen for
 }
 
 pub(super) fn setup_window(
@@ -136,8 +192,14 @@ pub(super) fn setup_window(
                                         create_draggable_image(
                                             parent,
                                             ui_assets.missing_image.clone(),
+                                            On::<Pointer<DragStart>>::run(
+                                                start_drag_inventory_item,
+                                            ),
                                             On::<Pointer<Drag>>::run(drag_inventory_item),
-                                        );
+                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
+                                        )
+                                        .insert(InventoryItemImage);
+
                                         create_label(
                                             parent,
                                             &ui_assets,
@@ -152,6 +214,27 @@ pub(super) fn setup_window(
                     });
             });
     });
+
+    // while we're here, setup the "item drag" image
+    commands.spawn((
+        ImageBundle {
+            style: Style {
+                // TODO: don't assume size here
+                width: Val::Px(32.0),
+                height: Val::Px(32.0),
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                ..default()
+            },
+            image: UiImage::new(ui_assets.missing_image.clone()),
+            visibility: Visibility::Hidden,
+            ..default()
+        },
+        Name::new("Inventory Item Drag Image"),
+        Pickable::IGNORE,
+        InventoryDragImage,
+    ));
 }
 
 pub(super) fn show_inventory(mut window_query: Query<&mut Visibility, With<InventoryWindow>>) {

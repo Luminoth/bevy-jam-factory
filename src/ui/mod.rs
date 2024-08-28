@@ -28,7 +28,33 @@ pub fn check_click_event(event: &Listener<Pointer<Click>>, button: PointerButton
 }
 
 #[inline]
+pub fn check_drag_start_event(event: &Listener<Pointer<DragStart>>, button: PointerButton) -> bool {
+    if event.target != event.listener() {
+        return false;
+    }
+
+    if event.button != button {
+        return false;
+    }
+
+    true
+}
+
+#[inline]
 pub fn check_drag_event(event: &Listener<Pointer<Drag>>, button: PointerButton) -> bool {
+    if event.target != event.listener() {
+        return false;
+    }
+
+    if event.button != button {
+        return false;
+    }
+
+    true
+}
+
+#[inline]
+pub fn check_drag_end_event(event: &Listener<Pointer<DragEnd>>, button: PointerButton) -> bool {
     if event.target != event.listener() {
         return false;
     }

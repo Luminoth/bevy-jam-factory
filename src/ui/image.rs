@@ -21,7 +21,9 @@ pub fn create_image<'a>(parent: &'a mut ChildBuilder, image: Handle<Image>) -> E
 pub fn create_draggable_image<'a>(
     parent: &'a mut ChildBuilder,
     image: Handle<Image>,
+    on_drag_start: On<Pointer<DragStart>>,
     on_drag: On<Pointer<Drag>>,
+    on_drag_end: On<Pointer<DragEnd>>,
 ) -> EntityCommands<'a> {
     parent.spawn((
         ImageBundle {
@@ -35,6 +37,8 @@ pub fn create_draggable_image<'a>(
             ..default()
         },
         Name::new("Draggable Image"),
+        on_drag_start,
         on_drag,
+        on_drag_end,
     ))
 }

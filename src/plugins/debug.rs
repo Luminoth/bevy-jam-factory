@@ -61,6 +61,8 @@ impl Plugin for DebugPlugin {
 
         app.add_systems(
             Update,
+            // TODO: this needs to be reworked to also hide the inspectors when disabling
+            // (probably just copy input_toggle_active but also have it disable everything?)
             debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
         );
     }

@@ -57,6 +57,13 @@ fn main() {
                 }),
                 ..default()
             })
+            .set(bevy::log::LogPlugin {
+                // default bevy filter plus silence some spammy 3rd party crates
+                filter:
+                    "wgpu=error,naga=warn,symphonia_core=error,symphonia_bundle_mp3=error,bevy_simple_scroll_view=error"
+                        .to_string(),
+                ..default()
+            })
             // prevent blurry sprites
             .set(ImagePlugin::default_nearest()),
         //bevy::diagnostic::LogDiagnosticsPlugin::default(),

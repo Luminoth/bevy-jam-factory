@@ -9,6 +9,41 @@ const TITLE_HEIGHT: usize = 40;
 const TITLE_BACKGROUND: Color = Color::srgb(0.1, 0.1, 0.1);
 const TITLE_FONT_SIZE: usize = 40;
 
+fn drag_window(
+    event: Listener<Pointer<Drag>>,
+    mut window_query: Query<&mut Style, With<UiWindow>>,
+    titlebar_query: Query<&UiWindowTitleBar>,
+) {
+    if !check_drag_event(&event, PointerButton::Primary) {
+        return;
+    }
+
+    let titlebar = titlebar_query.get(event.target).unwrap();
+    let mut window_style = window_query.get_mut(titlebar.0).unwrap();
+
+    if let Val::Px(left) = &mut window_style.left {
+        *left += event.delta.x;
+    }
+
+    if let Val::Px(top) = &mut window_style.top {
+        *top += event.delta.y;
+    }
+}
+
+fn close_window(
+    event: Listener<Pointer<Click>>,
+    mut window_query: Query<&mut Visibility, With<UiWindow>>,
+    close_button_query: Query<&UiWindowCloseButton>,
+) {
+    if !check_click_event(&event, PointerButton::Primary) {
+        return;
+    }
+
+    let close_button = close_button_query.get(event.target).unwrap();
+    let mut window_visibility = window_query.get_mut(close_button.0).unwrap();
+    *window_visibility = Visibility::Hidden;
+}
+
 pub fn create_window<C>(
     commands: &mut Commands,
     ui_assets: &Res<UiAssets>,
@@ -91,29 +126,7 @@ where
                             ..default()
                         },
                         Name::new("Title"),
-                        On::<Pointer<Drag>>::run(
-                            |event: Listener<Pointer<Drag>>,
-                             mut window_query: Query<&mut Style, With<UiWindow>>,
-                             titlebar_query: Query<&UiWindowTitleBar>| {
-                                if event.target != event.listener() {
-                                    return;
-                                }
-                                if event.button != PointerButton::Primary {
-                                    return;
-                                }
-
-                                let titlebar = titlebar_query.get(event.target).unwrap();
-                                let mut window_style = window_query.get_mut(titlebar.0).unwrap();
-
-                                if let Val::Px(left) = &mut window_style.left {
-                                    *left += event.delta.x;
-                                }
-
-                                if let Val::Px(top) = &mut window_style.top {
-                                    *top += event.delta.y;
-                                }
-                            },
-                        ),
+                        On::<Pointer<Drag>>::run(drag_window),
                         UiWindowTitleBar(ui_window),
                     ))
                     .with_children(|parent| {
@@ -137,22 +150,7 @@ where
                             ..default()
                         },
                         Name::new("Close Button"),
-                        On::<Pointer<Click>>::run(
-                            |event: Listener<Pointer<Click>>,
-                             mut window_query: Query<&mut Visibility, With<UiWindow>>,
-                             close_button_query: Query<&UiWindowCloseButton>| {
-                                if event.target != event.listener() {
-                                    return;
-                                }
-                                if event.button != PointerButton::Primary {
-                                    return;
-                                }
-
-                                let close_button = close_button_query.get(event.target).unwrap();
-                                let mut window_visibility = window_query.get_mut(close_button.0).unwrap();
-                                *window_visibility = Visibility::Hidden;
-                            },
-                        ),
+                        On::<Pointer<Click>>::run(close_window),
                         UiWindowCloseButton(ui_window),
                     ))
                     .with_children(|parent| {

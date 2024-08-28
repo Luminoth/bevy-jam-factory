@@ -3,7 +3,7 @@ use bevy_mod_picking::prelude::*;
 
 use crate::cleanup_state;
 use crate::plugins::UiAssets;
-use crate::ui::{create_button, create_canvas};
+use crate::ui::{check_click_event, create_button, create_canvas};
 use crate::AppState;
 
 #[derive(Debug, Component)]
@@ -41,13 +41,9 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut game_state: ResMut<NextState<AppState>>| {
-                        if event.target != event.listener() {
+                        if !check_click_event(&event, PointerButton::Primary) {
                             return;
                         }
-                        if event.button != PointerButton::Primary {
-                            return;
-                        }
-
                         game_state.set(AppState::LoadAssets);
                     },
                 ),
@@ -59,13 +55,9 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 "Exit Game",
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
-                        if event.target != event.listener() {
+                        if !check_click_event(&event, PointerButton::Primary) {
                             return;
                         }
-                        if event.button != PointerButton::Primary {
-                            return;
-                        }
-
                         exit.send(AppExit::Success);
                     },
                 ),

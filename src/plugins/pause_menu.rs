@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use crate::plugins::{IsPaused, Music, UiAssets};
-use crate::ui::{create_button, create_canvas};
+use crate::ui::{check_click_event, create_button, create_canvas};
 use crate::AppState;
 
 #[derive(Debug, Component)]
@@ -31,13 +31,9 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut pause_state: ResMut<NextState<IsPaused>>| {
-                        if event.target != event.listener() {
+                        if !check_click_event(&event, PointerButton::Primary) {
                             return;
                         }
-                        if event.button != PointerButton::Primary {
-                            return;
-                        }
-
                         pause_state.set(IsPaused::Running);
                     },
                 ),
@@ -50,13 +46,9 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut game_state: ResMut<NextState<AppState>>| {
-                        if event.target != event.listener() {
+                        if !check_click_event(&event, PointerButton::Primary) {
                             return;
                         }
-                        if event.button != PointerButton::Primary {
-                            return;
-                        }
-
                         game_state.set(AppState::MainMenu);
                     },
                 ),

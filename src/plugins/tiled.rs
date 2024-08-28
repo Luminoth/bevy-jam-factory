@@ -9,6 +9,7 @@ use crate::data::objects::ObjectData;
 use crate::plugins::{
     game::OnInGame, game_ui::object_info::ObjectInfoWindow, objects::*, ObjectInfo,
 };
+use crate::ui::check_click_event;
 
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {
@@ -482,10 +483,7 @@ fn process_object_layer(
                                     &mut Visibility,
                                     With<ObjectInfoWindow>,
                                 >| {
-                                    if event.target != event.listener() {
-                                        return;
-                                    }
-                                    if event.button != PointerButton::Secondary {
+                                    if !check_click_event(&event, PointerButton::Secondary) {
                                         return;
                                     }
 

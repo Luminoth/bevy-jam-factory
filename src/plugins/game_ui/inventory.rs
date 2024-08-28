@@ -1,4 +1,5 @@
 use bevy::{prelude::*, window::PrimaryWindow};
+use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
 use crate::data::{items::ItemType, resources::ResourceType};
@@ -24,6 +25,31 @@ pub struct InventoryItemUI(pub ItemType);
 #[allow(dead_code)]
 #[derive(Debug, Component)]
 pub struct InventoryItemAmountUI(pub ItemType, pub u32);
+
+fn drag_inventory_item(
+    event: Listener<Pointer<Drag>>,
+    // TODO: this would find the "dragged" image
+    //mut window_query: Query<&mut Style, With<UiWindow>>,
+    ui_image_query: Query<&UiImage>,
+) {
+    if !check_drag_event(&event, PointerButton::Primary) {
+        return;
+    }
+
+    let _image = ui_image_query.get(event.target).unwrap();
+
+    info!("drag inventory item: {}", event.delta);
+
+    /*let mut window_style = window_query.get_mut(titlebar.0).unwrap();
+
+    if let Val::Px(left) = &mut window_style.left {
+        *left += event.delta.x;
+    }
+
+    if let Val::Px(top) = &mut window_style.top {
+        *top += event.delta.y;
+    }*/
+}
 
 pub(super) fn setup_window(
     mut commands: Commands,
@@ -107,7 +133,11 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
-                                        create_image(parent, ui_assets.missing_image.clone());
+                                        create_draggable_image(
+                                            parent,
+                                            ui_assets.missing_image.clone(),
+                                            On::<Pointer<Drag>>::run(drag_inventory_item),
+                                        );
                                         create_label(
                                             parent,
                                             &ui_assets,

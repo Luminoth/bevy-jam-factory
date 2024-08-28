@@ -8,7 +8,7 @@ mod tiled;
 mod tilemap;
 mod ui;
 
-use bevy::{input::common_conditions::input_toggle_active, prelude::*};
+use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::ScrollViewPlugin;
@@ -43,16 +43,18 @@ where
     }
 }
 
+const DEFAULT_RESOLUTION: (f32, f32) = (1280.0, 720.0);
+
 fn main() {
     let mut app = App::new();
 
-    app.add_plugins((
-        // core plugins
+    // core plugins
+    app.add_plugins(
         DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "Bevy Jam - Factory".into(),
-                    resolution: (1280.0, 720.0).into(),
+                    title: "Funemployment (Bevy) Jam - Factory".into(),
+                    resolution: DEFAULT_RESOLUTION.into(),
                     ..default()
                 }),
                 ..default()
@@ -65,27 +67,14 @@ fn main() {
                 ..default()
             })
             // prevent blurry sprites
-            .set(ImagePlugin::default_nearest()),
-        //bevy::diagnostic::LogDiagnosticsPlugin::default(),
-        bevy::diagnostic::FrameTimeDiagnosticsPlugin,
-        bevy::diagnostic::EntityCountDiagnosticsPlugin,
-        //bevy::render::diagnostic::RenderDiagnosticsPlugin,
-        bevy::diagnostic::SystemInformationDiagnosticsPlugin,
-        // third-party plugins
+            .set(ImagePlugin::default_nearest()));
+
+    // third-party plugins
+    app.add_plugins((
         DefaultPickingPlugins,
         TilemapPlugin,
         ScrollViewPlugin,
         bevy_egui::EguiPlugin,
-        // inspectors
-        // TODO: why does the world inspector not pick up custom resource types?
-        // using register_type() on them doesn't seem to fix it
-        // TODO: might have outgrown the quick plugins: https://docs.rs/bevy-inspector-egui/0.25.2/bevy_inspector_egui/#use-case-2-manual-ui
-        bevy_inspector_egui::quick::WorldInspectorPlugin::default()
-            .run_if(input_toggle_active(false, KeyCode::Backquote)),
-        bevy_inspector_egui::quick::StateInspectorPlugin::<AppState>::default()
-            .run_if(input_toggle_active(false, KeyCode::Backquote)),
-        bevy_inspector_egui::quick::ResourceInspectorPlugin::<plugins::Inventory>::default()
-            .run_if(input_toggle_active(false, KeyCode::Backquote)),
     ));
 
     /*app.insert_resource(bevy_egui::EguiSettings {
@@ -93,9 +82,9 @@ fn main() {
         ..Default::default()
     });*/
 
-    // TODO: move to a state init or something
     app.init_state::<AppState>();
 
+    // game plugins
     app.add_plugins((
         plugins::TiledMapPlugin,
         plugins::TiledPickingBackend,

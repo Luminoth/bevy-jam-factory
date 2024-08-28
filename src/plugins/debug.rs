@@ -8,14 +8,57 @@ use bevy::{
 };
 use bevy_egui::{egui, EguiContexts};
 
-use crate::plugins::game_ui::log::LogTextContent;
+use crate::AppState;
+
+#[derive(Debug, Default, Reflect, Resource)]
+pub struct DebugSettings {
+    pub show_world_inspector: bool,
+    pub show_state_inspector: bool,
+    pub show_inventory_inspector: bool,
+}
+
+fn show_world_inspector(debug_settings: Res<DebugSettings>) -> bool {
+    debug_settings.show_world_inspector
+}
+
+fn show_state_inspector(debug_settings: Res<DebugSettings>) -> bool {
+    debug_settings.show_state_inspector
+}
+
+fn show_inventory_inspector(debug_settings: Res<DebugSettings>) -> bool {
+    debug_settings.show_inventory_inspector
+}
 
 #[derive(Debug, Default)]
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        // TODO: move to a plugin
+        // diagnostics
+        app.add_plugins((
+            //bevy::diagnostic::LogDiagnosticsPlugin::default(),
+            bevy::diagnostic::FrameTimeDiagnosticsPlugin,
+            bevy::diagnostic::EntityCountDiagnosticsPlugin,
+            //bevy::render::diagnostic::RenderDiagnosticsPlugin,
+            bevy::diagnostic::SystemInformationDiagnosticsPlugin,
+        ));
+
+        // inspectors
+        app.add_plugins((
+            // TODO: why does the world inspector not pick up custom resource types?
+            // using register_type() on them doesn't seem to fix it
+            // TODO: might have outgrown the quick plugins: https://docs.rs/bevy-inspector-egui/0.25.2/bevy_inspector_egui/#use-case-2-manual-ui
+            bevy_inspector_egui::quick::WorldInspectorPlugin::default()
+                .run_if(show_world_inspector),
+            bevy_inspector_egui::quick::StateInspectorPlugin::<AppState>::default()
+                .run_if(show_state_inspector),
+            // resource inspectors
+            bevy_inspector_egui::quick::ResourceInspectorPlugin::<crate::plugins::Inventory>::default()
+                .run_if(show_inventory_inspector),
+        ));
+
+        app.init_resource::<DebugSettings>();
+
         app.add_systems(
             Update,
             debug_ui.run_if(input_toggle_active(false, KeyCode::Backquote)),
@@ -26,8 +69,7 @@ impl Plugin for DebugPlugin {
 fn debug_ui(
     time: Res<Time>,
     diagnostics: Res<DiagnosticsStore>,
-    log: Res<LogTextContent>,
-    //mut inspector: ResMut<WorldInspectorParams>,
+    mut debug_settings: ResMut<DebugSettings>,
     mut contexts: EguiContexts,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
@@ -61,12 +103,18 @@ fn debug_ui(
                     .and_then(|count| count.value())
                     .unwrap_or_default()
             ));
-            ui.label("Log:");
-            ui.label(log.0.to_string())
 
-            /*if ui.button("Inspector").clicked() {
-                inspector.enabled = !inspector.enabled;
-            }*/
+            if ui.button("World Inspector").clicked() {
+                debug_settings.show_world_inspector = !debug_settings.show_world_inspector;
+            }
+
+            if ui.button("State Inspector").clicked() {
+                debug_settings.show_state_inspector = !debug_settings.show_state_inspector;
+            }
+
+            if ui.button("Inventory Inspector").clicked() {
+                debug_settings.show_inventory_inspector = !debug_settings.show_inventory_inspector;
+            }
         });
     });
 }

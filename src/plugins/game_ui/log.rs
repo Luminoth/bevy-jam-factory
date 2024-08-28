@@ -1,13 +1,13 @@
+use std::time::Instant;
+
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_mod_picking::prelude::*;
 
 use crate::plugins::UiAssets;
 use crate::ui::*;
 
-// TODO: finish up being able to log stuff
-// (log when music is toggled as an example)
-// also need to be able to interact below the log window
-// (eg. fully ignore picking with it)
+// TODO: we need to be able to interact below the log window
+// (eg. update_pointer_capture needs to ignore it)
 
 #[derive(Debug, Component)]
 pub struct LogWindow;
@@ -17,6 +17,21 @@ pub struct LogText;
 
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct LogTextContent(pub String);
+
+#[derive(Debug, Event)]
+pub struct LogEvent {
+    timestamp: Instant,
+    message: String,
+}
+
+impl LogEvent {
+    pub fn new(message: impl Into<String>) -> Self {
+        Self {
+            timestamp: Instant::now(),
+            message: message.into(),
+        }
+    }
+}
 
 pub(super) fn setup_window(
     mut commands: Commands,
@@ -48,4 +63,24 @@ pub(super) fn setup_window(
             LogText,
         ));
     });
+}
+
+pub(super) fn log_event_handler(
+    mut events: EventReader<LogEvent>,
+    mut log_content: ResMut<LogTextContent>,
+    mut log_text_query: Query<&mut Text, With<LogText>>,
+) {
+    for event in events.read() {
+        info!("{:?}: {}", event.timestamp, event.message);
+        log_content.0.push_str(&event.message);
+        log_content.0.push('\n');
+    }
+
+    let mut log_text = log_text_query.single_mut();
+    log_text
+        .sections
+        .get_mut(0)
+        .unwrap()
+        .value
+        .clone_from(&log_content.0);
 }

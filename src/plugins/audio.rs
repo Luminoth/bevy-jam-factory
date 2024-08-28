@@ -1,6 +1,7 @@
 use bevy::{input::common_conditions::input_just_released, prelude::*};
 
 use crate::audio::*;
+use crate::plugins::game_ui::log::LogEvent;
 
 #[derive(Debug, Component)]
 pub struct Music;
@@ -33,9 +34,12 @@ impl Plugin for AudioPlugin {
 
 fn toggle_music(
     mut commands: Commands,
+    mut log_events: EventWriter<LogEvent>,
     audio_assets: Res<AudioAssets>,
     music_query: Query<Entity, With<Music>>,
 ) {
+    log_events.send(LogEvent::new("Toggling music"));
+
     if music_query.is_empty() {
         start_music(&mut commands, audio_assets.music.clone());
     } else {

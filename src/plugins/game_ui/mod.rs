@@ -12,7 +12,8 @@ pub struct GameUiPlugin;
 
 impl Plugin for GameUiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::LoadAssets), load_assets)
+        app.add_event::<log::LogEvent>()
+            .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
                 OnEnter(AppState::InGame),
                 (
@@ -25,6 +26,7 @@ impl Plugin for GameUiPlugin {
             .add_systems(
                 Update,
                 (
+                    log::log_event_handler,
                     object_info::update_object_info_ui
                         .run_if(object_info::should_update_object_info_ui),
                     inventory::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),

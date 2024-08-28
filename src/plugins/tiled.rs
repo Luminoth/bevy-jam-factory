@@ -7,7 +7,10 @@ use bevy_mod_picking::prelude::*;
 use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
 use crate::plugins::{
-    game::OnInGame, game_ui::object_info::ObjectInfoWindow, objects::*, ObjectInfo,
+    game::OnInGame,
+    game_ui::{log::LogEvent, object_info::ObjectInfoWindow},
+    objects::*,
+    ObjectInfo,
 };
 use crate::ui::check_click_event;
 
@@ -478,6 +481,7 @@ fn process_object_layer(
                             PickableBundle::default(),
                             On::<Pointer<Click>>::run(
                                 |event: Listener<Pointer<Click>>,
+                                 mut log_events: EventWriter<LogEvent>,
                                  mut commands: Commands,
                                  mut window_query: Query<
                                     &mut Visibility,
@@ -489,6 +493,7 @@ fn process_object_layer(
 
                                     commands.insert_resource(ObjectInfo(event.target));
                                     *window_query.single_mut() = Visibility::Visible;
+                                    log_events.send(LogEvent::new("Showing Object Info"));
                                 },
                             ),
                         ),

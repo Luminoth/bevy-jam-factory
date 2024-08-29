@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use super::Inventory;
 use crate::data::items::{ItemData, ItemType};
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
-    camera::MainCamera, objects::Object, InventoryUpdatedEvent, TiledMapObjectLayer,
-    TiledMapTileLayer,
+    camera::MainCamera, /*game_ui::inventory::hide_inventory_drag_icon,*/ objects::Object,
+    Inventory, InventoryUpdatedEvent, TiledMapObjectLayer, TiledMapTileLayer,
 };
 use crate::tilemap::{get_tile_position, TileMapQuery};
 
@@ -38,13 +37,22 @@ impl ItemDragEvent {
 pub struct ItemDropEvent {
     pub item_type: ItemType,
     pub cursor_position: Option<Vec2>,
+    pub drag_image_id: Entity,
+    pub drag_image_position: (Val, Val),
 }
 
 impl ItemDropEvent {
-    pub fn new(window: &Window, item_type: ItemType) -> Self {
+    pub fn new(
+        window: &Window,
+        item_type: ItemType,
+        drag_image_id: Entity,
+        drag_image_style: &Style,
+    ) -> Self {
         Self {
             item_type,
             cursor_position: window.cursor_position(),
+            drag_image_id,
+            drag_image_position: (drag_image_style.left, drag_image_style.top),
         }
     }
 }
@@ -256,6 +264,32 @@ pub(super) fn item_drop_event_handler(
                     event
                         .item_type
                         .drop_tile(&mut inventory.0, &mut inventory_updated_events);
+                } else {
+                    let tween = bevy_tweening::Tween::new(
+                        bevy_tweening::EaseFunction::QuadraticOut,
+                        std::time::Duration::from_secs(1),
+                        bevy_tweening::lens::UiPositionLens {
+                            start: UiRect {
+                                left: event.drag_image_position.0,
+                                top: event.drag_image_position.1,
+                                right: Val::Auto,
+                                bottom: Val::Auto,
+                            },
+                            // TODO: this should be the drag start
+                            end: UiRect {
+                                left: Val::Px(0.0),
+                                top: Val::Px(0.0),
+                                right: Val::Auto,
+                                bottom: Val::Auto,
+                            },
+                        },
+                    );
+                    // TODO: hmmmmmm
+                    //.with_completed_system(hide_inventory_drag_icon);
+
+                    commands
+                        .entity(event.drag_image_id)
+                        .insert(bevy_tweening::Animator::new(tween));
                 }
 
                 continue;

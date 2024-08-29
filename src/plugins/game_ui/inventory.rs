@@ -117,7 +117,7 @@ fn end_drag_inventory_item(
     event: Listener<Pointer<DragEnd>>,
     mut item_drop_events: EventWriter<ItemDropEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut drag_image_query: Query<(&mut Visibility, &mut InventoryDragImage)>,
+    mut drag_image_query: Query<(Entity, &Style, &mut InventoryDragImage)>,
 ) {
     if !check_drag_end_event(
         event.listener(),
@@ -128,12 +128,24 @@ fn end_drag_inventory_item(
         return;
     }
 
-    let (mut drag_image_visibility, mut drag_image_item_type) = drag_image_query.single_mut();
-    *drag_image_visibility = Visibility::Hidden;
+    let (drag_image_id, drag_image_style, mut drag_image_item_type) = drag_image_query.single_mut();
     let item_type = drag_image_item_type.item_type.take();
 
     let window = window_query.single();
-    item_drop_events.send(ItemDropEvent::new(window, item_type.unwrap()));
+    item_drop_events.send(ItemDropEvent::new(
+        window,
+        item_type.unwrap(),
+        drag_image_id,
+        drag_image_style,
+    ));
+}
+
+#[allow(dead_code)]
+pub fn hide_inventory_drag_icon(
+    mut visibility_query: Query<&mut Visibility, With<InventoryDragImage>>,
+) {
+    let mut visibility = visibility_query.single_mut();
+    *visibility = Visibility::Hidden;
 }
 
 pub(super) fn setup_window(

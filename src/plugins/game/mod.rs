@@ -68,6 +68,8 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_sub_state::<IsPaused>()
             .enable_state_scoped_entities::<IsPaused>()
+            .add_event::<items::ItemDragEvent>()
+            .add_event::<items::ItemDropEvent>()
             .add_event::<InventoryUpdatedEvent>()
             .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
@@ -78,13 +80,15 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
+                    pause_game.run_if(input_just_released(KeyCode::Escape)),
                     camera::pan,
                     input::start_drag.run_if(input_just_pressed(MouseButton::Left)),
                     input::stop_drag.run_if(input_just_released(MouseButton::Left)),
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing
                     // (eg. resource_exists::<DragOperation>)
                     input::drag.run_if(input_pressed(MouseButton::Left)),
-                    pause_game.run_if(input_just_released(KeyCode::Escape)),
+                    items::item_drag_event_handler,
+                    items::item_drop_event_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

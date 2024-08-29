@@ -3,7 +3,10 @@ use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
 use crate::data::{items::ItemType, resources::ResourceType};
-use crate::plugins::{Inventory, InventoryUpdatedEvent, UiAssets};
+use crate::plugins::{
+    game::items::{ItemDragEvent, ItemDropEvent},
+    Inventory, InventoryUpdatedEvent, UiAssets,
+};
 use crate::ui::*;
 
 #[derive(Debug, Component)]
@@ -74,6 +77,8 @@ fn start_drag_inventory_item(
 
 fn drag_inventory_item(
     event: Listener<Pointer<Drag>>,
+    mut item_drag_events: EventWriter<ItemDragEvent>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
     mut drag_image_query: Query<&mut Style, With<InventoryDragImage>>,
 ) {
     if !check_drag_event(&event, PointerButton::Primary) {
@@ -90,11 +95,14 @@ fn drag_inventory_item(
         *top += event.delta.y;
     }
 
-    // TODO: send an event that the game can listen for
+    let window = window_query.single();
+    item_drag_events.send(ItemDragEvent::new(window));
 }
 
 fn end_drag_inventory_item(
     event: Listener<Pointer<DragEnd>>,
+    mut item_drop_events: EventWriter<ItemDropEvent>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
     mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
     if !check_drag_end_event(&event, PointerButton::Primary) {
@@ -104,7 +112,8 @@ fn end_drag_inventory_item(
     let mut image_visibility = drag_image_query.single_mut();
     *image_visibility = Visibility::Hidden;
 
-    // TODO: send an event that the game can listen for
+    let window = window_query.single();
+    item_drop_events.send(ItemDropEvent::new(window));
 }
 
 pub(super) fn setup_window(
@@ -242,7 +251,7 @@ pub(super) fn show_inventory(mut window_query: Query<&mut Visibility, With<Inven
 }
 
 #[allow(clippy::type_complexity)]
-pub(super) fn inventory_updated_handler(
+pub(super) fn inventory_updated_event_handler(
     mut events: EventReader<InventoryUpdatedEvent>,
     inventory: Res<Inventory>,
     mut visibility_set: ParamSet<(

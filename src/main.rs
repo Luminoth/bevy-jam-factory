@@ -25,12 +25,11 @@ pub enum AppState {
 
 #[inline]
 pub fn get_world_position_from_cursor_position(
-    window: &Window,
+    cursor_position: Option<Vec2>,
     camera: &Camera,
     camera_transform: &GlobalTransform,
 ) -> Option<Vec2> {
-    window
-        .cursor_position()
+    cursor_position
         .and_then(|cursor_position| camera.viewport_to_world_2d(camera_transform, cursor_position))
 }
 

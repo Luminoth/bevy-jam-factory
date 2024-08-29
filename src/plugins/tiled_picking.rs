@@ -39,9 +39,11 @@ fn tiled_picking(
             pointer_pos -= viewport.min;
         }
 
-        if let Some(world_position) =
-            get_world_position_from_cursor_position(window, camera, camera_transform)
-        {
+        if let Some(world_position) = get_world_position_from_cursor_position(
+            window.cursor_position(),
+            camera,
+            camera_transform,
+        ) {
             let tilemap = object_layer_query.single();
 
             // TODO: don't pick objects that aren't visible

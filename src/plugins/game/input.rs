@@ -18,9 +18,11 @@ pub(super) fn start_drag(
     let camera = camera_query.single();
     let window = window_query.single();
 
-    if let Some(world_position) =
-        get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
-    {
+    if let Some(world_position) = get_world_position_from_cursor_position(
+        window.cursor_position(),
+        camera.camera,
+        camera.global_transform,
+    ) {
         info!("start drag at {}", world_position);
 
         // TODO: figure out what entity to add here (there are multiple tilemap layers)
@@ -46,9 +48,11 @@ pub(super) fn stop_drag(
     let camera = camera_query.single();
     let window = window_query.single();
 
-    if let Some(world_position) =
-        get_world_position_from_cursor_position(window, camera.camera, camera.global_transform)
-    {
+    if let Some(world_position) = get_world_position_from_cursor_position(
+        window.cursor_position(),
+        camera.camera,
+        camera.global_transform,
+    ) {
         info!("stop drag at {}", world_position);
 
         commands.remove_resource::<TileDrag>();
@@ -73,7 +77,7 @@ pub(super) fn drag(
     let window = window_query.single();
 
     if let Some(world_position) =
-        get_world_position_from_cursor_position(window, camera, camera_transform)
+        get_world_position_from_cursor_position(window.cursor_position(), camera, camera_transform)
     {
         info!("drag at {}", world_position);
 

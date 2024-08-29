@@ -298,8 +298,6 @@ pub(super) fn inventory_updated_event_handler(
         return;
     }
 
-    info!("Inventory updated");
-
     for (mut visibility, resources) in visibility_set.p0().iter_mut() {
         if inventory.resources.contains_key(&resources.0) {
             *visibility = Visibility::Inherited;

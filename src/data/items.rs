@@ -16,6 +16,8 @@ impl ItemType {
     // TODO: move inventory mutations into the InventoryData
     // and have it send the events
 
+    // TODO: when we drop something, log it!
+
     pub fn drop_object(
         &self,
         inventory: &mut InventoryData,

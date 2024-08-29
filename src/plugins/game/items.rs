@@ -140,14 +140,31 @@ pub(super) fn item_drag_event_handler(
 }
 
 pub(super) fn item_drop_event_handler(
+    mut commands: Commands,
     mut events: EventReader<ItemDropEvent>,
+    drag_object: Option<Res<ItemDragObject>>,
+    drag_tile: Option<Res<ItemDragTile>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    mut object_query: Query<&mut TileColor, With<Object>>,
+    mut tile_query: Query<&mut TileColor, Without<Object>>,
 ) {
     if events.is_empty() {
         return;
     }
 
     let (camera, camera_transform) = camera_query.single();
+
+    if let Some(drag_object) = drag_object {
+        let mut color = object_query.get_mut(drag_object.0).unwrap();
+        color.0 = Color::default();
+        commands.remove_resource::<ItemDragObject>();
+    }
+
+    if let Some(drag_tile) = drag_tile {
+        let mut color = tile_query.get_mut(drag_tile.0).unwrap();
+        color.0 = Color::default();
+        commands.remove_resource::<ItemDragTile>();
+    }
 
     for event in events.read() {
         let world_position =

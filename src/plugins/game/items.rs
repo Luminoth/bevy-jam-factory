@@ -83,18 +83,19 @@ pub(super) fn item_drag_event_handler(
 
                     // check previous object
                     if let Some(drag_object) = &mut drag_object {
-                        if drag_object.0 == object_entity {
-                        } else {
+                        if drag_object.0 != object_entity {
                             let mut color = object_query.get_mut(drag_object.0).unwrap();
                             color.0 = Color::default();
+
+                            let mut color = object_query.get_mut(object_entity).unwrap();
+                            color.0 = NEGATIVE_COLOR;
                             drag_object.0 = object_entity;
                         }
-                        continue;
+                    } else {
+                        let mut color = object_query.get_mut(object_entity).unwrap();
+                        color.0 = NEGATIVE_COLOR;
+                        commands.insert_resource(ItemDragObject(object_entity));
                     }
-
-                    let mut color = object_query.get_mut(object_entity).unwrap();
-                    color.0 = NEGATIVE_COLOR;
-                    commands.insert_resource(ItemDragObject(object_entity));
                     continue;
                 }
             }
@@ -118,18 +119,19 @@ pub(super) fn item_drag_event_handler(
 
                     // check previous tile
                     if let Some(drag_tile) = &mut drag_tile {
-                        if drag_tile.0 == tile_entity {
-                        } else {
+                        if drag_tile.0 != tile_entity {
                             let mut color = tile_query.get_mut(drag_tile.0).unwrap();
                             color.0 = Color::default();
+
+                            let mut color = tile_query.get_mut(tile_entity).unwrap();
+                            color.0 = NEGATIVE_COLOR;
                             drag_tile.0 = tile_entity;
                         }
-                        continue;
+                    } else {
+                        let mut color = tile_query.get_mut(tile_entity).unwrap();
+                        color.0 = NEGATIVE_COLOR;
+                        commands.insert_resource(ItemDragTile(tile_entity));
                     }
-
-                    let mut color = tile_query.get_mut(tile_entity).unwrap();
-                    color.0 = NEGATIVE_COLOR;
-                    commands.insert_resource(ItemDragTile(tile_entity));
                     continue;
                 }
             }

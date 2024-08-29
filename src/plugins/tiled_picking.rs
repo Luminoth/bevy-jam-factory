@@ -10,11 +10,11 @@ pub struct TiledPickingBackend;
 
 impl Plugin for TiledPickingBackend {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, tiled_picking.in_set(PickSet::Backend));
+        app.add_systems(PreUpdate, object_picking.in_set(PickSet::Backend));
     }
 }
 
-fn tiled_picking(
+fn object_picking(
     pointers: Query<(&PointerId, &PointerLocation)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(Entity, &Camera, &GlobalTransform), With<MainCamera>>,
@@ -44,18 +44,18 @@ fn tiled_picking(
             camera,
             camera_transform,
         ) {
-            let tilemap = object_layer_query.single();
+            let object_tilemap = object_layer_query.single();
 
             // TODO: don't pick objects that aren't visible
 
-            if let Some(tile_position) = get_tile_position(
+            if let Some(object_position) = get_tile_position(
                 world_position,
-                tilemap.size,
-                tilemap.grid_size,
-                tilemap.r#type,
-                tilemap.transform,
+                object_tilemap.size,
+                object_tilemap.grid_size,
+                object_tilemap.r#type,
+                object_tilemap.transform,
             ) {
-                if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
+                if let Some(tile_entity) = object_tilemap.storage.get(&object_position) {
                     output.send(PointerHits::new(
                         pointer_id,
                         vec![(

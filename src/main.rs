@@ -12,6 +12,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::ScrollViewPlugin;
+use bevy_tweening::TweeningPlugin;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States, Reflect)]
 pub enum AppState {
@@ -73,6 +74,7 @@ fn main() {
         DefaultPickingPlugins,
         TilemapPlugin,
         ScrollViewPlugin,
+        TweeningPlugin,
         bevy_egui::EguiPlugin,
     ));
 

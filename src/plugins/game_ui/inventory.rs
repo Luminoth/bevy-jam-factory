@@ -47,7 +47,12 @@ fn start_drag_inventory_item(
         (With<InventoryDragImage>, Without<InventoryItemImage>),
     >,
 ) {
-    if !check_drag_start_event(&event, PointerButton::Primary) {
+    if !check_drag_start_event(
+        event.listener(),
+        event.target,
+        event.button,
+        PointerButton::Primary,
+    ) {
         return;
     }
 
@@ -81,7 +86,12 @@ fn drag_inventory_item(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut drag_image_query: Query<&mut Style, With<InventoryDragImage>>,
 ) {
-    if !check_drag_event(&event, PointerButton::Primary) {
+    if !check_drag_event(
+        event.listener(),
+        event.target,
+        event.button,
+        PointerButton::Primary,
+    ) {
         return;
     }
 
@@ -105,7 +115,12 @@ fn end_drag_inventory_item(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
-    if !check_drag_end_event(&event, PointerButton::Primary) {
+    if !check_drag_end_event(
+        event.listener(),
+        event.target,
+        event.button,
+        PointerButton::Primary,
+    ) {
         return;
     }
 

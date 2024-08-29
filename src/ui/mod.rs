@@ -15,55 +15,43 @@ pub const FONT: &str = "fonts/FiraSans-Bold.ttf";
 pub const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
 #[inline]
-pub fn check_click_event(event: &Listener<Pointer<Click>>, button: PointerButton) -> bool {
-    if event.target != event.listener() {
-        return false;
-    }
-
-    if event.button != button {
-        return false;
-    }
-
-    true
+pub fn check_click_event(
+    listener: Entity,
+    target: Entity,
+    event_button: PointerButton,
+    expected_button: PointerButton,
+) -> bool {
+    target == listener && event_button == expected_button
 }
 
 #[inline]
-pub fn check_drag_start_event(event: &Listener<Pointer<DragStart>>, button: PointerButton) -> bool {
-    if event.target != event.listener() {
-        return false;
-    }
-
-    if event.button != button {
-        return false;
-    }
-
-    true
+pub fn check_drag_start_event(
+    listener: Entity,
+    target: Entity,
+    event_button: PointerButton,
+    expected_button: PointerButton,
+) -> bool {
+    target == listener && event_button == expected_button
 }
 
 #[inline]
-pub fn check_drag_event(event: &Listener<Pointer<Drag>>, button: PointerButton) -> bool {
-    if event.target != event.listener() {
-        return false;
-    }
-
-    if event.button != button {
-        return false;
-    }
-
-    true
+pub fn check_drag_event(
+    listener: Entity,
+    target: Entity,
+    event_button: PointerButton,
+    expected_button: PointerButton,
+) -> bool {
+    target == listener && event_button == expected_button
 }
 
 #[inline]
-pub fn check_drag_end_event(event: &Listener<Pointer<DragEnd>>, button: PointerButton) -> bool {
-    if event.target != event.listener() {
-        return false;
-    }
-
-    if event.button != button {
-        return false;
-    }
-
-    true
+pub fn check_drag_end_event(
+    listener: Entity,
+    target: Entity,
+    event_button: PointerButton,
+    expected_button: PointerButton,
+) -> bool {
+    target == listener && event_button == expected_button
 }
 
 pub fn create_canvas<'a>(commands: &'a mut Commands, name: impl AsRef<str>) -> EntityCommands<'a> {

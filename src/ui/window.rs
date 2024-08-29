@@ -14,7 +14,12 @@ fn drag_window(
     mut window_query: Query<&mut Style, With<UiWindow>>,
     titlebar_query: Query<&UiWindowTitleBar>,
 ) {
-    if !check_drag_event(&event, PointerButton::Primary) {
+    if !check_drag_event(
+        event.listener(),
+        event.target,
+        event.button,
+        PointerButton::Primary,
+    ) {
         return;
     }
 
@@ -35,7 +40,12 @@ fn close_window(
     mut window_query: Query<&mut Visibility, With<UiWindow>>,
     close_button_query: Query<&UiWindowCloseButton>,
 ) {
-    if !check_click_event(&event, PointerButton::Primary) {
+    if !check_click_event(
+        event.listener(),
+        event.target,
+        event.button,
+        PointerButton::Primary,
+    ) {
         return;
     }
 

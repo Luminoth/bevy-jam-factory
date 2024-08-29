@@ -89,6 +89,7 @@ impl Plugin for GamePlugin {
                     input::drag.run_if(input_pressed(MouseButton::Left)),
                     items::item_drag_event_handler,
                     items::item_drop_event_handler,
+                    objects::object_click_event_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

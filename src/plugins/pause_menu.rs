@@ -31,7 +31,12 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut pause_state: ResMut<NextState<IsPaused>>| {
-                        if !check_click_event(&event, PointerButton::Primary) {
+                        if !check_click_event(
+                            event.listener(),
+                            event.target,
+                            event.button,
+                            PointerButton::Primary,
+                        ) {
                             return;
                         }
                         pause_state.set(IsPaused::Running);
@@ -46,7 +51,12 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut game_state: ResMut<NextState<AppState>>| {
-                        if !check_click_event(&event, PointerButton::Primary) {
+                        if !check_click_event(
+                            event.listener(),
+                            event.target,
+                            event.button,
+                            PointerButton::Primary,
+                        ) {
                             return;
                         }
                         game_state.set(AppState::MainMenu);

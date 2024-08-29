@@ -6,13 +6,7 @@ use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
-use crate::plugins::{
-    game::OnInGame,
-    game_ui::{log::LogEvent, object_info::ObjectInfoWindow},
-    objects::*,
-    ObjectInfo,
-};
-use crate::ui::check_click_event;
+use crate::plugins::{game::OnInGame, objects::*};
 
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {
@@ -34,6 +28,13 @@ pub struct TiledMapTileLayer;
 #[derive(Debug, Component)]
 pub struct TiledMapObjectLayer;
 
+#[derive(Debug, Event)]
+pub struct TiledMapObjectClickEvent {
+    pub listener: Entity,
+    pub target: Entity,
+    pub button: PointerButton,
+}
+
 #[derive(Debug, Default)]
 pub struct TiledMapPlugin;
 
@@ -41,6 +42,7 @@ impl Plugin for TiledMapPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.init_asset::<TiledMap>()
             .register_asset_loader(TiledLoader)
+            .add_event::<TiledMapObjectClickEvent>()
             .add_systems(Update, process_loaded_maps);
     }
 }
@@ -460,45 +462,34 @@ fn process_object_layer(
                 x: x as u32,
                 y: tiled_map.map.height - 1 - y as u32,
             };
-            let tile_entity =
-                parent
-                    .spawn(
-                        (
-                            TileBundle {
-                                position: tile_pos,
-                                tilemap_id: TilemapId(layer_entity_id),
-                                texture_index: TileTextureIndex(texture_index),
-                                flip: TileFlip {
-                                    x: object_tile_data.flip_h,
-                                    y: object_tile_data.flip_v,
-                                    d: object_tile_data.flip_d,
-                                },
-                                visible: TileVisible(object.visible),
-                                ..Default::default()
-                            },
-                            Name::new(format!("Object ({},{})", x, y)),
-                            Object(object_data),
-                            PickableBundle::default(),
-                            On::<Pointer<Click>>::run(
-                                |event: Listener<Pointer<Click>>,
-                                 mut log_events: EventWriter<LogEvent>,
-                                 mut commands: Commands,
-                                 mut window_query: Query<
-                                    &mut Visibility,
-                                    With<ObjectInfoWindow>,
-                                >| {
-                                    if !check_click_event(&event, PointerButton::Secondary) {
-                                        return;
-                                    }
-
-                                    commands.insert_resource(ObjectInfo(event.target));
-                                    *window_query.single_mut() = Visibility::Visible;
-                                    log_events.send(LogEvent::new("Showing Object Info"));
-                                },
-                            ),
-                        ),
-                    )
-                    .id();
+            let tile_entity = parent
+                .spawn((
+                    TileBundle {
+                        position: tile_pos,
+                        tilemap_id: TilemapId(layer_entity_id),
+                        texture_index: TileTextureIndex(texture_index),
+                        flip: TileFlip {
+                            x: object_tile_data.flip_h,
+                            y: object_tile_data.flip_v,
+                            d: object_tile_data.flip_d,
+                        },
+                        visible: TileVisible(object.visible),
+                        ..Default::default()
+                    },
+                    Name::new(format!("Object ({},{})", x, y)),
+                    Object(object_data),
+                    PickableBundle::default(),
+                    On::<Pointer<Click>>::run(
+                        |event: Listener<Pointer<Click>>, mut click_events: EventWriter<TiledMapObjectClickEvent>| {
+                            click_events.send(TiledMapObjectClickEvent {
+                                listener: event.listener(),
+                                target: event.target,
+                                button: event.button,
+                            });
+                        },
+                    ),
+                ))
+                .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
     });

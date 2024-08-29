@@ -41,7 +41,12 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>,
                      mut game_state: ResMut<NextState<AppState>>| {
-                        if !check_click_event(&event, PointerButton::Primary) {
+                        if !check_click_event(
+                            event.listener(),
+                            event.target,
+                            event.button,
+                            PointerButton::Primary,
+                        ) {
                             return;
                         }
                         game_state.set(AppState::LoadAssets);
@@ -55,7 +60,12 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 "Exit Game",
                 On::<Pointer<Click>>::run(
                     |event: Listener<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
-                        if !check_click_event(&event, PointerButton::Primary) {
+                        if !check_click_event(
+                            event.listener(),
+                            event.target,
+                            event.button,
+                            PointerButton::Primary,
+                        ) {
                             return;
                         }
                         exit.send(AppExit::Success);

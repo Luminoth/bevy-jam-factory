@@ -27,25 +27,23 @@ pub struct InventoryItemUI(pub ItemType);
 
 #[allow(dead_code)]
 #[derive(Debug, Component)]
-pub struct InventoryItemAmountUI(pub ItemType, pub u32);
+pub struct InventoryItemAmountUI(pub ItemType, pub u32, pub Entity);
 
 #[derive(Debug, Component)]
-pub struct InventoryItemImage;
+pub struct InventoryItemImage {
+    pub item_type: ItemType,
+}
 
-#[derive(Debug, Component)]
-pub struct InventoryDragImage;
+#[derive(Debug, Default, Component)]
+pub struct InventoryDragImage {
+    pub item_type: Option<ItemType>,
+}
 
 #[allow(clippy::type_complexity)]
 fn start_drag_inventory_item(
     event: Listener<Pointer<DragStart>>,
-    item_image_query: Query<
-        &GlobalTransform,
-        (With<InventoryItemImage>, Without<InventoryDragImage>),
-    >,
-    mut drag_image_query: Query<
-        (&mut Visibility, &mut Style),
-        (With<InventoryDragImage>, Without<InventoryItemImage>),
-    >,
+    item_image_query: Query<(&GlobalTransform, &InventoryItemImage)>,
+    mut drag_image_query: Query<(&mut Visibility, &mut Style, &mut InventoryDragImage)>,
 ) {
     if !check_drag_start_event(
         event.listener(),
@@ -56,26 +54,29 @@ fn start_drag_inventory_item(
         return;
     }
 
-    let (mut image_visibility, mut image_style) = drag_image_query.single_mut();
-    *image_visibility = Visibility::Visible;
+    let (item_image_transform, item_image) = item_image_query.get(event.target).unwrap();
 
-    let item_image_transform = item_image_query.get(event.target).unwrap();
-    let half_width = if let Val::Px(width) = image_style.width {
+    let (mut drag_image_visibility, mut drag_image_style, mut drag_image_item_type) =
+        drag_image_query.single_mut();
+    *drag_image_visibility = Visibility::Visible;
+    drag_image_item_type.item_type = Some(item_image.item_type);
+
+    let half_width = if let Val::Px(width) = drag_image_style.width {
         width / 2.0
     } else {
         0.0
     };
-    let half_height = if let Val::Px(height) = image_style.height {
+    let half_height = if let Val::Px(height) = drag_image_style.height {
         height / 2.0
     } else {
         0.0
     };
 
-    if let Val::Px(left) = &mut image_style.left {
+    if let Val::Px(left) = &mut drag_image_style.left {
         *left = item_image_transform.translation().x - half_width;
     }
 
-    if let Val::Px(top) = &mut image_style.top {
+    if let Val::Px(top) = &mut drag_image_style.top {
         *top = item_image_transform.translation().y - half_height;
     }
 }
@@ -84,7 +85,7 @@ fn drag_inventory_item(
     event: Listener<Pointer<Drag>>,
     mut item_drag_events: EventWriter<ItemDragEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut drag_image_query: Query<&mut Style, With<InventoryDragImage>>,
+    mut drag_image_query: Query<(&mut Style, &InventoryDragImage)>,
 ) {
     if !check_drag_event(
         event.listener(),
@@ -95,25 +96,28 @@ fn drag_inventory_item(
         return;
     }
 
-    let mut image_style = drag_image_query.single_mut();
+    let (mut drag_image_style, drag_image_item_type) = drag_image_query.single_mut();
 
-    if let Val::Px(left) = &mut image_style.left {
+    if let Val::Px(left) = &mut drag_image_style.left {
         *left += event.delta.x;
     }
 
-    if let Val::Px(top) = &mut image_style.top {
+    if let Val::Px(top) = &mut drag_image_style.top {
         *top += event.delta.y;
     }
 
     let window = window_query.single();
-    item_drag_events.send(ItemDragEvent::new(window));
+    item_drag_events.send(ItemDragEvent::new(
+        window,
+        drag_image_item_type.item_type.unwrap(),
+    ));
 }
 
 fn end_drag_inventory_item(
     event: Listener<Pointer<DragEnd>>,
     mut item_drop_events: EventWriter<ItemDropEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
+    mut drag_image_query: Query<(&mut Visibility, &mut InventoryDragImage)>,
 ) {
     if !check_drag_end_event(
         event.listener(),
@@ -124,11 +128,12 @@ fn end_drag_inventory_item(
         return;
     }
 
-    let mut image_visibility = drag_image_query.single_mut();
-    *image_visibility = Visibility::Hidden;
+    let (mut drag_image_visibility, mut drag_image_item_type) = drag_image_query.single_mut();
+    *drag_image_visibility = Visibility::Hidden;
+    let item_type = drag_image_item_type.item_type.take();
 
     let window = window_query.single();
-    item_drop_events.send(ItemDropEvent::new(window));
+    item_drop_events.send(ItemDropEvent::new(window, item_type.unwrap()));
 }
 
 pub(super) fn setup_window(
@@ -213,7 +218,7 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
-                                        create_draggable_image(
+                                        let item_image_id = create_draggable_image(
                                             parent,
                                             ui_assets.missing_image.clone(),
                                             On::<Pointer<DragStart>>::run(
@@ -222,7 +227,13 @@ pub(super) fn setup_window(
                                             On::<Pointer<Drag>>::run(drag_inventory_item),
                                             On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
                                         )
-                                        .insert(InventoryItemImage);
+                                        .insert((
+                                            InventoryItemImage {
+                                                item_type: ItemType::Harvester,
+                                            },
+                                            Pickable::IGNORE,
+                                        ))
+                                        .id();
 
                                         create_label(
                                             parent,
@@ -232,7 +243,11 @@ pub(super) fn setup_window(
                                             FONT_COLOR,
                                         );
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                                            .insert(InventoryItemAmountUI(ItemType::Harvester, 0));
+                                            .insert(InventoryItemAmountUI(
+                                                ItemType::Harvester,
+                                                0,
+                                                item_image_id,
+                                            ));
                                     });
                             });
                     });
@@ -257,7 +272,7 @@ pub(super) fn setup_window(
         },
         Name::new("Inventory Item Drag Image"),
         Pickable::IGNORE,
-        InventoryDragImage,
+        InventoryDragImage::default(),
     ));
 }
 
@@ -267,6 +282,7 @@ pub(super) fn show_inventory(mut window_query: Query<&mut Visibility, With<Inven
 
 #[allow(clippy::type_complexity)]
 pub(super) fn inventory_updated_event_handler(
+    mut commands: Commands,
     mut events: EventReader<InventoryUpdatedEvent>,
     inventory: Res<Inventory>,
     mut visibility_set: ParamSet<(
@@ -313,6 +329,13 @@ pub(super) fn inventory_updated_event_handler(
                 if *amount != item.1 {
                     text.sections.get_mut(0).unwrap().value = amount.to_string();
                     item.1 = *amount;
+
+                    let mut item_image = commands.entity(item.2);
+                    if item.1 == 0 {
+                        item_image.insert(Pickable::IGNORE);
+                    } else {
+                        item_image.remove::<Pickable>();
+                    }
                 }
             }
         }

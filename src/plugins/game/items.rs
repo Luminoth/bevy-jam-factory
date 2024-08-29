@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::data::items::ItemData;
+use crate::data::items::{ItemData, ItemType};
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{camera::MainCamera, objects::Object, TiledMapObjectLayer, TiledMapTileLayer};
 use crate::tilemap::{get_tile_position, TileMapQuery};
@@ -16,20 +16,32 @@ pub struct ItemDragObject(pub Entity);
 pub struct ItemDragTile(pub Entity);
 
 #[derive(Debug, Event)]
-pub struct ItemDragEvent(pub Option<Vec2>);
+pub struct ItemDragEvent {
+    pub item_type: ItemType,
+    pub cursor_position: Option<Vec2>,
+}
 
 impl ItemDragEvent {
-    pub fn new(window: &Window) -> Self {
-        Self(window.cursor_position())
+    pub fn new(window: &Window, item_type: ItemType) -> Self {
+        Self {
+            item_type,
+            cursor_position: window.cursor_position(),
+        }
     }
 }
 
 #[derive(Debug, Event)]
-pub struct ItemDropEvent(pub Option<Vec2>);
+pub struct ItemDropEvent {
+    pub item_type: ItemType,
+    pub cursor_position: Option<Vec2>,
+}
 
 impl ItemDropEvent {
-    pub fn new(window: &Window) -> Self {
-        Self(window.cursor_position())
+    pub fn new(window: &Window, item_type: ItemType) -> Self {
+        Self {
+            item_type,
+            cursor_position: window.cursor_position(),
+        }
     }
 }
 
@@ -61,9 +73,14 @@ pub(super) fn item_drag_event_handler(
     for event in events.read() {
         // TODO: pretty sure this is missing some edge cases
 
-        let world_position =
-            get_world_position_from_cursor_position(event.0, camera, camera_transform);
+        let world_position = get_world_position_from_cursor_position(
+            event.cursor_position,
+            camera,
+            camera_transform,
+        );
         if let Some(world_position) = world_position {
+            info!("ItemDragEvent: {} at {:?}", event.item_type, world_position);
+
             // first check for objects
             let object_tilemap = object_layer_query.single();
             if let Some(object_position) = get_tile_position(
@@ -167,10 +184,13 @@ pub(super) fn item_drop_event_handler(
     }
 
     for event in events.read() {
-        let world_position =
-            get_world_position_from_cursor_position(event.0, camera, camera_transform);
+        let world_position = get_world_position_from_cursor_position(
+            event.cursor_position,
+            camera,
+            camera_transform,
+        );
         if let Some(world_position) = world_position {
-            info!("ItemDropEvent: {:?}", world_position);
+            info!("ItemDropEvent: {} at {:?}", event.item_type, world_position);
 
             // TODO: find the underlying tile and do something
         }

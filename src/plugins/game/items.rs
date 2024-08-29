@@ -1,9 +1,13 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
+use super::Inventory;
 use crate::data::items::{ItemData, ItemType};
 use crate::get_world_position_from_cursor_position;
-use crate::plugins::{camera::MainCamera, objects::Object, TiledMapObjectLayer, TiledMapTileLayer};
+use crate::plugins::{
+    camera::MainCamera, objects::Object, InventoryUpdatedEvent, TiledMapObjectLayer,
+    TiledMapTileLayer,
+};
 use crate::tilemap::{get_tile_position, TileMapQuery};
 
 #[derive(Debug, Component, Deref)]
@@ -45,7 +49,8 @@ impl ItemDropEvent {
     }
 }
 
-const NEGATIVE_COLOR: Color = Color::srgba(1.0, 0.0, 0.0, 0.5);
+const CAN_DROP_COLOR: Color = Color::srgba(0.0, 1.0, 0.0, 0.5);
+const NO_DROP_COLOR: Color = Color::srgba(1.0, 0.0, 0.0, 0.5);
 
 // TODO: we might be able to simplify this by splitting it into
 // an object handler and a tile handler? would need to not consume the events for that
@@ -79,8 +84,6 @@ pub(super) fn item_drag_event_handler(
             camera_transform,
         );
         if let Some(world_position) = world_position {
-            info!("ItemDragEvent: {} at {:?}", event.item_type, world_position);
-
             // first check for objects
             let object_tilemap = object_layer_query.single();
             if let Some(object_position) = get_tile_position(
@@ -105,12 +108,20 @@ pub(super) fn item_drag_event_handler(
                             color.0 = Color::default();
 
                             let mut color = object_query.get_mut(object_entity).unwrap();
-                            color.0 = NEGATIVE_COLOR;
+                            color.0 = if event.item_type.can_drop_on_object() {
+                                CAN_DROP_COLOR
+                            } else {
+                                NO_DROP_COLOR
+                            };
                             drag_object.0 = object_entity;
                         }
                     } else {
                         let mut color = object_query.get_mut(object_entity).unwrap();
-                        color.0 = NEGATIVE_COLOR;
+                        color.0 = if event.item_type.can_drop_on_object() {
+                            CAN_DROP_COLOR
+                        } else {
+                            NO_DROP_COLOR
+                        };
                         commands.insert_resource(ItemDragObject(object_entity));
                     }
                     continue;
@@ -141,12 +152,20 @@ pub(super) fn item_drag_event_handler(
                             color.0 = Color::default();
 
                             let mut color = tile_query.get_mut(tile_entity).unwrap();
-                            color.0 = NEGATIVE_COLOR;
+                            color.0 = if event.item_type.can_drop_on_tile() {
+                                CAN_DROP_COLOR
+                            } else {
+                                NO_DROP_COLOR
+                            };
                             drag_tile.0 = tile_entity;
                         }
                     } else {
                         let mut color = tile_query.get_mut(tile_entity).unwrap();
-                        color.0 = NEGATIVE_COLOR;
+                        color.0 = if event.item_type.can_drop_on_tile() {
+                            CAN_DROP_COLOR
+                        } else {
+                            NO_DROP_COLOR
+                        };
                         commands.insert_resource(ItemDragTile(tile_entity));
                     }
                     continue;
@@ -156,14 +175,22 @@ pub(super) fn item_drag_event_handler(
     }
 }
 
+// TODO: we might be able to simplify this by splitting it into
+// an object handler and a tile handler? would need to not consume the events for that
+// and would need to make sure we handle objects before tiles ...
+#[allow(clippy::too_many_arguments)]
 pub(super) fn item_drop_event_handler(
     mut commands: Commands,
     mut events: EventReader<ItemDropEvent>,
-    drag_object: Option<Res<ItemDragObject>>,
-    drag_tile: Option<Res<ItemDragTile>>,
+    mut inventory: ResMut<Inventory>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    drag_object: Option<Res<ItemDragObject>>,
+    object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
     mut object_query: Query<&mut TileColor, With<Object>>,
+    drag_tile: Option<Res<ItemDragTile>>,
+    tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
     mut tile_query: Query<&mut TileColor, Without<Object>>,
+    mut inventory_updated_events: EventWriter<InventoryUpdatedEvent>,
 ) {
     if events.is_empty() {
         return;
@@ -171,28 +198,68 @@ pub(super) fn item_drop_event_handler(
 
     let (camera, camera_transform) = camera_query.single();
 
-    if let Some(drag_object) = drag_object {
-        let mut color = object_query.get_mut(drag_object.0).unwrap();
-        color.0 = Color::default();
-        commands.remove_resource::<ItemDragObject>();
-    }
-
-    if let Some(drag_tile) = drag_tile {
-        let mut color = tile_query.get_mut(drag_tile.0).unwrap();
-        color.0 = Color::default();
-        commands.remove_resource::<ItemDragTile>();
-    }
-
+    // TODO: should we just deal with the first (or last?) event?
+    // what does it even mean to have more than one of these ...
     for event in events.read() {
+        // TODO: pretty sure this is missing some edge cases
+
         let world_position = get_world_position_from_cursor_position(
             event.cursor_position,
             camera,
             camera_transform,
         );
         if let Some(world_position) = world_position {
-            info!("ItemDropEvent: {} at {:?}", event.item_type, world_position);
+            // first check for objects
+            if let Some(drag_object) = &drag_object {
+                let mut color = object_query.get_mut(drag_object.0).unwrap();
+                color.0 = Color::default();
+                commands.remove_resource::<ItemDragObject>();
 
-            // TODO: find the underlying tile and do something
+                let object_tilemap = object_layer_query.single();
+                let object_position = get_tile_position(
+                    world_position,
+                    object_tilemap.size,
+                    object_tilemap.grid_size,
+                    object_tilemap.r#type,
+                    object_tilemap.transform,
+                )
+                .unwrap();
+
+                let _object_entity = object_tilemap.storage.get(&object_position).unwrap();
+                if event.item_type.can_drop_on_object() {
+                    event
+                        .item_type
+                        .drop_object(&mut inventory.0, &mut inventory_updated_events);
+                }
+
+                continue;
+            }
+
+            // then check for tiles
+            if let Some(drag_tile) = &drag_tile {
+                let mut color = tile_query.get_mut(drag_tile.0).unwrap();
+                color.0 = Color::default();
+                commands.remove_resource::<ItemDragTile>();
+
+                let tilemap = tilemap_layer_query.single();
+                let tile_position = get_tile_position(
+                    world_position,
+                    tilemap.size,
+                    tilemap.grid_size,
+                    tilemap.r#type,
+                    tilemap.transform,
+                )
+                .unwrap();
+
+                let _tile_entity = tilemap.storage.get(&tile_position).unwrap();
+                if event.item_type.can_drop_on_tile() {
+                    event
+                        .item_type
+                        .drop_tile(&mut inventory.0, &mut inventory_updated_events);
+                }
+
+                continue;
+            }
         }
     }
 }

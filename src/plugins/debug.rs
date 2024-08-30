@@ -53,8 +53,10 @@ impl Plugin for DebugPlugin {
             bevy_inspector_egui::quick::StateInspectorPlugin::<AppState>::default()
                 .run_if(show_state_inspector),
             // resource inspectors
-            bevy_inspector_egui::quick::ResourceInspectorPlugin::<crate::plugins::Inventory>::default()
-                .run_if(show_inventory_inspector),
+            bevy_inspector_egui::quick::ResourceInspectorPlugin::<
+                crate::plugins::game::inventory::Inventory,
+            >::default()
+            .run_if(show_inventory_inspector),
         ));
 
         app.init_resource::<DebugSettings>();

@@ -1,6 +1,6 @@
 use bevy::{ecs::query::QueryData, prelude::*, window::PrimaryWindow};
 
-use crate::plugins::{IsPointerCaptured, TiledMapTileLayer};
+use crate::plugins::{tiled::TiledMapTileLayer, ui::IsPointerCaptured};
 use crate::tilemap::TileMapSizeQuery;
 
 #[derive(Component)]

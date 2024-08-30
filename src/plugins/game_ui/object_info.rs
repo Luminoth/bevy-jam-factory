@@ -1,34 +1,39 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::data::objects::ObjectData;
-use crate::plugins::{objects::Object, ObjectInfo, UiAssets};
+use crate::plugins::{
+    game::{objects::Object, ObjectInfo},
+    ui::UiAssets,
+};
 use crate::ui::*;
 
+/// Game Object info window tag
 #[derive(Debug, Component)]
 pub struct ObjectInfoWindow;
 
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ObjectInfoData {
     ObjectId,
     ObjectType,
 }
 
+/// Game Object info window data tag
 #[derive(Debug, Component)]
-pub struct ObjectInfoDataUI(pub ObjectInfoData);
+pub struct ObjectInfoWindowDataUI(pub ObjectInfoData);
 
+/// Game Object info window resources tag
 #[derive(Debug, Component)]
-pub struct ObjectInfoResources;
+pub struct ObjectInfoWindowResources;
 
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ObjectInfoResourcesData {
     ResourceType,
     Amount(u32),
 }
 
+/// Game Object info window resources data tag
 #[derive(Debug, Component)]
-pub struct ObjectInfoResourcesDataUI(pub ObjectInfoResourcesData);
+pub struct ObjectInfoWindowResourcesDataUI(pub ObjectInfoResourcesData);
 
 pub(super) fn setup_window(
     mut commands: Commands,
@@ -50,13 +55,13 @@ pub(super) fn setup_window(
         create_row_container(parent).with_children(|parent| {
             create_label(parent, &ui_assets, "Object ID:", 14.0, FONT_COLOR);
             create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectId));
+                .insert(ObjectInfoWindowDataUI(ObjectInfoData::ObjectId));
         });
 
         create_row_container(parent).with_children(|parent| {
             create_label(parent, &ui_assets, "Object Type:", 14.0, FONT_COLOR);
             create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
-                .insert(ObjectInfoDataUI(ObjectInfoData::ObjectType));
+                .insert(ObjectInfoWindowDataUI(ObjectInfoData::ObjectType));
         });
 
         // Resources
@@ -64,20 +69,20 @@ pub(super) fn setup_window(
             .insert((
                 Visibility::Hidden,
                 Name::new("Resources"),
-                ObjectInfoResources,
+                ObjectInfoWindowResources,
             ))
             .with_children(|parent| {
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, &ui_assets, "Resource Type:", 14.0, FONT_COLOR);
                     create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR).insert(
-                        ObjectInfoResourcesDataUI(ObjectInfoResourcesData::ResourceType),
+                        ObjectInfoWindowResourcesDataUI(ObjectInfoResourcesData::ResourceType),
                     );
                 });
 
                 create_row_container(parent).with_children(|parent| {
                     create_label(parent, &ui_assets, "Amount:", 14.0, FONT_COLOR);
                     create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR).insert(
-                        ObjectInfoResourcesDataUI(ObjectInfoResourcesData::Amount(0)),
+                        ObjectInfoWindowResourcesDataUI(ObjectInfoResourcesData::Amount(0)),
                     );
                 });
             });
@@ -104,10 +109,10 @@ pub(super) fn update_object_info_ui(
     object: Res<ObjectInfo>,
     object_query: Query<&Object>,
     mut text_set: ParamSet<(
-        Query<(&mut Text, &ObjectInfoDataUI)>,
-        Query<(&mut Text, &mut ObjectInfoResourcesDataUI)>,
+        Query<(&mut Text, &ObjectInfoWindowDataUI)>,
+        Query<(&mut Text, &mut ObjectInfoWindowResourcesDataUI)>,
     )>,
-    mut resources_section_query: Query<&mut Visibility, With<ObjectInfoResources>>,
+    mut resources_section_query: Query<&mut Visibility, With<ObjectInfoWindowResources>>,
 ) {
     let object = object_query
         .get(object.0)

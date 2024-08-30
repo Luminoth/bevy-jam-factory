@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::plugins::{IsPaused, Music, UiAssets};
+use crate::plugins::{audio::Music, game::IsPaused, ui::UiAssets};
 use crate::ui::{check_click_event, create_button, create_canvas};
 use crate::AppState;
 
+/// Pause menu state tag
 #[derive(Debug, Component)]
 pub struct PauseMenu;
 

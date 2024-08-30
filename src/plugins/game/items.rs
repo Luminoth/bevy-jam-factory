@@ -1,22 +1,26 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
+use super::camera::MainCamera;
+use super::inventory::{Inventory, InventoryUpdatedEvent};
+use super::objects::Object;
 use crate::data::items::ItemType;
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
-    camera::MainCamera,
     game_ui::inventory::{InventoryDragImage, HIDE_DRAG_IMAGE_ID},
-    objects::Object,
-    Inventory, InventoryUpdatedEvent, TiledMapObjectLayer, TiledMapTileLayer,
+    tiled::{TiledMapObjectLayer, TiledMapTileLayer},
 };
 use crate::tilemap::{get_tile_position, TileMapQuery};
 
+/// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
 pub struct ItemDragObject(pub Entity);
 
+/// Tracks teh current Tile being dragged over
 #[derive(Debug, Resource)]
 pub struct ItemDragTile(pub Entity);
 
+/// Emitted when an Item is being dragged
 #[derive(Debug, Event)]
 pub struct ItemDragEvent {
     pub item_type: ItemType,
@@ -32,10 +36,15 @@ impl ItemDragEvent {
     }
 }
 
+/// Emitted when an Item is dropped
 #[derive(Debug, Event)]
 pub struct ItemDropEvent {
     pub item_type: ItemType,
     pub cursor_position: Option<Vec2>,
+
+    // this state is all used to let the listener
+    // control what happens with the drag image
+    // (hide, tween, etc)
     pub drag_image_id: Entity,
     pub drage_image_start_position: (Val, Val),
     pub drag_image_position: (Val, Val),

@@ -7,7 +7,7 @@ use bevy::prelude::*;
 
 use super::inventory::InventoryData;
 use super::objects::ObjectType;
-use crate::plugins::InventoryUpdatedEvent;
+use crate::plugins::game::inventory::InventoryUpdatedEvent;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
 pub enum ItemType {

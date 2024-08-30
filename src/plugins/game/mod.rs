@@ -1,5 +1,6 @@
 pub mod camera;
 pub mod input;
+pub mod inventory;
 pub mod items;
 pub mod objects;
 
@@ -13,10 +14,10 @@ use bevy_egui::{egui, EguiContexts};
 use crate::assets::tiled::TiledMap;
 use crate::audio::start_music;
 use crate::cleanup_state;
-use crate::data::inventory::InventoryData;
-use crate::plugins::{AudioAssets, TiledMapBundle};
+use crate::plugins::{audio::AudioAssets, tiled::TiledMapBundle};
 use crate::AppState;
 
+/// Pause game sub-state
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates, Reflect)]
 #[source(AppState = AppState::InGame)]
 pub enum IsPaused {
@@ -25,9 +26,11 @@ pub enum IsPaused {
     Paused,
 }
 
+/// InGame state tag
 #[derive(Debug, Component)]
 pub struct OnInGame;
 
+/// Game asset container resource
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct GameAssets {
     pub map: Handle<TiledMap>,
@@ -38,12 +41,6 @@ impl GameAssets {
         map_assets.contains(&self.map)
     }
 }
-
-#[derive(Debug, Default, Reflect, Resource, Deref)]
-pub struct Inventory(pub InventoryData);
-
-#[derive(Debug, Default, Event)]
-pub struct InventoryUpdatedEvent;
 
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct TileDrag {
@@ -58,8 +55,13 @@ impl TileDrag {
     }
 }
 
+/// Tracks what Object is being viewed in the ObjectInfo window
 #[derive(Debug, Reflect, Resource, Deref)]
 pub struct ObjectInfo(pub Entity);
+
+// these should be less than (systems::tiled::MIN_TILEMAP_WIDTH / HEIGHT * systems::tiled::TILE_WIDTH / HEIGHT)
+const VIEW_WIDTH: f32 = 800.0;
+const VIEW_HEIGHT: f32 = 600.0;
 
 #[derive(Debug, Default)]
 pub struct GamePlugin;
@@ -70,7 +72,7 @@ impl Plugin for GamePlugin {
             .enable_state_scoped_entities::<IsPaused>()
             .add_event::<items::ItemDragEvent>()
             .add_event::<items::ItemDropEvent>()
-            .add_event::<InventoryUpdatedEvent>()
+            .add_event::<inventory::InventoryUpdatedEvent>()
             .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
                 Update,
@@ -101,10 +103,6 @@ impl Plugin for GamePlugin {
             );
     }
 }
-
-// these should be less than (systems::tiled::MIN_TILEMAP_WIDTH / HEIGHT * systems::tiled::TILE_WIDTH / HEIGHT)
-const VIEW_WIDTH: f32 = 800.0;
-const VIEW_HEIGHT: f32 = 600.0;
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(AudioAssets {
@@ -148,7 +146,7 @@ fn enter(
     mut commands: Commands,
     audio_assets: Res<AudioAssets>,
     game_assets: Res<GameAssets>,
-    mut inventory_update_events: EventWriter<InventoryUpdatedEvent>,
+    mut inventory_update_events: EventWriter<inventory::InventoryUpdatedEvent>,
     mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     info!("entering InGame state");
@@ -177,8 +175,8 @@ fn enter(
     start_music(&mut commands, audio_assets.music.clone());
 
     commands.insert_resource(
-        //Inventory::default()
-        Inventory(InventoryData::new_test()),
+        //inventory::Inventory::default()
+        inventory::Inventory(crate::data::inventory::InventoryData::new_test()),
     );
     inventory_update_events.send_default();
 
@@ -199,7 +197,7 @@ fn exit(mut commands: Commands) {
     commands.remove_resource::<AudioAssets>();
     commands.remove_resource::<ObjectInfo>();
     commands.remove_resource::<TileDrag>();
-    commands.remove_resource::<Inventory>();
+    commands.remove_resource::<inventory::Inventory>();
     commands.remove_resource::<ClearColor>();
 }
 

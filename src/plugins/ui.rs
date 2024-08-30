@@ -5,18 +5,23 @@ use crate::audio::play_oneshot_audio;
 use crate::ui::*;
 use crate::AppState;
 
+/// Window tag
 #[derive(Debug, Component)]
 pub struct UiWindow;
 
+/// Window title bar tag
 #[derive(Debug, Component)]
 pub struct UiWindowTitleBar(pub Entity);
 
+/// Window close button tag
 #[derive(Debug, Component)]
 pub struct UiWindowCloseButton(pub Entity);
 
+/// Window content tag
 #[derive(Debug, Component)]
 pub struct UiWindowContent;
 
+/// UI asset container resource
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct UiAssets {
     pub missing_image: Handle<Image>,
@@ -25,6 +30,7 @@ pub struct UiAssets {
     pub button_pressed_sound: Handle<AudioSource>,
 }
 
+/// Resource tracking whether or not the pointer is captured by UI
 #[derive(Debug, Default, Reflect, Resource, Deref, DerefMut)]
 pub struct IsPointerCaptured(pub bool);
 

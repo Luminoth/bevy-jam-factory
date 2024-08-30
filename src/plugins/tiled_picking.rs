@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_mod_picking::backend::prelude::*;
 
 use crate::get_world_position_from_cursor_position;
-use crate::plugins::{camera::MainCamera, TiledMapObjectLayer};
+use crate::plugins::{game::camera::MainCamera, tiled::TiledMapObjectLayer};
 use crate::tilemap::{get_tile_position, TileMapQuery};
 
 #[derive(Debug, Default)]

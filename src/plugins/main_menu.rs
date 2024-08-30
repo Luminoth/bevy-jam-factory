@@ -2,15 +2,17 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use crate::cleanup_state;
-use crate::plugins::UiAssets;
+use crate::plugins::ui::UiAssets;
 use crate::ui::{check_click_event, create_button, create_canvas};
 use crate::AppState;
 
-#[derive(Debug, Component)]
-pub struct MainMenu;
-
+/// Main menu state tag
 #[derive(Debug, Component)]
 pub struct OnMainMenu;
+
+/// Main menu canvas tag
+#[derive(Debug, Component)]
+pub struct MainMenuCanvas;
 
 #[derive(Debug, Default)]
 pub struct MainMenuPlugin;
@@ -32,7 +34,7 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((Camera2dBundle::default(), OnMainMenu));
 
     create_canvas(&mut commands, "Main Menu")
-        .insert(MainMenu)
+        .insert(MainMenuCanvas)
         .with_children(|parent| {
             create_button(
                 parent,

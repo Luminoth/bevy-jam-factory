@@ -4,7 +4,7 @@ pub mod object_info;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-use crate::plugins::{IsPaused, IsPointerCaptured};
+use crate::plugins::{game::IsPaused, ui::IsPointerCaptured};
 use crate::AppState;
 
 #[derive(Debug, Default)]

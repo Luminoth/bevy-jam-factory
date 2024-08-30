@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 use super::{label::*, *};
-use crate::plugins::UiAssets;
+use crate::plugins::ui::UiAssets;
 
 const BUTTON_WIDTH: usize = 150;
 const BUTTON_HEIGHT: usize = 50;

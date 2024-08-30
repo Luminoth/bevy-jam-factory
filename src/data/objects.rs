@@ -4,8 +4,8 @@
 
 use std::str::FromStr;
 
-use super::resources::*;
-use crate::tiled::*;
+use super::resources::ResourceType;
+use crate::tiled::{require_object_int_property, require_object_string_property};
 
 #[derive(Debug, Clone, PartialEq, Eq, strum::EnumString, strum::Display)]
 pub enum ObjectType {

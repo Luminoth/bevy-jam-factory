@@ -6,7 +6,7 @@ use bevy::prelude::*;
 
 use super::items::ItemType;
 use super::resources::ResourceType;
-use crate::plugins::InventoryUpdatedEvent;
+use crate::plugins::game::inventory::InventoryUpdatedEvent;
 
 #[derive(Debug, Default, Reflect)]
 pub struct InventoryData {

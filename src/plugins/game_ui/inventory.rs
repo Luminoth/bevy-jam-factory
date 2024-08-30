@@ -4,39 +4,56 @@ use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
 use crate::data::{items::ItemType, resources::ResourceType};
 use crate::plugins::{
-    game::items::{ItemDragEvent, ItemDropEvent},
-    Inventory, InventoryUpdatedEvent, UiAssets,
+    game::{
+        inventory::{Inventory, InventoryUpdatedEvent},
+        items::{ItemDragEvent, ItemDropEvent},
+    },
+    ui::UiAssets,
 };
 use crate::ui::*;
 
+/// Inventory window tag
 #[derive(Debug, Component)]
 pub struct InventoryWindow;
 
+/// Inventory window content tag
 #[derive(Debug, Component)]
-pub struct InventoryContent;
+pub struct InventoryWindowContent;
 
+/// Inventory window Resource label tag
+///
+/// One per-Resource type
 #[derive(Debug, Component)]
 pub struct InventoryResourcesUI(pub ResourceType);
 
-#[allow(dead_code)]
+/// Inventory window Resource amount tag
+///
+/// One per-Resource type
 #[derive(Debug, Component)]
 pub struct InventoryResourcesAmountUI(pub ResourceType, pub u32);
 
+/// Inventory window Item label tag
+///
+/// One per-Item type
 #[derive(Debug, Component)]
 pub struct InventoryItemUI(pub ItemType);
 
-#[allow(dead_code)]
+/// Inventory window Item amount tag
+///
+/// One per-Item type
 #[derive(Debug, Component)]
 pub struct InventoryItemAmountUI(pub ItemType, pub u32, pub Entity);
 
+/// Inventory window Item image tag
 #[derive(Debug, Component)]
-pub struct InventoryItemImage {
-    pub item_type: ItemType,
-}
+pub struct InventoryItemImage(pub ItemType);
 
+/// Inventory (Item) drag image component
+///
+/// Holds state needed by the Item drop event handler
+// TODO: this should probably be a resource instead
 #[derive(Debug, Default, Component)]
 pub struct InventoryDragImage {
-    // TODO: this should probably go in a resource instead
     pub item_type: Option<ItemType>,
     pub start_position: (Val, Val),
 }
@@ -66,7 +83,7 @@ fn start_drag_inventory_item(
     let (mut drag_image_visibility, mut drag_image_style, mut drag_image) =
         drag_image_query.single_mut();
     *drag_image_visibility = Visibility::Visible;
-    drag_image.item_type = Some(item_image.item_type);
+    drag_image.item_type = Some(item_image.0);
 
     let half_width = if let Val::Px(width) = drag_image_style.width {
         width / 2.0
@@ -155,7 +172,6 @@ fn end_drag_inventory_item(
     ));
 }
 
-#[allow(dead_code)]
 pub(super) fn hide_item_drag_image_event_handler(
     mut events: EventReader<bevy_tweening::TweenCompleted>,
     mut visibility_query: Query<&mut Visibility, With<InventoryDragImage>>,
@@ -211,7 +227,7 @@ pub(super) fn setup_window(
                         },
                         Name::new("Scroll Content"),
                         ScrollableContent::default(),
-                        InventoryContent,
+                        InventoryWindowContent,
                     ))
                     .with_children(|parent| {
                         // Resources
@@ -260,9 +276,7 @@ pub(super) fn setup_window(
                                             On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
                                         )
                                         .insert((
-                                            InventoryItemImage {
-                                                item_type: ItemType::Harvester,
-                                            },
+                                            InventoryItemImage(ItemType::Harvester),
                                             Pickable::IGNORE,
                                         ))
                                         .id();

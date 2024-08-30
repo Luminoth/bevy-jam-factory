@@ -3,21 +3,25 @@ use std::time::Instant;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_mod_picking::prelude::*;
 
-use crate::plugins::UiAssets;
+use crate::plugins::ui::UiAssets;
 use crate::ui::*;
 
 // TODO: we need to be able to interact below the log window
 // (eg. update_pointer_capture needs to ignore it)
 
+/// Log window tag
 #[derive(Debug, Component)]
 pub struct LogWindow;
 
+/// Log window text tag
 #[derive(Debug, Component)]
-pub struct LogText;
+pub struct LogWindowText;
 
+/// Log content resource
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct LogTextContent(pub String);
 
+/// Emit to add a message to the log
 #[derive(Debug, Event)]
 pub struct LogEvent {
     timestamp: Instant,
@@ -60,7 +64,7 @@ pub(super) fn setup_window(
             ),
             Name::new("Log"),
             Pickable::IGNORE,
-            LogText,
+            LogWindowText,
         ));
     });
 }
@@ -68,7 +72,7 @@ pub(super) fn setup_window(
 pub(super) fn log_event_handler(
     mut events: EventReader<LogEvent>,
     mut log_content: ResMut<LogTextContent>,
-    mut log_text_query: Query<&mut Text, With<LogText>>,
+    mut log_text_query: Query<&mut Text, With<LogWindowText>>,
 ) {
     for event in events.read() {
         info!("{:?}: {}", event.timestamp, event.message);

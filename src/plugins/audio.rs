@@ -3,9 +3,11 @@ use bevy::{input::common_conditions::input_just_released, prelude::*};
 use crate::audio::*;
 use crate::plugins::game_ui::log::LogEvent;
 
+/// Music entity tag
 #[derive(Debug, Component)]
 pub struct Music;
 
+/// One-shot audio entity tag
 #[derive(Debug, Component)]
 pub struct OneShotAudio;
 

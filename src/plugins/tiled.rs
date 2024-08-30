@@ -6,7 +6,7 @@ use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
-use crate::plugins::{game::OnInGame, objects::*};
+use crate::plugins::game::{objects::*, OnInGame};
 
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {
@@ -22,18 +22,26 @@ pub struct TiledMapBundle {
     pub render_settings: TilemapRenderSettings,
 }
 
+/// Tile layer tag
 #[derive(Debug, Component)]
 pub struct TiledMapTileLayer;
 
+/// Object layer tag
 #[derive(Debug, Component)]
 pub struct TiledMapObjectLayer;
 
+/// Emitted when an Object is clicked
 #[derive(Debug, Event)]
 pub struct TiledMapObjectClickEvent {
     pub listener: Entity,
     pub target: Entity,
     pub button: PointerButton,
 }
+
+const MIN_TILEMAP_WIDTH: u32 = 25;
+const MIN_TILEMAP_HEIGHT: u32 = 25;
+const TILE_WIDTH: u32 = 32;
+const TILE_HEIGHT: u32 = 32;
 
 #[derive(Debug, Default)]
 pub struct TiledMapPlugin;
@@ -46,11 +54,6 @@ impl Plugin for TiledMapPlugin {
             .add_systems(Update, process_loaded_maps);
     }
 }
-
-const MIN_TILEMAP_WIDTH: u32 = 25;
-const MIN_TILEMAP_HEIGHT: u32 = 25;
-const TILE_WIDTH: u32 = 32;
-const TILE_HEIGHT: u32 = 32;
 
 fn process_loaded_maps(
     mut commands: Commands,

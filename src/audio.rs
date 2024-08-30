@@ -1,6 +1,6 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::plugins::*;
+use crate::plugins::{audio::*, game::OnInGame};
 
 // TODO: these might be better as events so that the callers
 // don't need to know anything about the queries?
@@ -20,14 +20,12 @@ pub fn start_music(commands: &mut Commands, source: Handle<AudioSource>) {
     ));
 }
 
-#[allow(dead_code)]
 pub fn stop_music(commands: &mut Commands, music_query: &Query<Entity, With<Music>>) {
     for music in music_query {
         commands.entity(music).despawn();
     }
 }
 
-#[allow(dead_code)]
 pub fn play_oneshot_audio(commands: &mut Commands, source: Handle<AudioSource>) {
     commands.spawn((
         AudioBundle {

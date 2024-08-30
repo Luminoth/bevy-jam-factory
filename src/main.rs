@@ -87,16 +87,16 @@ fn main() {
 
     // game plugins
     app.add_plugins((
-        plugins::TiledMapPlugin,
-        plugins::TiledPickingBackend,
-        plugins::UiPlugin,
-        plugins::AudioPlugin,
-        plugins::GameUiPlugin,
-        plugins::SplashPlugin,
-        plugins::MainMenuPlugin,
-        plugins::PauseMenuPlugin,
-        plugins::GamePlugin,
-        plugins::DebugPlugin,
+        plugins::tiled::TiledMapPlugin,
+        plugins::tiled_picking::TiledPickingBackend,
+        plugins::ui::UiPlugin,
+        plugins::audio::AudioPlugin,
+        plugins::game_ui::GameUiPlugin,
+        plugins::splash::SplashPlugin,
+        plugins::main_menu::MainMenuPlugin,
+        plugins::pause_menu::PauseMenuPlugin,
+        plugins::game::GamePlugin,
+        plugins::debug::DebugPlugin,
     ));
 
     app.run();

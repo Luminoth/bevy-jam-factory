@@ -5,6 +5,7 @@ use crate::cleanup_state;
 use crate::ui::create_canvas;
 use crate::AppState;
 
+/// Splash screen state tag
 #[derive(Debug, Component)]
 pub struct OnSplashScreen;
 

@@ -1,14 +1,15 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use super::ObjectInfo;
 use crate::data::objects::ObjectData;
 use crate::plugins::{
     game_ui::{log::LogEvent, object_info::ObjectInfoWindow},
     tiled::TiledMapObjectClickEvent,
-    ObjectInfo,
 };
 use crate::ui::check_click_event;
 
+/// Game Object data component
 #[derive(Debug, Component, Deref)]
 pub struct Object(pub ObjectData);
 

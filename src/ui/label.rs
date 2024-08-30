@@ -1,7 +1,7 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_mod_picking::prelude::*;
 
-use crate::plugins::UiAssets;
+use crate::plugins::ui::UiAssets;
 
 pub fn create_label<'a>(
     parent: &'a mut ChildBuilder,

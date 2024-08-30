@@ -1,6 +1,8 @@
 //! Game world Items
 // TODO: "Item" is a terrible name ...
 
+pub mod harvester;
+
 use bevy::prelude::*;
 
 use super::inventory::InventoryData;
@@ -70,26 +72,7 @@ impl ItemType {
     }
 }
 
-// TODO: this is not the move
-/*#[derive(Debug, Clone, PartialEq, Eq, strum::Display)]
-pub enum ItemData {
-    // TODO: this also needs access to the underlying Resources
-    // because it's going to modify its data
-    Harvester { current: u32 },
-}
-
-impl ItemData {
-    #[inline]
-    pub fn get_type(&self) -> ItemType {
-        match self {
-            Self::Harvester { .. } => ItemType::Harvester,
-        }
-    }
-
+pub trait ItemData {
     #[allow(dead_code)]
-    pub fn update(&mut self) {
-        match self {
-            Self::Harvester { .. } => (),
-        }
-    }
-}*/
+    fn get_type(&self) -> ItemType;
+}

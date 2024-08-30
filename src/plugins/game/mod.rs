@@ -176,14 +176,10 @@ fn enter(
 
     start_music(&mut commands, audio_assets.music.clone());
 
-    commands.insert_resource(/*Inventory::default()*/ Inventory(InventoryData {
-        // TODO: temp hack to get some stuff in the inventory
-        resources: std::collections::HashMap::from([(
-            crate::data::resources::ResourceType::Iron,
-            100,
-        )]),
-        items: std::collections::HashMap::from([(crate::data::items::ItemType::Harvester, 1)]),
-    }));
+    commands.insert_resource(
+        //Inventory::default()
+        Inventory(InventoryData::new_test()),
+    );
     inventory_update_events.send_default();
 
     commands.spawn((

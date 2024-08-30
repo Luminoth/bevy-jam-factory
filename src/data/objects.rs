@@ -1,3 +1,7 @@
+//! Game world Objects
+// TODO: "Object" is a terrible name ...
+// it's used here to match with Tiled "Objects"
+
 use std::str::FromStr;
 
 use super::resources::*;
@@ -50,12 +54,14 @@ impl ObjectData {
         }
     }
 
+    #[inline]
     pub fn get_id(&self) -> u32 {
         match self {
             Self::Resources { id, .. } => *id,
         }
     }
 
+    #[inline]
     pub fn get_type(&self) -> ObjectType {
         match self {
             Self::Resources { .. } => ObjectType::Resources,

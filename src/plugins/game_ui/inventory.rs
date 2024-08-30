@@ -330,15 +330,17 @@ pub(super) fn inventory_updated_event_handler(
         return;
     }
 
+    let inventory_resources = inventory.get_resources();
+
     for (mut visibility, resources) in visibility_set.p0().iter_mut() {
-        if inventory.resources.contains_key(&resources.0) {
+        if inventory_resources.contains_key(&resources.0) {
             *visibility = Visibility::Inherited;
         }
     }
 
     for (mut text, mut resources) in text_set.p0().iter_mut() {
-        if inventory.resources.contains_key(&resources.0) {
-            if let Some(amount) = inventory.resources.get(&resources.0) {
+        if inventory_resources.contains_key(&resources.0) {
+            if let Some(amount) = inventory_resources.get(&resources.0) {
                 if *amount != resources.1 {
                     text.sections.get_mut(0).unwrap().value = amount.to_string();
                     resources.1 = *amount;
@@ -347,15 +349,17 @@ pub(super) fn inventory_updated_event_handler(
         }
     }
 
+    let inventory_items = inventory.get_items();
+
     for (mut visibility, item) in visibility_set.p1().iter_mut() {
-        if inventory.items.contains_key(&item.0) {
+        if inventory_items.contains_key(&item.0) {
             *visibility = Visibility::Inherited;
         }
     }
 
     for (mut text, mut item) in text_set.p1().iter_mut() {
-        if inventory.items.contains_key(&item.0) {
-            if let Some(amount) = inventory.items.get(&item.0) {
+        if inventory_items.contains_key(&item.0) {
+            if let Some(amount) = inventory_items.get(&item.0) {
                 if *amount != item.1 {
                     text.sections.get_mut(0).unwrap().value = amount.to_string();
                     item.1 = *amount;

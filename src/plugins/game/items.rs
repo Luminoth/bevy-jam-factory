@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::data::items::{ItemData, ItemType};
+use crate::data::items::ItemType;
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
     camera::MainCamera,
@@ -10,9 +10,6 @@ use crate::plugins::{
     Inventory, InventoryUpdatedEvent, TiledMapObjectLayer, TiledMapTileLayer,
 };
 use crate::tilemap::{get_tile_position, TileMapQuery};
-
-#[derive(Debug, Component, Deref)]
-pub struct Item(pub ItemData);
 
 #[derive(Debug, Resource)]
 pub struct ItemDragObject(pub Entity);
@@ -75,7 +72,7 @@ pub(super) fn item_drag_event_handler(
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut drag_object: Option<ResMut<ItemDragObject>>,
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    mut object_query: Query<&mut TileColor, With<Object>>,
+    mut object_query: Query<(&Object, &mut TileColor)>,
     mut drag_tile: Option<ResMut<ItemDragTile>>,
     tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
     mut tile_query: Query<&mut TileColor, Without<Object>>,
@@ -117,11 +114,11 @@ pub(super) fn item_drag_event_handler(
                     // check previous object
                     if let Some(drag_object) = &mut drag_object {
                         if drag_object.0 != object_entity {
-                            let mut color = object_query.get_mut(drag_object.0).unwrap();
+                            let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
                             color.0 = Color::default();
 
-                            let mut color = object_query.get_mut(object_entity).unwrap();
-                            color.0 = if event.item_type.can_drop_on_object() {
+                            let (object, mut color) = object_query.get_mut(object_entity).unwrap();
+                            color.0 = if event.item_type.can_drop_on_object(object.get_type()) {
                                 CAN_DROP_COLOR
                             } else {
                                 NO_DROP_COLOR
@@ -129,8 +126,8 @@ pub(super) fn item_drag_event_handler(
                             drag_object.0 = object_entity;
                         }
                     } else {
-                        let mut color = object_query.get_mut(object_entity).unwrap();
-                        color.0 = if event.item_type.can_drop_on_object() {
+                        let (object, mut color) = object_query.get_mut(object_entity).unwrap();
+                        color.0 = if event.item_type.can_drop_on_object(object.get_type()) {
                             CAN_DROP_COLOR
                         } else {
                             NO_DROP_COLOR
@@ -153,7 +150,7 @@ pub(super) fn item_drag_event_handler(
                 if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
                     // reset and remove previous object
                     if let Some(drag_object) = &drag_object {
-                        let mut color = object_query.get_mut(drag_object.0).unwrap();
+                        let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
                         color.0 = Color::default();
                         commands.remove_resource::<ItemDragObject>();
                     }
@@ -199,7 +196,7 @@ pub(super) fn item_drop_event_handler(
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     drag_object: Option<Res<ItemDragObject>>,
     object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    mut object_query: Query<&mut TileColor, With<Object>>,
+    mut object_query: Query<(&Object, &mut TileColor)>,
     drag_tile: Option<Res<ItemDragTile>>,
     tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
     mut tile_query: Query<&mut TileColor, Without<Object>>,
@@ -225,7 +222,7 @@ pub(super) fn item_drop_event_handler(
         if let Some(world_position) = world_position {
             // first check for objects
             if let Some(drag_object) = &drag_object {
-                let mut color = object_query.get_mut(drag_object.0).unwrap();
+                let (object, mut color) = object_query.get_mut(drag_object.0).unwrap();
                 color.0 = Color::default();
                 commands.remove_resource::<ItemDragObject>();
 
@@ -240,10 +237,10 @@ pub(super) fn item_drop_event_handler(
                 .unwrap();
 
                 let _object_entity = object_tilemap.storage.get(&object_position).unwrap();
-                if event.item_type.can_drop_on_object() {
+                if event.item_type.can_drop_on_object(object.get_type()) {
                     event
                         .item_type
-                        .drop_object(&mut inventory.0, &mut inventory_updated_events);
+                        .on_drop_object(&mut inventory.0, &mut inventory_updated_events);
                 }
 
                 let mut visibility = drag_image_query.single_mut();
@@ -272,7 +269,7 @@ pub(super) fn item_drop_event_handler(
                 if event.item_type.can_drop_on_tile() {
                     event
                         .item_type
-                        .drop_tile(&mut inventory.0, &mut inventory_updated_events);
+                        .on_drop_tile(&mut inventory.0, &mut inventory_updated_events);
 
                     let mut visibility = drag_image_query.single_mut();
                     *visibility = Visibility::Hidden;

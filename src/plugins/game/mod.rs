@@ -14,6 +14,7 @@ use bevy_egui::{egui, EguiContexts};
 use crate::assets::tiled::TiledMap;
 use crate::audio::start_music;
 use crate::cleanup_state;
+use crate::data::items::ItemType;
 use crate::plugins::{audio::AudioAssets, tiled::TiledMapBundle};
 use crate::AppState;
 
@@ -34,13 +35,42 @@ pub struct OnInGame;
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct GameAssets {
     pub map: Handle<TiledMap>,
-    pub resources_sheet: Handle<Image>,
-    pub harvester_sheet: Handle<Image>,
+
+    pub resources_image: Handle<Image>,
+    pub resources_atlas: Handle<TextureAtlasLayout>,
+
+    pub harvester_image: Handle<Image>,
+    pub harvester_atlas: Handle<TextureAtlasLayout>,
 }
 
 impl GameAssets {
-    pub fn is_loaded(&self, map_assets: &Res<Assets<TiledMap>>) -> bool {
+    // TODO: well this kinda sucks
+    #[inline]
+    pub fn is_loaded(
+        &self,
+        map_assets: &Res<Assets<TiledMap>>,
+        image_assets: &Res<Assets<Image>>,
+        atlas_assets: &Res<Assets<TextureAtlasLayout>>,
+    ) -> bool {
         map_assets.contains(&self.map)
+            && image_assets.contains(&self.resources_image)
+            && image_assets.contains(&self.harvester_image)
+            && atlas_assets.contains(&self.resources_atlas)
+            && atlas_assets.contains(&self.harvester_atlas)
+    }
+
+    #[inline]
+    pub fn get_item_texture(&self, item_type: ItemType) -> Handle<Image> {
+        match item_type {
+            ItemType::Harvester => self.harvester_image.clone(),
+        }
+    }
+
+    #[inline]
+    pub fn get_item_atlas(&self, item_type: ItemType) -> Handle<TextureAtlasLayout> {
+        match item_type {
+            ItemType::Harvester => self.harvester_atlas.clone(),
+        }
     }
 }
 
@@ -106,16 +136,30 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn load_assets(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
     commands.insert_resource(AudioAssets {
         // TODO: is there a way to make this streaming?
         music: asset_server.load("music/Windless Slopes.ogg"),
     });
 
+    let resources_image = asset_server.load("resources.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 4, None, None);
+    let resources_atlas = texture_atlas_layouts.add(layout);
+
+    let harvester_image = asset_server.load("harvester.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 4, None, None);
+    let harvester_atlas = texture_atlas_layouts.add(layout);
+
     commands.insert_resource(GameAssets {
         map: asset_server.load("map.tmx"),
-        resources_sheet: asset_server.load("resources.png"),
-        harvester_sheet: asset_server.load("harvester.png"),
+        resources_image,
+        resources_atlas,
+        harvester_image,
+        harvester_atlas,
     });
 
     info!("Waiting for assets ...");
@@ -126,6 +170,8 @@ fn wait_for_assets(
     mut game_state: ResMut<NextState<AppState>>,
     game_assets: Res<GameAssets>,
     map_assets: Res<Assets<TiledMap>>,
+    image_assets: Res<Assets<Image>>,
+    atlas_assets: Res<Assets<TextureAtlasLayout>>,
     game_audio_assets: Res<AudioAssets>,
     audio_assets: Res<Assets<AudioSource>>,
 ) {
@@ -138,7 +184,9 @@ fn wait_for_assets(
         });
     });
 
-    if !game_assets.is_loaded(&map_assets) || !game_audio_assets.is_loaded(&audio_assets) {
+    if !game_assets.is_loaded(&map_assets, &image_assets, &atlas_assets)
+        || !game_audio_assets.is_loaded(&audio_assets)
+    {
         return;
     }
 

@@ -29,7 +29,6 @@
   * https://www.youtube.com/watch?v=eoO5s3-__sM
 * Process
   * 256x256 document to place tiles onto (this is the Tileset)
-    * This can be modified (always a multiple of 32) depending on the number of tiles needed
     * 32x32 grid
     * Turn on Snap to Grid
   * 400x400 document for creating tiles
@@ -57,3 +56,4 @@
 ## Sprite sheets
 
 * Same process as creating Tilesets
+* Must be 128x128

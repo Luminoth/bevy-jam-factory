@@ -57,6 +57,8 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         button_hover_sound: asset_server.load("sounds/ui/button-hover.mp3"),
         button_pressed_sound: asset_server.load("sounds/ui/button-click.mp3"),
     });
+
+    // TODO: need to wait for the assets to be loaded
 }
 
 #[allow(clippy::type_complexity)]

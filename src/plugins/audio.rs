@@ -17,6 +17,8 @@ pub struct AudioAssets {
 }
 
 impl AudioAssets {
+    // TODO: well this kinda sucks
+    #[inline]
     pub fn is_loaded(&self, audio_assets: &Res<Assets<AudioSource>>) -> bool {
         audio_assets.contains(&self.music)
     }

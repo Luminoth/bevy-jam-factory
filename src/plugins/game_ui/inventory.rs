@@ -7,6 +7,7 @@ use crate::plugins::{
     game::{
         inventory::{Inventory, InventoryUpdatedEvent},
         items::{ItemDragEvent, ItemDropEvent},
+        GameAssets,
     },
     ui::UiAssets,
 };
@@ -65,9 +66,17 @@ pub const HIDE_DRAG_IMAGE_ID: u64 = 1;
 
 #[allow(clippy::type_complexity)]
 fn start_drag_inventory_item(
+    mut commands: Commands,
     event: Listener<Pointer<DragStart>>,
+    game_assets: Res<GameAssets>,
     item_image_query: Query<(&GlobalTransform, &InventoryItemImage)>,
-    mut drag_image_query: Query<(&mut Visibility, &mut Style, &mut InventoryDragImage)>,
+    mut drag_image_query: Query<(
+        Entity,
+        &mut Visibility,
+        &mut Style,
+        &mut UiImage,
+        &mut InventoryDragImage,
+    )>,
 ) {
     if !check_drag_start_event(
         event.listener(),
@@ -80,10 +89,22 @@ fn start_drag_inventory_item(
 
     let (item_image_transform, item_image) = item_image_query.get(event.target).unwrap();
 
-    let (mut drag_image_visibility, mut drag_image_style, mut drag_image) =
-        drag_image_query.single_mut();
+    let (
+        drag_image_id,
+        mut drag_image_visibility,
+        mut drag_image_style,
+        mut drag_image_image,
+        mut drag_image,
+    ) = drag_image_query.single_mut();
     *drag_image_visibility = Visibility::Visible;
+
+    // update the drag image item
     drag_image.item_type = Some(item_image.0);
+    drag_image_image.texture = game_assets.get_item_texture(item_image.0);
+    commands.entity(drag_image_id).insert(TextureAtlas {
+        layout: game_assets.get_item_atlas(item_image.0),
+        index: 0,
+    });
 
     let half_width = if let Val::Px(width) = drag_image_style.width {
         width / 2.0
@@ -187,6 +208,7 @@ pub(super) fn hide_item_drag_image_event_handler(
 pub(super) fn setup_window(
     mut commands: Commands,
     ui_assets: Res<UiAssets>,
+    game_assets: Res<GameAssets>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.single();
@@ -243,7 +265,12 @@ pub(super) fn setup_window(
                                         InventoryResourcesUI(ResourceType::Iron),
                                     ))
                                     .with_children(|parent| {
-                                        create_image(parent, ui_assets.missing_image.clone());
+                                        create_image_from_slice(
+                                            parent,
+                                            game_assets.resources_image.clone(),
+                                            game_assets.resources_atlas.clone(),
+                                            0,
+                                        );
                                         create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
                                             .insert(InventoryResourcesAmountUI(
@@ -266,9 +293,11 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
-                                        let item_image_id = create_draggable_image(
+                                        let item_image_id = create_draggable_image_from_slice(
                                             parent,
-                                            ui_assets.missing_image.clone(),
+                                            game_assets.harvester_image.clone(),
+                                            game_assets.harvester_atlas.clone(),
+                                            0,
                                             On::<Pointer<DragStart>>::run(
                                                 start_drag_inventory_item,
                                             ),

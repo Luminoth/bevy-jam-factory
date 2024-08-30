@@ -34,6 +34,8 @@ pub struct OnInGame;
 #[derive(Debug, Default, Reflect, Resource)]
 pub struct GameAssets {
     pub map: Handle<TiledMap>,
+    pub resources_sheet: Handle<Image>,
+    pub harvester_sheet: Handle<Image>,
 }
 
 impl GameAssets {
@@ -112,6 +114,8 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.insert_resource(GameAssets {
         map: asset_server.load("map.tmx"),
+        resources_sheet: asset_server.load("resources.png"),
+        harvester_sheet: asset_server.load("harvester.png"),
     });
 
     info!("Waiting for assets ...");

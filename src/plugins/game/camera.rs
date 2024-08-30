@@ -33,7 +33,8 @@ pub struct CameraProjectionQueryMut {
     pub projection: &'static OrthographicProjection,
 }
 
-const CAMERA_SPEED: f32 = 200.0;
+const CAMERA_SPEED: f32 = 175.0;
+const PAN_DETECTION_FACTOR: f32 = 0.1; // TODO: this name is bad lol ...
 
 pub(super) fn pan(
     is_pointer_captured: Res<IsPointerCaptured>,
@@ -48,8 +49,8 @@ pub(super) fn pan(
     }
 
     let window = window_query.single();
-    let window_movement_width = window.width() / 4.0;
-    let window_movement_height = window.height() / 4.0;
+    let window_movement_width = window.width() * PAN_DETECTION_FACTOR;
+    let window_movement_height = window.height() * PAN_DETECTION_FACTOR;
 
     let mut camera = camera_query.single_mut();
     let view_half_width = camera.projection.area.width() / 2.0;

@@ -36,8 +36,10 @@ impl ItemType {
         inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
     ) {
         match self {
-            // TODO: create the item in the world
-            Self::Harvester => (),
+            Self::Harvester => {
+                // TODO: create the item in the world
+                info!("TODO: create harvester");
+            }
         }
 
         inventory.remove_item(*self, inventory_updated_events);

@@ -36,8 +36,15 @@ pub struct InventoryItemImage {
 
 #[derive(Debug, Default, Component)]
 pub struct InventoryDragImage {
+    // TODO: this should probably go in a resource instead
     pub item_type: Option<ItemType>,
+    pub start_position: (Val, Val),
 }
+
+// TODO this needs to go to a common place
+// because we have to avoid collisions
+// (and I guess the handler goes there too? idk)
+pub const HIDE_DRAG_IMAGE_ID: u64 = 1;
 
 #[allow(clippy::type_complexity)]
 fn start_drag_inventory_item(
@@ -56,10 +63,10 @@ fn start_drag_inventory_item(
 
     let (item_image_transform, item_image) = item_image_query.get(event.target).unwrap();
 
-    let (mut drag_image_visibility, mut drag_image_style, mut drag_image_item_type) =
+    let (mut drag_image_visibility, mut drag_image_style, mut drag_image) =
         drag_image_query.single_mut();
     *drag_image_visibility = Visibility::Visible;
-    drag_image_item_type.item_type = Some(item_image.item_type);
+    drag_image.item_type = Some(item_image.item_type);
 
     let half_width = if let Val::Px(width) = drag_image_style.width {
         width / 2.0
@@ -79,6 +86,8 @@ fn start_drag_inventory_item(
     if let Val::Px(top) = &mut drag_image_style.top {
         *top = item_image_transform.translation().y - half_height;
     }
+
+    drag_image.start_position = (drag_image_style.left, drag_image_style.top);
 }
 
 fn drag_inventory_item(
@@ -97,6 +106,11 @@ fn drag_inventory_item(
     }
 
     let (mut drag_image_style, drag_image_item_type) = drag_image_query.single_mut();
+    if drag_image_item_type.item_type.is_none() {
+        // this check catches "drag" running before "start drag"
+        // not sure why that can even happen ...
+        return;
+    }
 
     if let Val::Px(left) = &mut drag_image_style.left {
         *left += event.delta.x;
@@ -128,24 +142,30 @@ fn end_drag_inventory_item(
         return;
     }
 
-    let (drag_image_id, drag_image_style, mut drag_image_item_type) = drag_image_query.single_mut();
-    let item_type = drag_image_item_type.item_type.take();
+    let (drag_image_id, drag_image_style, mut drag_image) = drag_image_query.single_mut();
+    let item_type = drag_image.item_type.take();
 
     let window = window_query.single();
     item_drop_events.send(ItemDropEvent::new(
         window,
         item_type.unwrap(),
         drag_image_id,
+        drag_image.start_position,
         drag_image_style,
     ));
 }
 
 #[allow(dead_code)]
-pub fn hide_inventory_drag_icon(
+pub(super) fn hide_item_drag_image_event_handler(
+    mut events: EventReader<bevy_tweening::TweenCompleted>,
     mut visibility_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
     let mut visibility = visibility_query.single_mut();
-    *visibility = Visibility::Hidden;
+    for event in events.read() {
+        if event.user_data == HIDE_DRAG_IMAGE_ID {
+            *visibility = Visibility::Hidden;
+        }
+    }
 }
 
 pub(super) fn setup_window(

@@ -86,7 +86,9 @@ impl Plugin for GamePlugin {
                     input::stop_drag.run_if(input_just_released(MouseButton::Left)),
                     // TODO: instead of "just_pressed" we should check for a Drag resource existing
                     // (eg. resource_exists::<DragOperation>)
-                    input::drag.run_if(input_pressed(MouseButton::Left)),
+                    input::drag
+                        .run_if(input_pressed(MouseButton::Left))
+                        .after(input::start_drag),
                     items::item_drag_event_handler,
                     items::item_drop_event_handler,
                     objects::object_click_event_handler,

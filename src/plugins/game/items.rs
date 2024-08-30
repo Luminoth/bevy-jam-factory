@@ -4,7 +4,9 @@ use bevy_ecs_tilemap::prelude::*;
 use crate::data::items::{ItemData, ItemType};
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
-    camera::MainCamera, /*game_ui::inventory::hide_inventory_drag_icon,*/ objects::Object,
+    camera::MainCamera,
+    game_ui::inventory::{InventoryDragImage, HIDE_DRAG_IMAGE_ID},
+    objects::Object,
     Inventory, InventoryUpdatedEvent, TiledMapObjectLayer, TiledMapTileLayer,
 };
 use crate::tilemap::{get_tile_position, TileMapQuery};
@@ -38,6 +40,7 @@ pub struct ItemDropEvent {
     pub item_type: ItemType,
     pub cursor_position: Option<Vec2>,
     pub drag_image_id: Entity,
+    pub drage_image_start_position: (Val, Val),
     pub drag_image_position: (Val, Val),
 }
 
@@ -46,12 +49,14 @@ impl ItemDropEvent {
         window: &Window,
         item_type: ItemType,
         drag_image_id: Entity,
+        drage_image_start_position: (Val, Val),
         drag_image_style: &Style,
     ) -> Self {
         Self {
             item_type,
             cursor_position: window.cursor_position(),
             drag_image_id,
+            drage_image_start_position,
             drag_image_position: (drag_image_style.left, drag_image_style.top),
         }
     }
@@ -199,6 +204,7 @@ pub(super) fn item_drop_event_handler(
     tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
     mut tile_query: Query<&mut TileColor, Without<Object>>,
     mut inventory_updated_events: EventWriter<InventoryUpdatedEvent>,
+    mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
     if events.is_empty() {
         return;
@@ -240,6 +246,9 @@ pub(super) fn item_drop_event_handler(
                         .drop_object(&mut inventory.0, &mut inventory_updated_events);
                 }
 
+                let mut visibility = drag_image_query.single_mut();
+                *visibility = Visibility::Hidden;
+
                 continue;
             }
 
@@ -264,10 +273,14 @@ pub(super) fn item_drop_event_handler(
                     event
                         .item_type
                         .drop_tile(&mut inventory.0, &mut inventory_updated_events);
+
+                    let mut visibility = drag_image_query.single_mut();
+                    *visibility = Visibility::Hidden;
                 } else {
+                    // TODO: can this move to the game UI code?
                     let tween = bevy_tweening::Tween::new(
                         bevy_tweening::EaseFunction::QuadraticOut,
-                        std::time::Duration::from_secs(1),
+                        std::time::Duration::from_millis(500),
                         bevy_tweening::lens::UiPositionLens {
                             start: UiRect {
                                 left: event.drag_image_position.0,
@@ -275,17 +288,16 @@ pub(super) fn item_drop_event_handler(
                                 right: Val::Auto,
                                 bottom: Val::Auto,
                             },
-                            // TODO: this should be the drag start
                             end: UiRect {
-                                left: Val::Px(0.0),
-                                top: Val::Px(0.0),
+                                left: event.drage_image_start_position.0,
+                                top: event.drage_image_start_position.1,
                                 right: Val::Auto,
                                 bottom: Val::Auto,
                             },
                         },
-                    );
-                    // TODO: hmmmmmm
-                    //.with_completed_system(hide_inventory_drag_icon);
+                    )
+                    // TODO: this really sucks lol
+                    .with_completed_event(HIDE_DRAG_IMAGE_ID);
 
                     commands
                         .entity(event.drag_image_id)

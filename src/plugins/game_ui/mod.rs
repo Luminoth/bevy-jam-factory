@@ -31,6 +31,7 @@ impl Plugin for GameUiPlugin {
                         .run_if(object_info::should_update_object_info_ui),
                     inventory::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),
                     inventory::inventory_updated_event_handler,
+                    inventory::hide_item_drag_image_event_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),
             )

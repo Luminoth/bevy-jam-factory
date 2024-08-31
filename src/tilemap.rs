@@ -18,6 +18,16 @@ pub struct TileMapQuery {
     pub transform: &'static Transform,
 }
 
+#[derive(QueryData)]
+#[query_data(mutable, derive(Debug))]
+pub struct TileMapQueryMut {
+    pub size: &'static TilemapSize,
+    pub grid_size: &'static TilemapGridSize,
+    pub r#type: &'static TilemapType,
+    pub storage: &'static mut TileStorage,
+    pub transform: &'static Transform,
+}
+
 #[inline]
 pub fn get_tile_position(
     world_position: Vec2,

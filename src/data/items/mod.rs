@@ -8,7 +8,7 @@ pub mod harvester;
 use bevy::prelude::*;
 
 use super::inventory::InventoryData;
-use super::objects::ObjectType;
+use super::objects::{ObjectData, ObjectType};
 use crate::plugins::game::inventory::InventoryUpdatedEvent;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
@@ -30,6 +30,7 @@ impl ItemType {
     /// Creates an instance of this Item in the game at an Object
     ///
     /// Removes an instance of this Item from the Inventory
+    /// Returns true if the Item replaces the Object
     ///
     /// # Panics
     ///
@@ -39,16 +40,23 @@ impl ItemType {
         &self,
         inventory: &mut InventoryData,
         inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
-    ) {
-        match self {
+        object: &ObjectData,
+    ) -> bool {
+        let replace = match self {
             Self::Harvester => {
-                // TODO: create the item in the world
                 info!("TODO: create harvester");
+                let _harvester = harvester::HarvesterData::from(object);
+
+                // TODO: add the item in the world
+
+                true
             }
             Self::Conveyor | Self::Crafter => unreachable!(),
-        }
+        };
 
         inventory.remove_item(*self, inventory_updated_events);
+
+        replace
     }
 
     // TODO: pass in state to determine if we can drop here
@@ -63,30 +71,35 @@ impl ItemType {
     /// Creates an instance of this Item in the game at a Tile
     ///
     /// Removes an instance of this Item from the Inventory
+    /// Returns true if the Item replaces the Tile
     ///
     /// # Panics
     ///
     /// This will panic if this Item is dropped on an invalid Tile
-    // TODO: pass in state to know where we were dropped
-    #[allow(unreachable_code)]
     pub fn on_drop_tile(
         &self,
-        _inventory: &mut InventoryData,
-        _inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
-    ) {
-        match self {
+        inventory: &mut InventoryData,
+        inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
+    ) -> bool {
+        let replace = match self {
             Self::Conveyor => {
                 // TODO: create the item in the world
                 info!("TODO: create conveyor");
+
+                false
             }
             Self::Crafter => {
                 // TODO: create the item in the world
                 info!("TODO: create crafter");
+
+                false
             }
             Self::Harvester => unreachable!(),
-        }
+        };
 
-        _inventory.remove_item(*self, _inventory_updated_events);
+        inventory.remove_item(*self, inventory_updated_events);
+
+        replace
     }
 }
 

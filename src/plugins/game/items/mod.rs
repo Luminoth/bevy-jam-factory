@@ -10,7 +10,7 @@ use crate::plugins::{
     game_ui::inventory::{InventoryDragImage, HIDE_DRAG_IMAGE_ID},
     tiled::{TiledMapObjectLayer, TiledMapTileLayer},
 };
-use crate::tilemap::{get_tile_position, TileMapQuery};
+use crate::tilemap::{get_tile_position, TileMapQuery, TileMapQueryMut};
 
 /// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
@@ -198,18 +198,21 @@ pub(super) fn item_drag_event_handler(
 // an object handler and a tile handler? would need to not consume the events for that
 // and would need to make sure we handle objects before tiles ...
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub(super) fn item_drop_event_handler(
     mut commands: Commands,
     mut events: EventReader<ItemDropEvent>,
     mut inventory: ResMut<Inventory>,
-    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     drag_object: Option<Res<ItemDragObject>>,
-    object_layer_query: Query<TileMapQuery, With<TiledMapObjectLayer>>,
-    mut object_query: Query<(&Object, &mut TileColor)>,
     drag_tile: Option<Res<ItemDragTile>>,
-    tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
-    mut tile_query: Query<&mut TileColor, Without<Object>>,
     mut inventory_updated_events: EventWriter<InventoryUpdatedEvent>,
+    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    mut tilemap_layer_set: ParamSet<(
+        Query<TileMapQueryMut, With<TiledMapObjectLayer>>,
+        Query<TileMapQueryMut, With<TiledMapTileLayer>>,
+    )>,
+    mut object_query: Query<(&Object, &mut TileColor)>,
+    mut tile_query: Query<&mut TileColor, Without<Object>>,
     mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
     if events.is_empty() {
@@ -237,7 +240,8 @@ pub(super) fn item_drop_event_handler(
                 color.0 = Color::default();
                 commands.remove_resource::<ItemDragObject>();
 
-                let object_tilemap = object_layer_query.single();
+                let mut object_layer_query = tilemap_layer_set.p0();
+                let mut object_tilemap = object_layer_query.single_mut();
                 let object_position = get_tile_position(
                     world_position,
                     object_tilemap.size,
@@ -247,11 +251,16 @@ pub(super) fn item_drop_event_handler(
                 )
                 .unwrap();
 
-                let _object_entity = object_tilemap.storage.get(&object_position).unwrap();
+                let object_id = object_tilemap.storage.get(&object_position).unwrap();
                 if event.item_type.can_drop_on_object(object.get_type()) {
-                    event
-                        .item_type
-                        .on_drop_object(&mut inventory.0, &mut inventory_updated_events);
+                    if event.item_type.on_drop_object(
+                        &mut inventory.0,
+                        &mut inventory_updated_events,
+                        object,
+                    ) {
+                        commands.entity(object_id).despawn_recursive();
+                        object_tilemap.storage.remove(&object_position);
+                    }
 
                     let mut visibility = drag_image_query.single_mut();
                     *visibility = Visibility::Hidden;
@@ -292,7 +301,8 @@ pub(super) fn item_drop_event_handler(
                 color.0 = Color::default();
                 commands.remove_resource::<ItemDragTile>();
 
-                let tilemap = tilemap_layer_query.single();
+                let mut tilemap_layer_query = tilemap_layer_set.p1();
+                let mut tilemap = tilemap_layer_query.single_mut();
                 let tile_position = get_tile_position(
                     world_position,
                     tilemap.size,
@@ -302,11 +312,15 @@ pub(super) fn item_drop_event_handler(
                 )
                 .unwrap();
 
-                let _tile_entity = tilemap.storage.get(&tile_position).unwrap();
+                let tile_id = tilemap.storage.get(&tile_position).unwrap();
                 if event.item_type.can_drop_on_tile() {
-                    event
+                    if event
                         .item_type
-                        .on_drop_tile(&mut inventory.0, &mut inventory_updated_events);
+                        .on_drop_tile(&mut inventory.0, &mut inventory_updated_events)
+                    {
+                        commands.entity(tile_id).despawn_recursive();
+                        tilemap.storage.remove(&tile_position);
+                    }
 
                     let mut visibility = drag_image_query.single_mut();
                     *visibility = Visibility::Hidden;

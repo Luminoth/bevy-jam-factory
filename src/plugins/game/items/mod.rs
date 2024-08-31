@@ -216,6 +216,8 @@ pub(super) fn item_drop_event_handler(
         return;
     }
 
+    // TODO: if we drop on a UI window, this should fail
+
     let (camera, camera_transform) = camera_query.single();
 
     // TODO: should we just deal with the first (or last?) event?
@@ -250,10 +252,36 @@ pub(super) fn item_drop_event_handler(
                     event
                         .item_type
                         .on_drop_object(&mut inventory.0, &mut inventory_updated_events);
-                }
 
-                let mut visibility = drag_image_query.single_mut();
-                *visibility = Visibility::Hidden;
+                    let mut visibility = drag_image_query.single_mut();
+                    *visibility = Visibility::Hidden;
+                } else {
+                    // TODO: can this move to the game UI code?
+                    let tween = bevy_tweening::Tween::new(
+                        bevy_tweening::EaseFunction::QuadraticOut,
+                        std::time::Duration::from_millis(500),
+                        bevy_tweening::lens::UiPositionLens {
+                            start: UiRect {
+                                left: event.drag_image_position.0,
+                                top: event.drag_image_position.1,
+                                right: Val::Auto,
+                                bottom: Val::Auto,
+                            },
+                            end: UiRect {
+                                left: event.drage_image_start_position.0,
+                                top: event.drage_image_start_position.1,
+                                right: Val::Auto,
+                                bottom: Val::Auto,
+                            },
+                        },
+                    )
+                    // TODO: this really sucks lol
+                    .with_completed_event(HIDE_DRAG_IMAGE_ID);
+
+                    commands
+                        .entity(event.drag_image_id)
+                        .insert(bevy_tweening::Animator::new(tween));
+                }
 
                 continue;
             }

@@ -41,6 +41,12 @@ pub struct GameAssets {
 
     pub harvester_image: Handle<Image>,
     pub harvester_atlas: Handle<TextureAtlasLayout>,
+
+    pub conveyor_image: Handle<Image>,
+    pub conveyor_atlas: Handle<TextureAtlasLayout>,
+
+    pub crafter_image: Handle<Image>,
+    pub crafter_atlas: Handle<TextureAtlasLayout>,
 }
 
 impl GameAssets {
@@ -57,12 +63,15 @@ impl GameAssets {
             && image_assets.contains(&self.harvester_image)
             && atlas_assets.contains(&self.resources_atlas)
             && atlas_assets.contains(&self.harvester_atlas)
+        // TODO: conveyor, crafter
     }
 
     #[inline]
     pub fn get_item_texture(&self, item_type: ItemType) -> Handle<Image> {
         match item_type {
             ItemType::Harvester => self.harvester_image.clone(),
+            ItemType::Conveyor => self.conveyor_image.clone(),
+            ItemType::Crafter => self.crafter_image.clone(),
         }
     }
 
@@ -70,6 +79,8 @@ impl GameAssets {
     pub fn get_item_atlas(&self, item_type: ItemType) -> Handle<TextureAtlasLayout> {
         match item_type {
             ItemType::Harvester => self.harvester_atlas.clone(),
+            ItemType::Conveyor => self.conveyor_atlas.clone(),
+            ItemType::Crafter => self.crafter_atlas.clone(),
         }
     }
 }
@@ -154,17 +165,30 @@ fn load_assets(
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 4, None, None);
     let harvester_atlas = texture_atlas_layouts.add(layout);
 
+    let conveyor_image = asset_server.load("missing.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 1, 1, None, None);
+    let conveyor_atlas = texture_atlas_layouts.add(layout);
+
+    let crafter_image = asset_server.load("missing.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 1, 1, None, None);
+    let crafter_atlas = texture_atlas_layouts.add(layout);
+
     commands.insert_resource(GameAssets {
         map: asset_server.load("map.tmx"),
         resources_image,
         resources_atlas,
         harvester_image,
         harvester_atlas,
+        conveyor_image,
+        conveyor_atlas,
+        crafter_image,
+        crafter_atlas,
     });
 
     info!("Waiting for assets ...");
 }
 
+#[allow(clippy::too_many_arguments)]
 fn wait_for_assets(
     mut contexts: EguiContexts,
     mut game_state: ResMut<NextState<AppState>>,

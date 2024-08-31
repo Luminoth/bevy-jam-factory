@@ -19,7 +19,7 @@ impl InventoryData {
     pub fn new_test() -> Self {
         Self {
             resources: HashMap::from([(ResourceType::Iron, 100)]),
-            items: HashMap::from([(ItemType::Harvester, 1)]),
+            items: HashMap::from([(ItemType::Harvester, 1), (ItemType::Conveyor, 10)]),
         }
     }
 

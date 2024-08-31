@@ -324,6 +324,84 @@ pub(super) fn setup_window(
                                                 item_image_id,
                                             ));
                                     });
+
+                                create_row_container(parent)
+                                    .insert((
+                                        Visibility::Hidden,
+                                        Name::new("Conveyors"),
+                                        InventoryItemUI(ItemType::Conveyor),
+                                    ))
+                                    .with_children(|parent| {
+                                        let item_image_id = create_draggable_image_from_slice(
+                                            parent,
+                                            game_assets.conveyor_image.clone(),
+                                            game_assets.conveyor_atlas.clone(),
+                                            0,
+                                            On::<Pointer<DragStart>>::run(
+                                                start_drag_inventory_item,
+                                            ),
+                                            On::<Pointer<Drag>>::run(drag_inventory_item),
+                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
+                                        )
+                                        .insert((
+                                            InventoryItemImage(ItemType::Conveyor),
+                                            Pickable::IGNORE,
+                                        ))
+                                        .id();
+
+                                        create_label(
+                                            parent,
+                                            &ui_assets,
+                                            "Conveyors:",
+                                            14.0,
+                                            FONT_COLOR,
+                                        );
+                                        create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                                            .insert(InventoryItemAmountUI(
+                                                ItemType::Conveyor,
+                                                0,
+                                                item_image_id,
+                                            ));
+                                    });
+
+                                create_row_container(parent)
+                                    .insert((
+                                        Visibility::Hidden,
+                                        Name::new("Crafters"),
+                                        InventoryItemUI(ItemType::Crafter),
+                                    ))
+                                    .with_children(|parent| {
+                                        let item_image_id = create_draggable_image_from_slice(
+                                            parent,
+                                            game_assets.crafter_image.clone(),
+                                            game_assets.crafter_atlas.clone(),
+                                            0,
+                                            On::<Pointer<DragStart>>::run(
+                                                start_drag_inventory_item,
+                                            ),
+                                            On::<Pointer<Drag>>::run(drag_inventory_item),
+                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
+                                        )
+                                        .insert((
+                                            InventoryItemImage(ItemType::Crafter),
+                                            Pickable::IGNORE,
+                                        ))
+                                        .id();
+
+                                        create_label(
+                                            parent,
+                                            &ui_assets,
+                                            "Crafters:",
+                                            14.0,
+                                            FONT_COLOR,
+                                        );
+                                        create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
+                                            .insert(InventoryItemAmountUI(
+                                                ItemType::Crafter,
+                                                0,
+                                                item_image_id,
+                                            ));
+                                    });
                             });
                     });
             });

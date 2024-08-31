@@ -1,6 +1,8 @@
 //! Game world Items
 // TODO: "Item" is a terrible name ...
 
+pub mod conveyor;
+pub mod crafter;
 pub mod harvester;
 
 use bevy::prelude::*;
@@ -12,6 +14,8 @@ use crate::plugins::game::inventory::InventoryUpdatedEvent;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
 pub enum ItemType {
     Harvester,
+    Conveyor,
+    Crafter,
 }
 
 impl ItemType {
@@ -19,6 +23,7 @@ impl ItemType {
     pub fn can_drop_on_object(&self, object_type: ObjectType) -> bool {
         match self {
             Self::Harvester => object_type == ObjectType::Resources,
+            Self::Conveyor | Self::Crafter => false,
         }
     }
 
@@ -40,6 +45,7 @@ impl ItemType {
                 // TODO: create the item in the world
                 info!("TODO: create harvester");
             }
+            Self::Conveyor | Self::Crafter => unreachable!(),
         }
 
         inventory.remove_item(*self, inventory_updated_events);
@@ -48,6 +54,8 @@ impl ItemType {
     // TODO: pass in state to determine if we can drop here
     pub fn can_drop_on_tile(&self) -> bool {
         match self {
+            Self::Conveyor => true,
+            Self::Crafter => true,
             Self::Harvester => false,
         }
     }
@@ -67,6 +75,14 @@ impl ItemType {
         _inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
     ) {
         match self {
+            Self::Conveyor => {
+                // TODO: create the item in the world
+                info!("TODO: create conveyor");
+            }
+            Self::Crafter => {
+                // TODO: create the item in the world
+                info!("TODO: create crafter");
+            }
             Self::Harvester => unreachable!(),
         }
 

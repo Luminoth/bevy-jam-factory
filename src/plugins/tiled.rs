@@ -1,3 +1,6 @@
+// TODO: need to wrap a lot of this code so it can be re-used
+// in particular adding / removing tiles and objects and items
+
 use std::collections::HashMap;
 
 use bevy::prelude::*;
@@ -8,6 +11,7 @@ use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
 use crate::plugins::game::{objects::*, OnInGame};
 
+/// Maps layer index to layer id
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {
     pub storage: HashMap<u32, Entity>,
@@ -30,9 +34,22 @@ pub struct TiledMapTileLayer;
 #[derive(Debug, Component)]
 pub struct TiledMapObjectLayer;
 
+/// Item layer tag
+#[derive(Debug, Component)]
+pub struct TiledMapItemLayer;
+
 /// Emitted when an Object is clicked
 #[derive(Debug, Event)]
 pub struct TiledMapObjectClickEvent {
+    pub listener: Entity,
+    pub target: Entity,
+    pub button: PointerButton,
+}
+
+/// Emitted when an Item is clicked
+#[allow(dead_code)]
+#[derive(Debug, Event)]
+pub struct TiledMapItemClickEvent {
     pub listener: Entity,
     pub target: Entity,
     pub button: PointerButton,
@@ -55,6 +72,9 @@ impl Plugin for TiledMapPlugin {
     }
 }
 
+// TODO: how does this even work ... the asset is loaded
+// before the bundle is available, right?
+// so it's just getting lucky on the timing?
 fn process_loaded_maps(
     mut commands: Commands,
     mut map_events: EventReader<AssetEvent<TiledMap>>,
@@ -195,6 +215,8 @@ fn process_loaded_map(
                     }
                 }
             }
+
+            create_item_layer(parent, layer_storage, tiled_map, render_settings);
         });
 }
 
@@ -521,4 +543,84 @@ fn process_object_layer(
     layer_storage
         .storage
         .insert(layer_index as u32, layer_entity_id);
+}
+
+// TODO: Items should be allowed in multiples of the tile size
+// (so that we can have small and large objects as needed)
+#[allow(clippy::too_many_arguments)]
+fn create_item_layer(
+    parent: &mut ChildBuilder,
+    _layer_storage: &mut TiledLayersStorage,
+    tiled_map: &TiledMap,
+    _render_settings: TilemapRenderSettings,
+) {
+    let layer_index = tiled_map.map.layers().len() + 1;
+    let layer_id = 0; // TODO: use an actual unique id
+    debug!("Creating item layer {} ({})", layer_index, layer_id);
+
+    let map_size = TilemapSize {
+        x: tiled_map.map.width,
+        y: tiled_map.map.height,
+    };
+
+    let mut _tile_storage = TileStorage::empty(map_size);
+    let mut layer_entity = parent.spawn((
+        SpatialBundle::default(),
+        Name::new(format!("Item layer {}", layer_id)),
+    ));
+    let _layer_entity_id = layer_entity.id();
+
+    // TODO: we don't actually want to create any tiles here
+    // just need a helper to add / remove them later
+    layer_entity.with_children(|_parent| {
+        for _x in 0..map_size.x {
+            for _y in 0..map_size.y {
+                /*let tile_pos = TilePos { x, y };
+                let tile_entity = parent
+                    .spawn((
+                        TileBundle {
+                            position: tile_pos,
+                            tilemap_id: TilemapId(layer_entity_id),
+                            visible: TileVisible(true),
+                            ..Default::default()
+                        },
+                        Name::new(format!("Object ({},{})", x, y)),
+                        PickableBundle::default(),
+                        On::<Pointer<Click>>::run(
+                            |event: Listener<Pointer<Click>>, mut click_events: EventWriter<TiledMapItemClickEvent>| {
+                                click_events.send(TiledMapItemClickEvent {
+                                    listener: event.listener(),
+                                    target: event.target,
+                                    button: event.button,
+                                });
+                            },
+                        ),
+                    ))
+                    .id();
+                tile_storage.set(&tile_pos, tile_entity);*/
+            }
+        }
+    });
+
+    // TODO: fix this
+    layer_entity.insert((
+        /*TilemapBundle {
+            grid_size,
+            size: map_size,
+            storage: tile_storage,
+            texture: shared_tilemap_texture.unwrap(),
+            tile_size,
+            spacing: tile_spacing,
+            transform: get_tilemap_center_transform(
+                &map_size,
+                &grid_size,
+                &map_type,
+                layer_index as f32,
+            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            map_type,
+            render_settings,
+            ..Default::default()
+        },*/
+        TiledMapItemLayer,
+    ));
 }

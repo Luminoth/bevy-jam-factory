@@ -159,6 +159,18 @@ fn load_assets(
 
     let map = asset_server.load("map.tmx");
 
+    // processing loaded maps requires this, it owns the tile storage
+    // there's still a potential race condition until this doesn't
+    // need a handle to the map (and it DOES need it, but I don't know why yet)
+    commands.spawn((
+        TiledMapBundle {
+            tiled_map: map.clone(),
+            ..Default::default()
+        },
+        Name::new("Tiled Map"),
+        OnInGame,
+    ));
+
     let resources_image = asset_server.load("resources.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 4, None, None);
     let resources_atlas = texture_atlas_layouts.add(layout);
@@ -176,7 +188,7 @@ fn load_assets(
     let crafter_atlas = texture_atlas_layouts.add(layout);
 
     commands.insert_resource(GameAssets {
-        map: map.clone(),
+        map,
         resources_image,
         resources_atlas,
         harvester_image,
@@ -186,18 +198,6 @@ fn load_assets(
         crafter_image,
         crafter_atlas,
     });
-
-    // processing loaded maps requires this, it owns the tile storage
-    // there's still a potential race condition until this doesn't
-    // need a handle to the map
-    commands.spawn((
-        TiledMapBundle {
-            tiled_map: map,
-            ..Default::default()
-        },
-        Name::new("Tiled Map"),
-        OnInGame,
-    ));
 
     info!("Waiting for assets ...");
 }

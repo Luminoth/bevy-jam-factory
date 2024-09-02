@@ -26,10 +26,10 @@ pub struct TiledLayersStorage {
 // can be stored in a resource
 #[derive(Debug, Default, Bundle)]
 pub struct TiledMapBundle {
-    pub tiled_map: Handle<TiledMap>,
-    pub storage: TiledLayersStorage,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
+    pub tiled_map: Handle<TiledMap>,
+    pub storage: TiledLayersStorage,
     pub render_settings: TilemapRenderSettings,
 }
 

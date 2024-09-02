@@ -29,6 +29,10 @@ fn object_picking(
         return;
     };
 
+    let Ok(object_tilemap) = object_layer_query.get_single() else {
+        return;
+    };
+
     for (pointer_id, pointer_location) in
         pointers.iter().filter_map(|(pointer, pointer_location)| {
             Some(*pointer).zip(pointer_location.location().cloned())
@@ -44,10 +48,6 @@ fn object_picking(
             camera,
             camera_transform,
         ) {
-            let object_tilemap = object_layer_query.single();
-
-            // TODO: don't pick objects that aren't visible
-
             if let Some(object_position) = get_tile_position(
                 world_position,
                 object_tilemap.size,
@@ -56,6 +56,9 @@ fn object_picking(
                 object_tilemap.transform,
             ) {
                 if let Some(tile_entity) = object_tilemap.storage.get(&object_position) {
+                    // TODO: don't pick objects that aren't visible
+                    // (have to query TileVisible to check this)
+
                     output.send(PointerHits::new(
                         pointer_id,
                         vec![(

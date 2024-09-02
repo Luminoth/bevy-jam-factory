@@ -157,6 +157,8 @@ fn load_assets(
         music: asset_server.load("music/Windless Slopes.ogg"),
     });
 
+    let map = asset_server.load("map.tmx");
+
     let resources_image = asset_server.load("resources.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 4, 4, None, None);
     let resources_atlas = texture_atlas_layouts.add(layout);
@@ -174,7 +176,7 @@ fn load_assets(
     let crafter_atlas = texture_atlas_layouts.add(layout);
 
     commands.insert_resource(GameAssets {
-        map: asset_server.load("map.tmx"),
+        map: map.clone(),
         resources_image,
         resources_atlas,
         harvester_image,
@@ -184,6 +186,18 @@ fn load_assets(
         crafter_image,
         crafter_atlas,
     });
+
+    // processing loaded maps requires this, it owns the tile storage
+    // there's still a potential race condition until this doesn't
+    // need a handle to the map
+    commands.spawn((
+        TiledMapBundle {
+            tiled_map: map,
+            ..Default::default()
+        },
+        Name::new("Tiled Map"),
+        OnInGame,
+    ));
 
     info!("Waiting for assets ...");
 }
@@ -221,7 +235,6 @@ fn wait_for_assets(
 fn enter(
     mut commands: Commands,
     audio_assets: Res<AudioAssets>,
-    game_assets: Res<GameAssets>,
     mut inventory_update_events: EventWriter<inventory::InventoryUpdatedEvent>,
     mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
@@ -255,15 +268,6 @@ fn enter(
         inventory::Inventory(crate::data::inventory::InventoryData::new_test()),
     );
     inventory_update_events.send_default();
-
-    commands.spawn((
-        TiledMapBundle {
-            tiled_map: game_assets.map.clone(),
-            ..Default::default()
-        },
-        Name::new("Tiled Map"),
-        OnInGame,
-    ));
 }
 
 fn exit(mut commands: Commands) {

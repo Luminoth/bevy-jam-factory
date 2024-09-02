@@ -12,11 +12,18 @@ use crate::data::objects::ObjectData;
 use crate::plugins::game::{objects::*, OnInGame};
 
 /// Maps layer index to layer id
+///
+/// Tiles are created as children
+/// of their respective layer entities
 #[derive(Debug, Default, Component)]
 pub struct TiledLayersStorage {
     pub storage: HashMap<u32, Entity>,
 }
 
+// TODO: this doesn't need to be a bundle,
+// we only load a single map at a time
+// so the storage and render settings
+// can be stored in a resource
 #[derive(Debug, Default, Bundle)]
 pub struct TiledMapBundle {
     pub tiled_map: Handle<TiledMap>,

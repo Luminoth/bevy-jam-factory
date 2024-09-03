@@ -9,7 +9,8 @@ use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
-use crate::plugins::game::{objects::*, OnInGame};
+use crate::plugins::game::OnInGame;
+use crate::tilemap::{spawn_object, spawn_tile};
 
 /// Maps layer index to layer id
 ///
@@ -20,14 +21,16 @@ pub struct TiledLayersStorage {
     pub storage: HashMap<u32, Entity>,
 }
 
-// TODO: this doesn't need to be a bundle,
+// TODO: this shouldn't need to be a bundle,
 // we only load a single map at a time
 // so the storage and render settings
-// can be stored in a resource
+// could be stored in a resource ?
 #[derive(Debug, Default, Bundle)]
 pub struct TiledMapBundle {
     pub transform: Transform,
     pub global_transform: GlobalTransform,
+
+    // TODO: this just straight up doesn't work if this handle isn't in here
     pub tiled_map: Handle<TiledMap>,
     pub storage: TiledLayersStorage,
     pub render_settings: TilemapRenderSettings,
@@ -321,23 +324,19 @@ fn process_tile_layer(
                 };
 
                 let tile_pos = TilePos { x, y };
-                let tile_entity = parent
-                    .spawn((
-                        TileBundle {
-                            position: tile_pos,
-                            tilemap_id: TilemapId(layer_entity_id),
-                            texture_index: TileTextureIndex(texture_index),
-                            flip: TileFlip {
-                                x: layer_tile_data.flip_h,
-                                y: layer_tile_data.flip_v,
-                                d: layer_tile_data.flip_d,
-                            },
-                            ..Default::default()
-                        },
-                        Name::new(format!("Tile ({},{})", x, y)),
-                    ))
-                    .id();
-                tile_storage.set(&tile_pos, tile_entity);
+                spawn_tile(
+                    parent,
+                    &mut tile_storage,
+                    layer_entity_id,
+                    tile_pos,
+                    texture_index,
+                    TileFlip {
+                        x: layer_tile_data.flip_h,
+                        y: layer_tile_data.flip_v,
+                        d: layer_tile_data.flip_d,
+                    },
+                    true,
+                );
             }
         }
     });
@@ -494,35 +493,21 @@ fn process_object_layer(
                 x: x as u32,
                 y: tiled_map.map.height - 1 - y as u32,
             };
-            let tile_entity = parent
-                .spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(layer_entity_id),
-                        texture_index: TileTextureIndex(texture_index),
-                        flip: TileFlip {
-                            x: object_tile_data.flip_h,
-                            y: object_tile_data.flip_v,
-                            d: object_tile_data.flip_d,
-                        },
-                        visible: TileVisible(object.visible),
-                        ..Default::default()
-                    },
-                    Name::new(format!("Object ({},{})", x, y)),
-                    Object(object_data),
-                    PickableBundle::default(),
-                    On::<Pointer<Click>>::run(
-                        |event: Listener<Pointer<Click>>, mut click_events: EventWriter<TiledMapObjectClickEvent>| {
-                            click_events.send(TiledMapObjectClickEvent {
-                                listener: event.listener(),
-                                target: event.target,
-                                button: event.button,
-                            });
-                        },
-                    ),
-                ))
-                .id();
-            tile_storage.set(&tile_pos, tile_entity);
+
+            spawn_object(
+                parent,
+                &mut tile_storage,
+                layer_entity_id,
+                tile_pos,
+                texture_index,
+                TileFlip {
+                    x: object_tile_data.flip_h,
+                    y: object_tile_data.flip_v,
+                    d: object_tile_data.flip_d,
+                },
+                object.visible,
+                object_data,
+            );
         }
     });
 
@@ -575,39 +560,6 @@ fn create_item_layer(
         SpatialBundle::default(),
         Name::new(format!("Item layer {}", layer_id)),
     ));
-    let _layer_entity_id = layer_entity.id();
-
-    // TODO: we don't actually want to create any tiles here
-    // just need a helper to add / remove them later
-    layer_entity.with_children(|_parent| {
-        for _x in 0..map_size.x {
-            for _y in 0..map_size.y {
-                /*let tile_pos = TilePos { x, y };
-                let tile_entity = parent
-                    .spawn((
-                        TileBundle {
-                            position: tile_pos,
-                            tilemap_id: TilemapId(layer_entity_id),
-                            visible: TileVisible(true),
-                            ..Default::default()
-                        },
-                        Name::new(format!("Object ({},{})", x, y)),
-                        PickableBundle::default(),
-                        On::<Pointer<Click>>::run(
-                            |event: Listener<Pointer<Click>>, mut click_events: EventWriter<TiledMapItemClickEvent>| {
-                                click_events.send(TiledMapItemClickEvent {
-                                    listener: event.listener(),
-                                    target: event.target,
-                                    button: event.button,
-                                });
-                            },
-                        ),
-                    ))
-                    .id();
-                tile_storage.set(&tile_pos, tile_entity);*/
-            }
-        }
-    });
 
     // TODO: fix this
     layer_entity.insert((

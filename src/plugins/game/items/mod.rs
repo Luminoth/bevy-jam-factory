@@ -10,7 +10,9 @@ use crate::plugins::{
     game_ui::inventory::{InventoryDragImage, HIDE_DRAG_IMAGE_ID},
     tiled::{TiledMapObjectLayer, TiledMapTileLayer},
 };
-use crate::tilemap::{get_tile_position, TileMapQuery, TileMapQueryMut};
+use crate::tilemap::{
+    despawn_object, despawn_tile, get_tile_position, TileMapQuery, TileMapQueryMut,
+};
 
 /// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
@@ -258,8 +260,12 @@ pub(super) fn item_drop_event_handler(
                         &mut inventory_updated_events,
                         object,
                     ) {
-                        commands.entity(object_id).despawn_recursive();
-                        object_tilemap.storage.remove(&object_position);
+                        despawn_object(
+                            &mut commands,
+                            &mut object_tilemap.storage,
+                            object_id,
+                            object_position,
+                        );
                     }
 
                     let mut visibility = drag_image_query.single_mut();
@@ -318,8 +324,7 @@ pub(super) fn item_drop_event_handler(
                         .item_type
                         .on_drop_tile(&mut inventory.0, &mut inventory_updated_events)
                     {
-                        commands.entity(tile_id).despawn_recursive();
-                        tilemap.storage.remove(&tile_position);
+                        despawn_tile(&mut commands, &mut tilemap.storage, tile_id, tile_position);
                     }
 
                     let mut visibility = drag_image_query.single_mut();

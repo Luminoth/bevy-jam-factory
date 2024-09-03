@@ -88,6 +88,7 @@ pub fn despawn_tile(
     storage.remove(&position);
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_object(
     parent: &mut ChildBuilder,
     storage: &mut TileStorage,
@@ -139,6 +140,7 @@ pub fn despawn_object(
     storage.remove(&position);
 }
 
+#[allow(clippy::too_many_arguments)]
 #[allow(dead_code)]
 pub fn spawn_item<C>(
     parent: &mut ChildBuilder,

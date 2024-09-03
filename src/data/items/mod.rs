@@ -78,6 +78,7 @@ impl ItemType {
     /// This will panic if this Item is dropped on an invalid Tile
     pub fn on_drop_tile(
         &self,
+        _commands: &mut Commands,
         inventory: &mut InventoryData,
         inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
     ) -> bool {
@@ -85,12 +86,14 @@ impl ItemType {
             Self::Conveyor => {
                 // TODO: create the item in the world
                 info!("TODO: create conveyor");
+                //spawn_item();
 
                 false
             }
             Self::Crafter => {
                 // TODO: create the item in the world
                 info!("TODO: create crafter");
+                //spawn_item();
 
                 false
             }

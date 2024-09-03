@@ -320,10 +320,11 @@ pub(super) fn item_drop_event_handler(
 
                 let tile_id = tilemap.storage.get(&tile_position).unwrap();
                 if event.item_type.can_drop_on_tile() {
-                    if event
-                        .item_type
-                        .on_drop_tile(&mut inventory.0, &mut inventory_updated_events)
-                    {
+                    if event.item_type.on_drop_tile(
+                        &mut commands,
+                        &mut inventory.0,
+                        &mut inventory_updated_events,
+                    ) {
                         despawn_tile(&mut commands, &mut tilemap.storage, tile_id, tile_position);
                     }
 

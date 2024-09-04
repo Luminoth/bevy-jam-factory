@@ -59,11 +59,6 @@ pub struct InventoryDragImage {
     pub start_position: (Val, Val),
 }
 
-// TODO this needs to go to a common place
-// because we have to avoid collisions
-// (and I guess the handler goes there too? idk)
-pub const HIDE_DRAG_IMAGE_ID: u64 = 1;
-
 #[allow(clippy::type_complexity)]
 fn start_drag_inventory_item(
     mut commands: Commands,
@@ -199,7 +194,7 @@ pub(super) fn hide_item_drag_image_event_handler(
 ) {
     let mut visibility = visibility_query.single_mut();
     for event in events.read() {
-        if event.user_data == HIDE_DRAG_IMAGE_ID {
+        if event.user_data == TweenId::HideDragImage as u64 {
             *visibility = Visibility::Hidden;
         }
     }

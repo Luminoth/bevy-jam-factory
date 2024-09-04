@@ -7,12 +7,13 @@ use super::objects::Object;
 use crate::data::items::ItemType;
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
-    game_ui::inventory::{InventoryDragImage, HIDE_DRAG_IMAGE_ID},
+    game_ui::inventory::InventoryDragImage,
     tiled::{TiledMapObjectLayer, TiledMapTileLayer},
 };
 use crate::tilemap::{
     despawn_object, despawn_tile, get_tile_position, TileMapQuery, TileMapQueryMut,
 };
+use crate::ui::{simple_tween_ui_object, TweenId};
 
 /// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
@@ -271,27 +272,12 @@ pub(super) fn item_drop_event_handler(
                     let mut visibility = drag_image_query.single_mut();
                     *visibility = Visibility::Hidden;
                 } else {
-                    // TODO: can this move to the game UI code?
-                    let tween = bevy_tweening::Tween::new(
-                        bevy_tweening::EaseFunction::QuadraticOut,
-                        std::time::Duration::from_millis(500),
-                        bevy_tweening::lens::UiPositionLens {
-                            start: UiRect {
-                                left: event.drag_image_position.0,
-                                top: event.drag_image_position.1,
-                                right: Val::Auto,
-                                bottom: Val::Auto,
-                            },
-                            end: UiRect {
-                                left: event.drage_image_start_position.0,
-                                top: event.drage_image_start_position.1,
-                                right: Val::Auto,
-                                bottom: Val::Auto,
-                            },
-                        },
-                    )
-                    // TODO: this really sucks lol
-                    .with_completed_event(HIDE_DRAG_IMAGE_ID);
+                    let tween = simple_tween_ui_object(
+                        500,
+                        event.drag_image_position,
+                        event.drage_image_start_position,
+                        TweenId::HideDragImage,
+                    );
 
                     commands
                         .entity(event.drag_image_id)
@@ -331,27 +317,12 @@ pub(super) fn item_drop_event_handler(
                     let mut visibility = drag_image_query.single_mut();
                     *visibility = Visibility::Hidden;
                 } else {
-                    // TODO: can this move to the game UI code?
-                    let tween = bevy_tweening::Tween::new(
-                        bevy_tweening::EaseFunction::QuadraticOut,
-                        std::time::Duration::from_millis(500),
-                        bevy_tweening::lens::UiPositionLens {
-                            start: UiRect {
-                                left: event.drag_image_position.0,
-                                top: event.drag_image_position.1,
-                                right: Val::Auto,
-                                bottom: Val::Auto,
-                            },
-                            end: UiRect {
-                                left: event.drage_image_start_position.0,
-                                top: event.drage_image_start_position.1,
-                                right: Val::Auto,
-                                bottom: Val::Auto,
-                            },
-                        },
-                    )
-                    // TODO: this really sucks lol
-                    .with_completed_event(HIDE_DRAG_IMAGE_ID);
+                    let tween = simple_tween_ui_object(
+                        500,
+                        event.drag_image_position,
+                        event.drage_image_start_position,
+                        TweenId::HideDragImage,
+                    );
 
                     commands
                         .entity(event.drag_image_id)

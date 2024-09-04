@@ -56,7 +56,6 @@ pub fn spawn_tile(
     tilemap_id: Entity,
     position: TilePos,
     texture_index: u32,
-    flip: TileFlip,
     visible: bool,
 ) -> Entity {
     let tile_entity = parent
@@ -65,7 +64,6 @@ pub fn spawn_tile(
                 position,
                 tilemap_id: TilemapId(tilemap_id),
                 texture_index: TileTextureIndex(texture_index),
-                flip,
                 visible: TileVisible(visible),
                 ..Default::default()
             },
@@ -95,7 +93,6 @@ pub fn spawn_object(
     tilemap_id: Entity,
     position: TilePos,
     texture_index: u32,
-    flip: TileFlip,
     visible: bool,
     data: ObjectData,
 ) -> Entity {
@@ -105,7 +102,6 @@ pub fn spawn_object(
                 position,
                 tilemap_id: TilemapId(tilemap_id),
                 texture_index: TileTextureIndex(texture_index),
-                flip,
                 visible: TileVisible(visible),
                 ..Default::default()
             },
@@ -148,7 +144,6 @@ pub fn spawn_item<C>(
     tilemap_id: Entity,
     position: TilePos,
     texture_index: u32,
-    flip: TileFlip,
     visible: bool,
     tag: C,
 ) -> Entity
@@ -161,7 +156,6 @@ where
                 position,
                 tilemap_id: TilemapId(tilemap_id),
                 texture_index: TileTextureIndex(texture_index),
-                flip,
                 visible: TileVisible(visible),
                 ..Default::default()
             },

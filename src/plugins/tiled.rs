@@ -320,6 +320,13 @@ fn process_tile_layer(
                         )
                     });
 
+                if layer_tile_data.flip_h || layer_tile_data.flip_v || layer_tile_data.flip_d {
+                    panic!(
+                        "Tile layer {} has unsupported tile flip at ({}, {})",
+                        layer_id, x, y
+                    )
+                }
+
                 let texture_index = match tilemap_texture {
                     TilemapTexture::Single(_) => layer_tile.id(),
                 };
@@ -331,11 +338,6 @@ fn process_tile_layer(
                     layer_entity_id,
                     tile_pos,
                     texture_index,
-                    TileFlip {
-                        x: layer_tile_data.flip_h,
-                        y: layer_tile_data.flip_v,
-                        d: layer_tile_data.flip_d,
-                    },
                     true,
                 );
             }
@@ -429,7 +431,10 @@ fn process_object_layer(
 
             let tileset = object_tile.get_tileset();
             if tileset.tile_width != TILE_WIDTH || tileset.tile_height != TILE_HEIGHT {
-                panic!("Tileset {} tiles have invalid tile size", tileset.name);
+                panic!(
+                    "Object tileset {} tiles have invalid tile size",
+                    tileset.name
+                );
             }
 
             let tilemap_texture = tiled_map
@@ -466,6 +471,14 @@ fn process_object_layer(
                 )
             });
 
+            if object_tile_data.flip_h || object_tile_data.flip_v || object_tile_data.flip_d {
+                panic!(
+                    "Object layer {} has unsupported tile flip for object {}",
+                    layer_id,
+                    object.id()
+                )
+            }
+
             let texture_index = match tilemap_texture {
                 TilemapTexture::Single(_) => object_tile.id(),
             };
@@ -492,6 +505,8 @@ fn process_object_layer(
 
             let tile_pos = TilePos {
                 x: x as u32,
+
+                // Transform TMX coords into bevy coords.
                 y: tiled_map.map.height - 1 - y as u32,
             };
 
@@ -501,11 +516,6 @@ fn process_object_layer(
                 layer_entity_id,
                 tile_pos,
                 texture_index,
-                TileFlip {
-                    x: object_tile_data.flip_h,
-                    y: object_tile_data.flip_v,
-                    d: object_tile_data.flip_d,
-                },
                 object.visible,
                 object_data,
             );

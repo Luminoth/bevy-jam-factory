@@ -17,9 +17,7 @@ pub struct TiledMap {
 
     pub map: tiled::Map,
 
-    // TODO: storing by name is pretty bad here
-    // but we need a way to from a Tileset to this texture
-    // and I can't find an easier id for it (so far)
+    // maps Tileset name to TilemapTexture
     pub tilemap_textures: HashMap<String, TilemapTexture>,
 }
 
@@ -106,7 +104,7 @@ impl AssetLoader for TiledLoader {
                 .expect("The asset load context was empty.");
             let tile_path = tmx_dir.join(&tilemap_image.source);
             let asset_path = AssetPath::from(tile_path);
-            let texture: Handle<Image> = load_context.load(asset_path.clone());
+            let texture = load_context.load(asset_path.clone());
 
             let tilemap_texture = TilemapTexture::Single(texture.clone());
             tilemap_textures.insert(tileset.name.clone(), tilemap_texture);

@@ -78,6 +78,7 @@ impl Plugin for TiledMapPlugin {
         app.init_asset::<TiledMap>()
             .register_asset_loader(TiledLoader)
             .add_event::<TiledMapObjectClickEvent>()
+            .add_event::<TiledMapItemClickEvent>()
             .add_systems(Update, process_loaded_maps);
     }
 }

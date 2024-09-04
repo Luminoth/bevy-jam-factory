@@ -102,6 +102,10 @@ impl TileDrag {
 #[derive(Debug, Reflect, Resource, Deref)]
 pub struct ObjectInfo(pub Entity);
 
+/// Tracks what Item is being viewed in the ItemInfo window
+#[derive(Debug, Reflect, Resource, Deref)]
+pub struct ItemInfo(pub Entity);
+
 // these should be less than (systems::tiled::MIN_TILEMAP_WIDTH / HEIGHT * systems::tiled::TILE_WIDTH / HEIGHT)
 const VIEW_WIDTH: f32 = 800.0;
 const VIEW_HEIGHT: f32 = 600.0;
@@ -115,7 +119,7 @@ impl Plugin for GamePlugin {
             .enable_state_scoped_entities::<IsPaused>()
             .add_event::<items::ItemDragEvent>()
             .add_event::<items::ItemDropEvent>()
-            .add_event::<items::CreateItemEvent>()
+            .add_event::<items::SpawnItemEvent>()
             .add_event::<inventory::InventoryUpdatedEvent>()
             .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
@@ -137,7 +141,8 @@ impl Plugin for GamePlugin {
                         .after(input::start_drag),
                     items::item_drag_event_handler,
                     items::item_drop_event_handler,
-                    items::create_item_event_handler,
+                    items::spawn_item_event_handler,
+                    items::item_click_event_handler,
                     objects::object_click_event_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),

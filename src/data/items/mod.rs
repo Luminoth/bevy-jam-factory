@@ -9,7 +9,7 @@ use bevy::prelude::*;
 
 use super::inventory::InventoryData;
 use super::objects::{ObjectData, ObjectType};
-use crate::plugins::game::{inventory::InventoryUpdatedEvent, items::CreateItemEvent};
+use crate::plugins::game::{inventory::InventoryUpdatedEvent, items::SpawnItemEvent};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, strum::EnumString, strum::Display, Reflect)]
 pub enum ItemType {
@@ -41,12 +41,12 @@ impl ItemType {
         inventory: &mut InventoryData,
         inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
         object: &ObjectData,
-        create_item_events: &mut EventWriter<CreateItemEvent>,
+        spawn_item_events: &mut EventWriter<SpawnItemEvent>,
     ) -> bool {
         let replace = match self {
             Self::Harvester => {
                 let harvester_data = harvester::HarvesterData::from(object);
-                create_item_events.send(CreateItemEvent::Harvester(harvester_data));
+                spawn_item_events.send(SpawnItemEvent::Harvester(harvester_data));
 
                 true
             }
@@ -80,16 +80,16 @@ impl ItemType {
         _commands: &mut Commands,
         inventory: &mut InventoryData,
         inventory_updated_events: &mut EventWriter<InventoryUpdatedEvent>,
-        create_item_events: &mut EventWriter<CreateItemEvent>,
+        spawn_item_events: &mut EventWriter<SpawnItemEvent>,
     ) -> bool {
         let replace = match self {
             Self::Conveyor => {
-                create_item_events.send(CreateItemEvent::Conveyor);
+                spawn_item_events.send(SpawnItemEvent::Conveyor);
 
                 false
             }
             Self::Crafter => {
-                create_item_events.send(CreateItemEvent::Crafter);
+                spawn_item_events.send(SpawnItemEvent::Crafter);
 
                 false
             }

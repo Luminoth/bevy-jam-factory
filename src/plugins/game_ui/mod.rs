@@ -1,4 +1,5 @@
 pub mod inventory;
+pub mod item_info;
 pub mod log;
 pub mod object_info;
 
@@ -19,6 +20,7 @@ impl Plugin for GameUiPlugin {
                 (
                     setup,
                     log::setup_window,
+                    item_info::setup_window,
                     object_info::setup_window,
                     inventory::setup_window,
                 ),
@@ -27,6 +29,7 @@ impl Plugin for GameUiPlugin {
                 Update,
                 (
                     log::log_event_handler,
+                    item_info::update_item_info_ui.run_if(item_info::should_update_item_info_ui),
                     object_info::update_object_info_ui
                         .run_if(object_info::should_update_object_info_ui),
                     inventory::show_inventory.run_if(input_just_pressed(KeyCode::KeyI)),

@@ -1,10 +1,14 @@
+mod conveyor;
+mod crafter;
+mod harvester;
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use super::camera::MainCamera;
 use super::inventory::{Inventory, InventoryUpdatedEvent};
 use super::objects::Object;
-use crate::data::items::ItemType;
+use crate::data::items::{harvester::HarvesterData, ItemType};
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
     game_ui::inventory::InventoryDragImage,
@@ -71,6 +75,13 @@ impl ItemDropEvent {
     }
 }
 
+#[derive(Debug, Event)]
+pub enum CreateItemEvent {
+    Harvester(HarvesterData),
+    Conveyor,
+    Crafter,
+}
+
 const CAN_DROP_COLOR: Color = Color::srgba(0.0, 1.0, 0.0, 0.5);
 const NO_DROP_COLOR: Color = Color::srgba(1.0, 0.0, 0.0, 0.5);
 
@@ -89,10 +100,6 @@ pub(super) fn item_drag_event_handler(
     tilemap_layer_query: Query<TileMapQuery, With<TiledMapTileLayer>>,
     mut tile_query: Query<&mut TileColor, Without<Object>>,
 ) {
-    if events.is_empty() {
-        return;
-    }
-
     let (camera, camera_transform) = camera_query.single();
 
     // TODO: should we just deal with the first (or last?) event?
@@ -209,6 +216,7 @@ pub(super) fn item_drop_event_handler(
     drag_object: Option<Res<ItemDragObject>>,
     drag_tile: Option<Res<ItemDragTile>>,
     mut inventory_updated_events: EventWriter<InventoryUpdatedEvent>,
+    mut create_item_events: EventWriter<CreateItemEvent>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut tilemap_layer_set: ParamSet<(
         Query<TileMapQueryMut, With<TiledMapObjectLayer>>,
@@ -218,10 +226,6 @@ pub(super) fn item_drop_event_handler(
     mut tile_query: Query<&mut TileColor, Without<Object>>,
     mut drag_image_query: Query<&mut Visibility, With<InventoryDragImage>>,
 ) {
-    if events.is_empty() {
-        return;
-    }
-
     // TODO: if we drop on a UI window, this should fail
 
     let (camera, camera_transform) = camera_query.single();
@@ -260,6 +264,7 @@ pub(super) fn item_drop_event_handler(
                         &mut inventory.0,
                         &mut inventory_updated_events,
                         object,
+                        &mut create_item_events,
                     ) {
                         despawn_object(
                             &mut commands,
@@ -310,6 +315,7 @@ pub(super) fn item_drop_event_handler(
                         &mut commands,
                         &mut inventory.0,
                         &mut inventory_updated_events,
+                        &mut create_item_events,
                     ) {
                         despawn_tile(&mut commands, &mut tilemap.storage, tile_id, tile_position);
                     }
@@ -331,6 +337,16 @@ pub(super) fn item_drop_event_handler(
 
                 continue;
             }
+        }
+    }
+}
+
+pub(super) fn create_item_event_handler(mut events: EventReader<CreateItemEvent>) {
+    for event in events.read() {
+        match event {
+            CreateItemEvent::Harvester(harvester_data) => harvester::spawn(harvester_data),
+            CreateItemEvent::Conveyor => conveyor::spawn(),
+            CreateItemEvent::Crafter => crafter::spawn(),
         }
     }
 }

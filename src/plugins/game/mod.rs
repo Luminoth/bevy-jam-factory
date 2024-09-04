@@ -115,6 +115,7 @@ impl Plugin for GamePlugin {
             .enable_state_scoped_entities::<IsPaused>()
             .add_event::<items::ItemDragEvent>()
             .add_event::<items::ItemDropEvent>()
+            .add_event::<items::CreateItemEvent>()
             .add_event::<inventory::InventoryUpdatedEvent>()
             .add_systems(OnEnter(AppState::LoadAssets), load_assets)
             .add_systems(
@@ -136,6 +137,7 @@ impl Plugin for GamePlugin {
                         .after(input::start_drag),
                     items::item_drag_event_handler,
                     items::item_drop_event_handler,
+                    items::create_item_event_handler,
                     objects::object_click_event_handler,
                 )
                     .run_if(in_state(IsPaused::Running)),

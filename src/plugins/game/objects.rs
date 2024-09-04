@@ -19,10 +19,6 @@ pub(super) fn object_click_event_handler(
     mut log_events: EventWriter<LogEvent>,
     mut window_query: Query<&mut Visibility, With<ObjectInfoWindow>>,
 ) {
-    if events.is_empty() {
-        return;
-    }
-
     for event in events.read() {
         if !check_click_event(
             event.listener,

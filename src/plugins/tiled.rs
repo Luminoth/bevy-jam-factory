@@ -578,7 +578,6 @@ fn create_item_layer(
                 x: TILE_WIDTH as f32,
                 y: TILE_HEIGHT as f32,
             },
-
             transform: get_tilemap_center_transform(
                 &map_size,
                 &grid_size,

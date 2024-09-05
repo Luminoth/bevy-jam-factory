@@ -538,6 +538,8 @@ fn process_object_layer(
 
 // TODO: Items should be allowed in multiples of the tile size
 // (so that we can have small and large objects as needed)
+// TODO: this probably needs to move to a post-step
+// where we would have access to the Item images for the layer
 #[allow(clippy::too_many_arguments)]
 fn create_item_layer(
     parent: &mut ChildBuilder,
@@ -573,6 +575,8 @@ fn create_item_layer(
             grid_size,
             size: map_size,
             storage: tile_storage,
+            // TODO: with "atlas" off this would be a vec of images I think?
+            // one for each type of item ?
             //texture: shared_tilemap_texture.unwrap(),
             tile_size: TilemapTileSize {
                 x: TILE_WIDTH as f32,

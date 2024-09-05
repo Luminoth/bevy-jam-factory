@@ -541,9 +541,9 @@ fn process_object_layer(
 #[allow(clippy::too_many_arguments)]
 fn create_item_layer(
     parent: &mut ChildBuilder,
-    _layer_storage: &mut TiledLayersStorage,
+    layer_storage: &mut TiledLayersStorage,
     tiled_map: &TiledMap,
-    _render_settings: TilemapRenderSettings,
+    render_settings: TilemapRenderSettings,
 ) {
     let layer_index = tiled_map.map.layers().len() + 1;
     let layer_id = 0; // TODO: use an actual unique id
@@ -554,31 +554,45 @@ fn create_item_layer(
         y: tiled_map.map.height,
     };
 
-    let mut _tile_storage = TileStorage::empty(map_size);
+    let grid_size = TilemapGridSize {
+        x: tiled_map.map.tile_width as f32,
+        y: tiled_map.map.tile_height as f32,
+    };
+
+    let map_type = TilemapType::Square;
+
+    let tile_storage = TileStorage::empty(map_size);
     let mut layer_entity = parent.spawn((
         SpatialBundle::default(),
         Name::new(format!("Item layer {}", layer_id)),
     ));
+    let layer_entity_id = layer_entity.id();
 
-    // TODO: fix this
     layer_entity.insert((
-        /*TilemapBundle {
+        TilemapBundle {
             grid_size,
             size: map_size,
             storage: tile_storage,
-            texture: shared_tilemap_texture.unwrap(),
-            tile_size,
-            spacing: tile_spacing,
+            //texture: shared_tilemap_texture.unwrap(),
+            tile_size: TilemapTileSize {
+                x: TILE_WIDTH as f32,
+                y: TILE_HEIGHT as f32,
+            },
+
             transform: get_tilemap_center_transform(
                 &map_size,
                 &grid_size,
                 &map_type,
                 layer_index as f32,
-            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            ),
             map_type,
             render_settings,
             ..Default::default()
-        },*/
+        },
         TiledMapItemLayer,
     ));
+
+    layer_storage
+        .storage
+        .insert(layer_index as u32, layer_entity_id);
 }

@@ -105,6 +105,7 @@ pub fn spawn_object(
                 visible: TileVisible(visible),
                 ..Default::default()
             },
+            // TODO: AnimatedTile for animation
             Name::new(format!("Object ({},{})", position.x, position.y)),
             Object(data),
             PickableBundle::default(),
@@ -159,6 +160,7 @@ where
                 visible: TileVisible(visible),
                 ..Default::default()
             },
+            // TODO: AnimatedTile for animation
             Name::new(format!("Item ({},{})", position.x, position.y)),
             tag,
             PickableBundle::default(),

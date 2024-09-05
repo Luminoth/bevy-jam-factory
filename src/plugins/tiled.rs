@@ -1,6 +1,3 @@
-// TODO: need to wrap a lot of this code so it can be re-used
-// in particular adding / removing tiles and objects and items
-
 use std::collections::HashMap;
 
 use bevy::prelude::*;
@@ -191,7 +188,11 @@ fn process_loaded_map(
 
             // Once materials have been created/added we need to then create the layers.
             for (layer_index, layer) in tiled_map.map.layers().enumerate() {
-                debug!("Processing layer {} ({}) ", layer_index, layer.id(),);
+                debug!("Processing layer {} ({}) ", layer_index, layer.id());
+
+                if layer.offset_x != 0.0 || layer.offset_y != 0.0 {
+                    panic!("Layer {} has invalid offset", layer.id());
+                }
 
                 match layer.layer_type() {
                     tiled::LayerType::Tiles(tile_layer) => {
@@ -202,7 +203,6 @@ fn process_loaded_map(
                             layer_index,
                             layer.id(),
                             &tile_layer,
-                            (layer.offset_x, layer.offset_y),
                             render_settings,
                         );
                     }
@@ -214,7 +214,6 @@ fn process_loaded_map(
                             layer_index,
                             layer.id(),
                             &object_layer,
-                            (layer.offset_x, layer.offset_y),
                             render_settings,
                         );
                     }
@@ -239,7 +238,6 @@ fn process_tile_layer(
     layer_index: usize,
     layer_id: u32,
     layer: &tiled::TileLayer,
-    offset: (f32, f32),
     render_settings: TilemapRenderSettings,
 ) {
     debug!("Processing tile layer {} ({})", layer_index, layer_id);
@@ -271,8 +269,6 @@ fn process_tile_layer(
     let layer_entity_id = layer_entity.id();
 
     let mut shared_tilemap_texture = None;
-    let mut tile_size = TilemapTileSize::default();
-    let mut tile_spacing = TilemapSpacing::default();
 
     layer_entity.with_children(|parent| {
         for x in 0..map_size.x {
@@ -292,6 +288,10 @@ fn process_tile_layer(
                     panic!("Tileset {} tiles have invalid tile size", tileset.name);
                 }
 
+                if tileset.spacing != 0 {
+                    panic!("Tileset {} tiles have invalid tile spacing", tileset.name);
+                }
+
                 let tilemap_texture = tiled_map
                     .tilemap_textures
                     .get(&tileset.name)
@@ -301,16 +301,6 @@ fn process_tile_layer(
                     shared_tilemap_texture = Some(tilemap_texture.clone());
                 }
                 // TODO: ensure the textures are the same texture
-
-                tile_size = TilemapTileSize {
-                    x: tileset.tile_width as f32,
-                    y: tileset.tile_height as f32,
-                };
-
-                tile_spacing = TilemapSpacing {
-                    x: tileset.spacing as f32,
-                    y: tileset.spacing as f32,
-                };
 
                 let layer_tile_data =
                     layer.get_tile_data(mapped_x, mapped_y).unwrap_or_else(|| {
@@ -350,14 +340,16 @@ fn process_tile_layer(
             size: map_size,
             storage: tile_storage,
             texture: shared_tilemap_texture.unwrap(),
-            tile_size,
-            spacing: tile_spacing,
+            tile_size: TilemapTileSize {
+                x: TILE_WIDTH as f32,
+                y: TILE_HEIGHT as f32,
+            },
             transform: get_tilemap_center_transform(
                 &map_size,
                 &grid_size,
                 &map_type,
                 layer_index as f32,
-            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            ),
             map_type,
             render_settings,
             ..Default::default()
@@ -380,7 +372,6 @@ fn process_object_layer(
     layer_index: usize,
     layer_id: u32,
     layer: &tiled::ObjectLayer,
-    offset: (f32, f32),
     render_settings: TilemapRenderSettings,
 ) {
     debug!("Processing object layer {} ({})", layer_index, layer_id);
@@ -408,8 +399,6 @@ fn process_object_layer(
     let layer_entity_id = layer_entity.id();
 
     let mut shared_tilemap_texture = None;
-    let mut tile_size = TilemapTileSize::default();
-    let mut tile_spacing = TilemapSpacing::default();
 
     layer_entity.with_children(|parent| {
         for object in layer.objects() {
@@ -437,6 +426,13 @@ fn process_object_layer(
                 );
             }
 
+            if tileset.spacing != 0 {
+                panic!(
+                    "Object tileset {} tiles have invalid tile spacing",
+                    tileset.name
+                );
+            }
+
             let tilemap_texture = tiled_map
                 .tilemap_textures
                 .get(&tileset.name)
@@ -452,16 +448,6 @@ fn process_object_layer(
                 shared_tilemap_texture = Some(tilemap_texture.clone());
             }
             // TODO: ensure the textures are the same texture
-
-            tile_size = TilemapTileSize {
-                x: tileset.tile_width as f32,
-                y: tileset.tile_height as f32,
-            };
-
-            tile_spacing = TilemapSpacing {
-                x: tileset.spacing as f32,
-                y: tileset.spacing as f32,
-            };
 
             let object_tile_data = object.tile_data().unwrap_or_else(|| {
                 panic!(
@@ -528,14 +514,16 @@ fn process_object_layer(
             size: map_size,
             storage: tile_storage,
             texture: shared_tilemap_texture.unwrap(),
-            tile_size,
-            spacing: tile_spacing,
+            tile_size: TilemapTileSize {
+                x: TILE_WIDTH as f32,
+                y: TILE_HEIGHT as f32,
+            },
             transform: get_tilemap_center_transform(
                 &map_size,
                 &grid_size,
                 &map_type,
                 layer_index as f32,
-            ) * Transform::from_xyz(offset.0, -offset.1, 0.0),
+            ),
             map_type,
             render_settings,
             ..Default::default()

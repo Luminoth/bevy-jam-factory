@@ -60,6 +60,7 @@ pub fn spawn_tile(
 ) -> Entity {
     let tile_entity = parent
         .spawn((
+            // NOTE: objects intentionally do not have Transforms for performance (but is that really true??)
             TileBundle {
                 position,
                 tilemap_id: TilemapId(tilemap_id),
@@ -98,6 +99,7 @@ pub fn spawn_object(
 ) -> Entity {
     let tile_entity = parent
         .spawn((
+            // NOTE: objects intentionally do not have Transforms for performance (but is that really true??)
             TileBundle {
                 position,
                 tilemap_id: TilemapId(tilemap_id),

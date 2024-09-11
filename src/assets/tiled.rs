@@ -96,14 +96,8 @@ impl AssetLoader for TiledLoader {
                 )
             });
 
-            // The load context path is the TMX file itself. If the file is at the root of the
-            // assets/ directory structure then the tmx_dir will be empty, which is fine.
-            let tmx_dir = load_context
-                .path()
-                .parent()
-                .expect("The asset load context was empty.");
-            let tile_path = tmx_dir.join(&tilemap_image.source);
-            let asset_path = AssetPath::from(tile_path);
+            // https://github.com/StarArawn/bevy_ecs_tilemap/pull/525
+            let asset_path = AssetPath::from(tilemap_image.source.clone());
             let texture = load_context.load(asset_path.clone());
 
             let tilemap_texture = TilemapTexture::Single(texture.clone());

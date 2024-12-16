@@ -35,7 +35,7 @@ impl<'a, 'ctx> BytesResourceReader<'a, 'ctx> {
     }
 }
 
-impl<'a, 'ctx> tiled::ResourceReader for BytesResourceReader<'a, 'ctx> {
+impl<'a> tiled::ResourceReader for BytesResourceReader<'a, '_> {
     type Resource = Box<dyn Read + 'a>;
     type Error = std::io::Error;
 

@@ -14,5 +14,6 @@ pub fn create_label<'a>(
         TextFont::from_font(ui_assets.font.clone()).with_font_size(size),
         TextColor(color),
         Name::new("Label"),
+        PickingBehavior::IGNORE,
     ))
 }

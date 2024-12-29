@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_tweening::Tween;
+use bevy_tweening::*;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u64)]
@@ -12,9 +12,9 @@ pub fn simple_tween_ui_object(
     start: (Val, Val),
     end: (Val, Val),
     completed_event: TweenId,
-) -> Tween<Style> {
+) -> Tween<Node> {
     Tween::new(
-        bevy_tweening::EaseFunction::QuadraticOut,
+        EaseFunction::QuadraticOut,
         std::time::Duration::from_millis(duration_ms),
         bevy_tweening::lens::UiPositionLens {
             start: UiRect {

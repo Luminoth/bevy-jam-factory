@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use super::{button::*, label::*, *};
 use crate::plugins::ui::*;
@@ -10,16 +9,11 @@ const TITLE_BACKGROUND: Color = Color::srgb(0.1, 0.1, 0.1);
 const TITLE_FONT_SIZE: usize = 40;
 
 fn drag_window(
-    event: Listener<Pointer<Drag>>,
-    mut window_query: Query<&mut Style, With<UiWindow>>,
+    event: Trigger<Pointer<Drag>>,
+    mut window_query: Query<&mut Node, With<UiWindow>>,
     titlebar_query: Query<&UiWindowTitleBar>,
 ) {
-    if !check_drag_event(
-        event.listener(),
-        event.target,
-        event.button,
-        PointerButton::Primary,
-    ) {
+    if event.button != PointerButton::Primary {
         return;
     }
 
@@ -36,16 +30,11 @@ fn drag_window(
 }
 
 fn close_window(
-    event: Listener<Pointer<Click>>,
+    event: Trigger<Pointer<Click>>,
     mut window_query: Query<&mut Visibility, With<UiWindow>>,
     close_button_query: Query<&UiWindowCloseButton>,
 ) {
-    if !check_click_event(
-        event.listener(),
-        event.target,
-        event.button,
-        PointerButton::Primary,
-    ) {
+    if event.button != PointerButton::Primary {
         return;
     }
 
@@ -77,29 +66,25 @@ where
 
     let ui_window = commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Px(content_size.0 as f32),
-                    height: Val::Px((ui_window_height) as f32),
-                    border: UiRect::all(Val::Px(5.0)),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(window_half_width - half_width),
-                    top: Val::Px(window_half_height - half_height),
-                    ..default()
-                },
-                background_color: WINDOW_BACKGROUND.into(),
-                visibility: if visible {
-                    Visibility::Visible
-                } else {
-                    Visibility::Hidden
-                },
+            Node {
+                width: Val::Px(content_size.0 as f32),
+                height: Val::Px((ui_window_height) as f32),
+                border: UiRect::all(Val::Px(5.0)),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Center,
+                position_type: PositionType::Absolute,
+                left: Val::Px(window_half_width - half_width),
+                top: Val::Px(window_half_height - half_height),
                 ..default()
             },
+            BackgroundColor(WINDOW_BACKGROUND),
+            if visible {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            },
             Name::new(format!("UiWindow - {}", name)),
-            Pickable::IGNORE,
             UiWindow,
             tag,
         ))
@@ -108,87 +93,75 @@ where
     commands.entity(ui_window).with_children(|parent| {
         parent
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Px(content_size.0 as f32),
-                        height: Val::Px(TITLE_HEIGHT as f32),
-                        flex_direction: FlexDirection::Row,
-                        ..default()
-                    },
+                Node {
+                    width: Val::Px(content_size.0 as f32),
+                    height: Val::Px(TITLE_HEIGHT as f32),
+                    flex_direction: FlexDirection::Row,
                     ..default()
                 },
                 Name::new("Title Bar"),
-                Pickable::IGNORE,
             ))
             .with_children(|parent| {
                 parent
                     .spawn((
-                        NodeBundle {
-                            style: Style {
-                                width: Val::Px(content_size.0 as f32 - TITLE_HEIGHT as f32),
-                                height: Val::Px(TITLE_HEIGHT as f32),
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },
-                            background_color: TITLE_BACKGROUND.into(),
+                        Node {
+                            width: Val::Px(content_size.0 as f32 - TITLE_HEIGHT as f32),
+                            height: Val::Px(TITLE_HEIGHT as f32),
+                            flex_direction: FlexDirection::Row,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
                             ..default()
                         },
+                        BackgroundColor(TITLE_BACKGROUND),
                         Name::new("Title"),
-                        On::<Pointer<Drag>>::run(drag_window),
                         UiWindowTitleBar(ui_window),
                     ))
                     .with_children(|parent| {
                         create_label(parent, ui_assets, name, TITLE_FONT_SIZE as f32, FONT_COLOR);
-                    });
+                    })
+                    .observe(drag_window);
 
                 parent
                     .spawn((
-                        ButtonBundle {
-                            style: Style {
-                                width: Val::Px(TITLE_HEIGHT as f32),
-                                height: Val::Px(TITLE_HEIGHT as f32),
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            // TODO: we can't make this any other color
-                            // because the button::update system forces it back
-                            // and that's probably not the best thing to be doing
-                            background_color: BUTTON_NORMAL.into(),
+                        Node {
+                            width: Val::Px(TITLE_HEIGHT as f32),
+                            height: Val::Px(TITLE_HEIGHT as f32),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+
                             ..default()
                         },
+                        Button,
+                        // TODO: we can't make this any other color
+                        // because the button::update system forces it back
+                        // and that's probably not the best thing to be doing
+                        BackgroundColor(BUTTON_NORMAL),
                         Name::new("Close Button"),
-                        On::<Pointer<Click>>::run(close_window),
                         UiWindowCloseButton(ui_window),
                     ))
                     .with_children(|parent| {
                         create_label(parent, ui_assets, "X", 24.0, FONT_COLOR);
-                    });
+                    })
+                    .observe(close_window);
             });
     });
 
     let content = commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Px(content_size.0 as f32),
-                    height: Val::Px(content_size.1 as f32),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Px(content_size.0 as f32),
+                height: Val::Px(content_size.1 as f32),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
             Name::new("Content"),
             UiWindowContent,
-            Pickable::IGNORE,
         ))
         .id();
 
-    commands.entity(ui_window).push_children(&[content]);
+    commands.entity(ui_window).add_children(&[content]);
 
     content
 }
@@ -208,29 +181,26 @@ where
 
     let ui_window = commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Px(content_size.0 as f32),
-                    height: Val::Px((content_size.1) as f32),
-                    border: UiRect::all(Val::Px(5.0)),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(position.0 as f32),
-                    top: Val::Px(position.1 as f32),
-                    ..default()
-                },
-                background_color: WINDOW_BACKGROUND.into(),
-                visibility: if visible {
-                    Visibility::Visible
-                } else {
-                    Visibility::Hidden
-                },
+            Node {
+                width: Val::Px(content_size.0 as f32),
+                height: Val::Px((content_size.1) as f32),
+                border: UiRect::all(Val::Px(5.0)),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Center,
+                position_type: PositionType::Absolute,
+                left: Val::Px(position.0 as f32),
+                top: Val::Px(position.1 as f32),
+
                 ..default()
             },
+            BackgroundColor(WINDOW_BACKGROUND),
+            if visible {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            },
             Name::new(format!("UiWindow - {}", name)),
-            Pickable::IGNORE,
             UiWindow,
             tag,
         ))
@@ -238,24 +208,20 @@ where
 
     let content = commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Px(content_size.0 as f32),
-                    height: Val::Px(content_size.1 as f32),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Px(content_size.0 as f32),
+                height: Val::Px(content_size.1 as f32),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
             Name::new("Content"),
             UiWindowContent,
-            Pickable::IGNORE,
         ))
         .id();
 
-    commands.entity(ui_window).push_children(&[content]);
+    commands.entity(ui_window).add_children(&[content]);
 
     content
 }

@@ -1,5 +1,8 @@
-use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_mod_picking::backend::prelude::*;
+use bevy::{
+    picking::backend::{prelude::*, PointerHits},
+    prelude::*,
+    window::PrimaryWindow,
+};
 
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{game::camera::MainCamera, tiled::TiledMapObjectLayer};

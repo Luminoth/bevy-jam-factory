@@ -7,12 +7,10 @@ use crate::plugins::{audio::*, game::OnInGame};
 
 pub fn start_music(commands: &mut Commands, source: Handle<AudioSource>) {
     commands.spawn((
-        AudioBundle {
-            source,
-            settings: PlaybackSettings {
-                volume: Volume::new(0.25),
-                ..PlaybackSettings::LOOP
-            },
+        AudioPlayer::new(source),
+        PlaybackSettings {
+            volume: Volume::new(0.25),
+            ..PlaybackSettings::LOOP
         },
         Name::new("Music"),
         Music,
@@ -28,12 +26,10 @@ pub fn stop_music(commands: &mut Commands, music_query: &Query<Entity, With<Musi
 
 pub fn play_oneshot_audio(commands: &mut Commands, source: Handle<AudioSource>) {
     commands.spawn((
-        AudioBundle {
-            source,
-            settings: PlaybackSettings {
-                volume: Volume::new(0.5),
-                ..PlaybackSettings::DESPAWN
-            },
+        AudioPlayer::new(source),
+        PlaybackSettings {
+            volume: Volume::new(0.5),
+            ..PlaybackSettings::DESPAWN
         },
         Name::new("OneShot Audio"),
         OneShotAudio,

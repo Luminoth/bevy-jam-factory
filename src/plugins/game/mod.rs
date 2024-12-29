@@ -15,7 +15,10 @@ use crate::assets::tiled::TiledMap;
 use crate::audio::start_music;
 use crate::cleanup_state;
 use crate::data::items::ItemType;
-use crate::plugins::{audio::AudioAssets, tiled::TiledMapBundle};
+use crate::plugins::{
+    audio::AudioAssets,
+    tiled::{TiledMapBundle, TiledMapHandle},
+};
 use crate::AppState;
 
 /// Pause game sub-state
@@ -171,7 +174,7 @@ fn load_assets(
     // need a handle to the map (and it DOES need it, but I don't know why yet)
     commands.spawn((
         TiledMapBundle {
-            tiled_map: map.clone(),
+            tiled_map: TiledMapHandle(map.clone()),
             ..Default::default()
         },
         Name::new("Tiled Map"),
@@ -249,13 +252,15 @@ fn enter(
 
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
 
-    let mut camera_bundle = Camera2dBundle::default();
-    camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
+    let mut projection = OrthographicProjection::default_2d();
+    projection.scaling_mode = ScalingMode::Fixed {
         width: VIEW_WIDTH,
         height: VIEW_HEIGHT,
     };
+
     commands.spawn((
-        camera_bundle,
+        Camera2d,
+        projection,
         Name::new("Main Camera"),
         camera::MainCamera,
         camera::UiCamera,

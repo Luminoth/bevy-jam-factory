@@ -62,7 +62,7 @@ pub(super) fn pan(
     let map_half_width = (tilemap.size.x as f32 * tilemap.grid_size.x) / 2.0;
     let map_half_height = (tilemap.size.y as f32 * tilemap.grid_size.y) / 2.0;
 
-    let speed = CAMERA_SPEED * time.delta_seconds();
+    let speed = CAMERA_SPEED * time.delta_secs();
 
     if let Some(position) = window.cursor_position() {
         if position.x < window_movement_width {

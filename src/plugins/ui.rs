@@ -39,7 +39,7 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreStartup, load_assets)
+        app.add_systems(OnEnter(AppState::PreLoadAssets), preload_assets)
             .add_systems(
                 PreUpdate,
                 update_pointer_capture.run_if(in_state(AppState::InGame)),
@@ -48,7 +48,9 @@ impl Plugin for UiPlugin {
     }
 }
 
-fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn preload_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+    info!("pre-loading UI assets ...");
+
     commands.insert_resource(UiAssets {
         // TODO: we should probably generate this rather than load it
         // (what if the missing image is missing??)
@@ -57,8 +59,6 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         button_hover_sound: asset_server.load("sounds/ui/button-hover.mp3"),
         button_pressed_sound: asset_server.load("sounds/ui/button-click.mp3"),
     });
-
-    // TODO: need to wait for the assets to be loaded
 }
 
 #[allow(clippy::type_complexity)]
@@ -90,7 +90,7 @@ fn update_button(
 fn update_pointer_capture(
     mut is_pointer_captured: ResMut<IsPointerCaptured>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    ui_window_query: Query<(&Node, &GlobalTransform, &ViewVisibility), With<UiWindow>>,
+    ui_window_query: Query<(&ComputedNode, &GlobalTransform, &ViewVisibility), With<UiWindow>>,
     mut contexts: EguiContexts,
 ) {
     let window = window_query.single();

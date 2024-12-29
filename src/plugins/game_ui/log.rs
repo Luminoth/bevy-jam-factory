@@ -1,7 +1,6 @@
 use std::time::Instant;
 
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_mod_picking::prelude::*;
 
 use crate::plugins::ui::UiAssets;
 use crate::ui::*;
@@ -54,16 +53,10 @@ pub(super) fn setup_window(
     );
     commands.entity(log_id).with_children(|parent| {
         parent.spawn((
-            TextBundle::from_section(
-                "",
-                TextStyle {
-                    font: ui_assets.font.clone(),
-                    font_size: 12.0,
-                    color: FONT_COLOR,
-                },
-            ),
+            Text::default(),
+            TextFont::from_font(ui_assets.font.clone()).with_font_size(12.0),
+            TextColor(FONT_COLOR),
             Name::new("Log"),
-            Pickable::IGNORE,
             LogWindowText,
         ));
     });
@@ -81,10 +74,5 @@ pub(super) fn log_event_handler(
     }
 
     let mut log_text = log_text_query.single_mut();
-    log_text
-        .sections
-        .get_mut(0)
-        .unwrap()
-        .value
-        .clone_from(&log_content.0);
+    log_text.0.clone_from(&log_content.0);
 }

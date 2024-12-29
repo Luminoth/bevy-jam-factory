@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use crate::plugins::{audio::Music, game::IsPaused, ui::UiAssets};
-use crate::ui::{check_click_event, create_button, create_canvas};
+use crate::ui::{create_button, create_canvas};
 use crate::AppState;
 
 /// Pause menu state tag
@@ -25,44 +24,20 @@ fn setup(mut commands: Commands, ui_assets: Res<UiAssets>) {
     create_canvas(&mut commands, "Pause Menu")
         .insert(PauseMenu)
         .with_children(|parent| {
-            create_button(
-                parent,
-                &ui_assets,
-                "Resume Game",
-                On::<Pointer<Click>>::run(
-                    |event: Listener<Pointer<Click>>,
-                     mut pause_state: ResMut<NextState<IsPaused>>| {
-                        if !check_click_event(
-                            event.listener(),
-                            event.target,
-                            event.button,
-                            PointerButton::Primary,
-                        ) {
-                            return;
-                        }
+            create_button(parent, &ui_assets, "Resume Game").observe(
+                |event: Trigger<Pointer<Click>>, mut pause_state: ResMut<NextState<IsPaused>>| {
+                    if event.button == PointerButton::Primary {
                         pause_state.set(IsPaused::Running);
-                    },
-                ),
+                    }
+                },
             );
 
-            create_button(
-                parent,
-                &ui_assets,
-                "Quit Game",
-                On::<Pointer<Click>>::run(
-                    |event: Listener<Pointer<Click>>,
-                     mut game_state: ResMut<NextState<AppState>>| {
-                        if !check_click_event(
-                            event.listener(),
-                            event.target,
-                            event.button,
-                            PointerButton::Primary,
-                        ) {
-                            return;
-                        }
+            create_button(parent, &ui_assets, "Quit Game").observe(
+                |event: Trigger<Pointer<Click>>, mut game_state: ResMut<NextState<AppState>>| {
+                    if event.button == PointerButton::Primary {
                         game_state.set(AppState::MainMenu);
-                    },
-                ),
+                    }
+                },
             );
         });
 }

@@ -10,7 +10,6 @@ mod ui;
 
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::ScrollViewPlugin;
 use bevy_tweening::TweeningPlugin;
 
@@ -19,6 +18,7 @@ pub enum AppState {
     //#[default]
     Splash,
     #[default]
+    PreLoadAssets,
     MainMenu,
     LoadAssets,
     InGame,
@@ -30,8 +30,11 @@ pub fn get_world_position_from_cursor_position(
     camera: &Camera,
     camera_transform: &GlobalTransform,
 ) -> Option<Vec2> {
-    cursor_position
-        .and_then(|cursor_position| camera.viewport_to_world_2d(camera_transform, cursor_position))
+    cursor_position.and_then(|cursor_position| {
+        camera
+            .viewport_to_world_2d(camera_transform, cursor_position)
+            .ok()
+    })
 }
 
 pub fn cleanup_state<T>(mut commands: Commands, query: Query<Entity, With<T>>)
@@ -41,6 +44,12 @@ where
     for e in &query {
         commands.entity(e).despawn_recursive();
     }
+}
+
+fn wait_for_assets_preload(mut game_state: ResMut<NextState<AppState>>) {
+    // TODO: need to wait for the assets to be loaded
+
+    game_state.set(AppState::MainMenu);
 }
 
 const DEFAULT_RESOLUTION: (f32, f32) = (1280.0, 720.0);
@@ -61,9 +70,10 @@ fn main() {
             })
             .set(bevy::log::LogPlugin {
                 // default bevy filter plus silence some spammy 3rd party crates
-                filter:
-                    "wgpu=error,naga=warn,symphonia_core=error,symphonia_bundle_mp3=error,bevy_simple_scroll_view=error"
-                        .to_string(),
+                filter: format!(
+                    "{},symphonia_core=error,symphonia_bundle_mp3=error,bevy_simple_scroll_view=error",
+                    bevy::log::DEFAULT_FILTER
+                ),
                 ..default()
             })
             // prevent blurry sprites
@@ -71,7 +81,6 @@ fn main() {
 
     // third-party plugins
     app.add_plugins((
-        DefaultPickingPlugins,
         TilemapPlugin,
         ScrollViewPlugin,
         TweeningPlugin,
@@ -98,6 +107,11 @@ fn main() {
         plugins::game::GamePlugin,
         plugins::debug::DebugPlugin,
     ));
+
+    app.add_systems(
+        Update,
+        wait_for_assets_preload.run_if(in_state(AppState::PreLoadAssets)),
+    );
 
     app.run();
 }

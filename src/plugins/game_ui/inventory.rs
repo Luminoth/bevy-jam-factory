@@ -1,5 +1,4 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_mod_picking::prelude::*;
 use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 
 use crate::data::{items::ItemType, resources::ResourceType};
@@ -61,95 +60,78 @@ pub struct InventoryDragImage {
 
 #[allow(clippy::type_complexity)]
 fn start_drag_inventory_item(
-    mut commands: Commands,
-    event: Listener<Pointer<DragStart>>,
+    event: Trigger<Pointer<DragStart>>,
     game_assets: Res<GameAssets>,
     item_image_query: Query<(&GlobalTransform, &InventoryItemImage)>,
     mut drag_image_query: Query<(
-        Entity,
         &mut Visibility,
-        &mut Style,
-        &mut UiImage,
+        &mut Node,
+        &mut ImageNode,
         &mut InventoryDragImage,
     )>,
 ) {
-    if !check_drag_start_event(
-        event.listener(),
-        event.target,
-        event.button,
-        PointerButton::Primary,
-    ) {
+    if event.button != PointerButton::Primary {
         return;
     }
 
     let (item_image_transform, item_image) = item_image_query.get(event.target).unwrap();
 
-    let (
-        drag_image_id,
-        mut drag_image_visibility,
-        mut drag_image_style,
-        mut drag_image_image,
-        mut drag_image,
-    ) = drag_image_query.single_mut();
+    let (mut drag_image_visibility, mut drag_image_node, mut drag_image_image, mut drag_image) =
+        drag_image_query.single_mut();
     *drag_image_visibility = Visibility::Visible;
 
     // update the drag image item
     drag_image.item_type = Some(item_image.0);
-    drag_image_image.texture = game_assets.get_item_texture(item_image.0);
-    commands.entity(drag_image_id).insert(TextureAtlas {
+    drag_image_image.image = game_assets.get_item_texture(item_image.0);
+    drag_image_image.texture_atlas = Some(TextureAtlas {
         layout: game_assets.get_item_atlas(item_image.0),
         index: 0,
     });
 
-    let half_width = if let Val::Px(width) = drag_image_style.width {
+    let half_width = if let Val::Px(width) = drag_image_node.width {
         width / 2.0
     } else {
         0.0
     };
-    let half_height = if let Val::Px(height) = drag_image_style.height {
+    let half_height = if let Val::Px(height) = drag_image_node.height {
         height / 2.0
     } else {
         0.0
     };
 
-    if let Val::Px(left) = &mut drag_image_style.left {
+    if let Val::Px(left) = &mut drag_image_node.left {
         *left = item_image_transform.translation().x - half_width;
     }
 
-    if let Val::Px(top) = &mut drag_image_style.top {
+    if let Val::Px(top) = &mut drag_image_node.top {
         *top = item_image_transform.translation().y - half_height;
     }
 
-    drag_image.start_position = (drag_image_style.left, drag_image_style.top);
+    drag_image.start_position = (drag_image_node.left, drag_image_node.top);
 }
 
 fn drag_inventory_item(
-    event: Listener<Pointer<Drag>>,
+    event: Trigger<Pointer<Drag>>,
     mut item_drag_events: EventWriter<ItemDragEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut drag_image_query: Query<(&mut Style, &InventoryDragImage)>,
+    mut drag_image_query: Query<(&mut Node, &InventoryDragImage)>,
 ) {
-    if !check_drag_event(
-        event.listener(),
-        event.target,
-        event.button,
-        PointerButton::Primary,
-    ) {
+    if event.button != PointerButton::Primary {
         return;
     }
 
-    let (mut drag_image_style, drag_image_item_type) = drag_image_query.single_mut();
+    let (mut drag_image_node, drag_image_item_type) = drag_image_query.single_mut();
     if drag_image_item_type.item_type.is_none() {
         // this check catches "drag" running before "start drag"
         // not sure why that can even happen ...
         return;
     }
 
-    if let Val::Px(left) = &mut drag_image_style.left {
+    if let Val::Px(left) = &mut drag_image_node.left {
         *left += event.delta.x;
     }
 
-    if let Val::Px(top) = &mut drag_image_style.top {
+    if let Val::Px(top) = &mut drag_image_node.top {
         *top += event.delta.y;
     }
 
@@ -161,21 +143,16 @@ fn drag_inventory_item(
 }
 
 fn end_drag_inventory_item(
-    event: Listener<Pointer<DragEnd>>,
+    event: Trigger<Pointer<DragEnd>>,
     mut item_drop_events: EventWriter<ItemDropEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut drag_image_query: Query<(Entity, &Style, &mut InventoryDragImage)>,
+    mut drag_image_query: Query<(Entity, &Node, &mut InventoryDragImage)>,
 ) {
-    if !check_drag_end_event(
-        event.listener(),
-        event.target,
-        event.button,
-        PointerButton::Primary,
-    ) {
+    if event.button != PointerButton::Primary {
         return;
     }
 
-    let (drag_image_id, drag_image_style, mut drag_image) = drag_image_query.single_mut();
+    let (drag_image_id, drag_image_node, mut drag_image) = drag_image_query.single_mut();
     let item_type = drag_image.item_type.take();
 
     let window = window_query.single();
@@ -184,7 +161,7 @@ fn end_drag_inventory_item(
         item_type.unwrap(),
         drag_image_id,
         drag_image.start_position,
-        drag_image_style,
+        drag_image_node,
     ));
 }
 
@@ -220,12 +197,9 @@ pub(super) fn setup_window(
     commands.entity(content_id).with_children(|parent| {
         parent
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(80.0),
-                        margin: UiRect::all(Val::Px(15.0)),
-                        ..default()
-                    },
+                Node {
+                    width: Val::Percent(80.0),
+                    margin: UiRect::all(Val::Px(15.0)),
                     ..default()
                 },
                 Name::new("Scroll View"),
@@ -234,12 +208,9 @@ pub(super) fn setup_window(
             .with_children(|parent| {
                 parent
                     .spawn((
-                        NodeBundle {
-                            style: Style {
-                                flex_direction: bevy::ui::FlexDirection::Column,
-                                width: Val::Percent(100.0),
-                                ..default()
-                            },
+                        Node {
+                            flex_direction: bevy::ui::FlexDirection::Column,
+                            width: Val::Percent(100.0),
                             ..default()
                         },
                         Name::new("Scroll Content"),
@@ -288,21 +259,16 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Harvester),
                                     ))
                                     .with_children(|parent| {
-                                        let item_image_id = create_draggable_image_from_slice(
+                                        let item_image_id = create_image_from_slice(
                                             parent,
                                             game_assets.harvester_image.clone(),
                                             game_assets.harvester_atlas.clone(),
                                             0,
-                                            On::<Pointer<DragStart>>::run(
-                                                start_drag_inventory_item,
-                                            ),
-                                            On::<Pointer<Drag>>::run(drag_inventory_item),
-                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
                                         )
-                                        .insert((
-                                            InventoryItemImage(ItemType::Harvester),
-                                            Pickable::IGNORE,
-                                        ))
+                                        .insert(InventoryItemImage(ItemType::Harvester))
+                                        .observe(start_drag_inventory_item)
+                                        .observe(drag_inventory_item)
+                                        .observe(end_drag_inventory_item)
                                         .id();
 
                                         create_label(
@@ -327,21 +293,16 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Conveyor),
                                     ))
                                     .with_children(|parent| {
-                                        let item_image_id = create_draggable_image_from_slice(
+                                        let item_image_id = create_image_from_slice(
                                             parent,
                                             game_assets.conveyor_image.clone(),
                                             game_assets.conveyor_atlas.clone(),
                                             0,
-                                            On::<Pointer<DragStart>>::run(
-                                                start_drag_inventory_item,
-                                            ),
-                                            On::<Pointer<Drag>>::run(drag_inventory_item),
-                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
                                         )
-                                        .insert((
-                                            InventoryItemImage(ItemType::Conveyor),
-                                            Pickable::IGNORE,
-                                        ))
+                                        .insert(InventoryItemImage(ItemType::Conveyor))
+                                        .observe(start_drag_inventory_item)
+                                        .observe(drag_inventory_item)
+                                        .observe(end_drag_inventory_item)
                                         .id();
 
                                         create_label(
@@ -366,21 +327,16 @@ pub(super) fn setup_window(
                                         InventoryItemUI(ItemType::Crafter),
                                     ))
                                     .with_children(|parent| {
-                                        let item_image_id = create_draggable_image_from_slice(
+                                        let item_image_id = create_image_from_slice(
                                             parent,
                                             game_assets.crafter_image.clone(),
                                             game_assets.crafter_atlas.clone(),
                                             0,
-                                            On::<Pointer<DragStart>>::run(
-                                                start_drag_inventory_item,
-                                            ),
-                                            On::<Pointer<Drag>>::run(drag_inventory_item),
-                                            On::<Pointer<DragEnd>>::run(end_drag_inventory_item),
                                         )
-                                        .insert((
-                                            InventoryItemImage(ItemType::Crafter),
-                                            Pickable::IGNORE,
-                                        ))
+                                        .insert(InventoryItemImage(ItemType::Crafter))
+                                        .observe(start_drag_inventory_item)
+                                        .observe(drag_inventory_item)
+                                        .observe(end_drag_inventory_item)
                                         .id();
 
                                         create_label(
@@ -404,22 +360,18 @@ pub(super) fn setup_window(
 
     // while we're here, setup the "item drag" image
     commands.spawn((
-        ImageBundle {
-            style: Style {
-                // TODO: don't assume size here
-                width: Val::Px(32.0),
-                height: Val::Px(32.0),
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                top: Val::Px(0.0),
-                ..default()
-            },
-            image: UiImage::new(ui_assets.missing_image.clone()),
-            visibility: Visibility::Hidden,
+        Node {
+            // TODO: don't assume size here
+            width: Val::Px(32.0),
+            height: Val::Px(32.0),
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
             ..default()
         },
+        ImageNode::new(ui_assets.missing_image.clone()),
+        Visibility::Hidden,
         Name::new("Inventory Item Drag Image"),
-        Pickable::IGNORE,
         InventoryDragImage::default(),
     ));
 }
@@ -458,7 +410,7 @@ pub(super) fn inventory_updated_event_handler(
         if inventory_resources.contains_key(&resources.0) {
             if let Some(amount) = inventory_resources.get(&resources.0) {
                 if *amount != resources.1 {
-                    text.sections.get_mut(0).unwrap().value = amount.to_string();
+                    text.0 = amount.to_string();
                     resources.1 = *amount;
                 }
             }
@@ -477,14 +429,14 @@ pub(super) fn inventory_updated_event_handler(
         if inventory_items.contains_key(&item.0) {
             if let Some(amount) = inventory_items.get(&item.0) {
                 if *amount != item.1 {
-                    text.sections.get_mut(0).unwrap().value = amount.to_string();
+                    text.0 = amount.to_string();
                     item.1 = *amount;
 
                     let mut item_image = commands.entity(item.2);
                     if item.1 == 0 {
-                        item_image.insert(Pickable::IGNORE);
+                        item_image.insert(PickingBehavior::IGNORE);
                     } else {
-                        item_image.remove::<Pickable>();
+                        item_image.remove::<PickingBehavior>();
                     }
                 }
             }

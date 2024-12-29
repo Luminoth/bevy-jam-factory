@@ -122,11 +122,11 @@ pub(super) fn update_object_info_ui(
         match data.0 {
             ObjectInfoData::ObjectId => {
                 // TODO: only update if changed
-                text.sections.get_mut(0).unwrap().value = object.get_id().to_string();
+                text.0 = object.get_id().to_string();
             }
             ObjectInfoData::ObjectType => {
                 // TODO: only update if changed
-                text.sections.get_mut(0).unwrap().value = object.get_type().to_string();
+                text.0 = object.get_type().to_string();
             }
         }
     }
@@ -137,11 +137,11 @@ pub(super) fn update_object_info_ui(
                 match &mut data.0 {
                     ObjectInfoResourcesData::ResourceType => {
                         // TODO: only update if changed
-                        text.sections.get_mut(0).unwrap().value = r#type.to_string();
+                        text.0 = r#type.to_string();
                     }
                     ObjectInfoResourcesData::Amount(prev) => {
                         if *amount != *prev {
-                            text.sections.get_mut(0).unwrap().value = amount.to_string();
+                            text.0 = amount.to_string();
                             *prev = *amount;
                         }
                     }

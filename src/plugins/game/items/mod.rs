@@ -4,7 +4,6 @@ mod harvester;
 
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use super::camera::MainCamera;
 use super::inventory::{Inventory, InventoryUpdatedEvent};
@@ -19,7 +18,7 @@ use crate::plugins::{
 use crate::tilemap::{
     despawn_object, despawn_tile, get_tile_position, TileMapQuery, TileMapQueryMut,
 };
-use crate::ui::{check_click_event, simple_tween_ui_object, TweenId};
+use crate::ui::{simple_tween_ui_object, TweenId};
 
 /// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
@@ -65,14 +64,14 @@ impl ItemDropEvent {
         item_type: ItemType,
         drag_image_id: Entity,
         drage_image_start_position: (Val, Val),
-        drag_image_style: &Style,
+        drag_image_node: &Node,
     ) -> Self {
         Self {
             item_type,
             cursor_position: window.cursor_position(),
             drag_image_id,
             drage_image_start_position,
-            drag_image_position: (drag_image_style.left, drag_image_style.top),
+            drag_image_position: (drag_image_node.left, drag_image_node.top),
         }
     }
 }
@@ -360,17 +359,10 @@ pub(super) fn item_click_event_handler(
     mut window_query: Query<&mut Visibility, With<ItemInfoWindow>>,
 ) {
     for event in events.read() {
-        if !check_click_event(
-            event.listener,
-            event.target,
-            event.button,
-            PointerButton::Secondary,
-        ) {
-            continue;
+        if event.button == PointerButton::Secondary {
+            commands.insert_resource(ItemInfo(event.target));
+            *window_query.single_mut() = Visibility::Visible;
+            log_events.send(LogEvent::new("Showing Item Info"));
         }
-
-        commands.insert_resource(ItemInfo(event.target));
-        *window_query.single_mut() = Visibility::Visible;
-        log_events.send(LogEvent::new("Showing Item Info"));
     }
 }

@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use crate::assets::tiled::*;
 use crate::data::objects::ObjectData;
@@ -18,6 +17,10 @@ pub struct TiledLayersStorage {
     pub storage: HashMap<u32, Entity>,
 }
 
+/// TiledMap Handle component wrapper
+#[derive(Debug, Default, Deref, Component)]
+pub struct TiledMapHandle(pub Handle<TiledMap>);
+
 // TODO: this shouldn't need to be a bundle,
 // we only load a single map at a time
 // so the storage and render settings
@@ -28,7 +31,7 @@ pub struct TiledMapBundle {
     pub global_transform: GlobalTransform,
 
     // TODO: this just straight up doesn't work if this handle isn't in here
-    pub tiled_map: Handle<TiledMap>,
+    pub tiled_map: TiledMapHandle,
     pub storage: TiledLayersStorage,
     pub render_settings: TilemapRenderSettings,
 }
@@ -48,7 +51,6 @@ pub struct TiledMapItemLayer;
 /// Emitted when an Object is clicked
 #[derive(Debug, Event)]
 pub struct TiledMapObjectClickEvent {
-    pub listener: Entity,
     pub target: Entity,
     pub button: PointerButton,
 }
@@ -57,7 +59,6 @@ pub struct TiledMapObjectClickEvent {
 #[allow(dead_code)]
 #[derive(Debug, Event)]
 pub struct TiledMapItemClickEvent {
-    pub listener: Entity,
     pub target: Entity,
     pub button: PointerButton,
 }
@@ -89,7 +90,7 @@ fn process_loaded_maps(
     tiled_maps: Res<Assets<TiledMap>>,
     tile_storage_query: Query<(Entity, &TileStorage)>,
     mut tiled_map_query: Query<(
-        &Handle<TiledMap>,
+        &TiledMapHandle,
         &mut TiledLayersStorage,
         &TilemapRenderSettings,
     )>,
@@ -133,7 +134,7 @@ fn process_loaded_maps(
 
             debug!("Processing map {}", map_handle.id());
 
-            if let Some(tiled_map) = tiled_maps.get(map_handle) {
+            if let Some(tiled_map) = tiled_maps.get(map_handle.id()) {
                 // TODO: Create a RemoveMap component..
                 for layer_entity in layer_storage.storage.values() {
                     if let Ok((_, layer_tile_storage)) = tile_storage_query.get(*layer_entity) {
@@ -173,7 +174,8 @@ fn process_loaded_map(
 
     commands
         .spawn((
-            SpatialBundle::default(),
+            Transform::default(),
+            Visibility::default(),
             Name::new(tiled_map.name.clone()),
             OnInGame,
         ))
@@ -263,7 +265,8 @@ fn process_tile_layer(
 
     let mut tile_storage = TileStorage::empty(map_size);
     let mut layer_entity = parent.spawn((
-        SpatialBundle::default(),
+        Transform::default(),
+        Visibility::default(),
         Name::new(format!("Tile Layer {}", layer_id)),
     ));
     let layer_entity_id = layer_entity.id();
@@ -393,7 +396,8 @@ fn process_object_layer(
 
     let mut tile_storage = TileStorage::empty(map_size);
     let mut layer_entity = parent.spawn((
-        SpatialBundle::default(),
+        Transform::default(),
+        Visibility::default(),
         Name::new(format!("Object layer {}", layer_id)),
     ));
     let layer_entity_id = layer_entity.id();
@@ -565,7 +569,8 @@ fn create_item_layer(
 
     let tile_storage = TileStorage::empty(map_size);
     let mut layer_entity = parent.spawn((
-        SpatialBundle::default(),
+        Transform::default(),
+        Visibility::default(),
         Name::new(format!("Item layer {}", layer_id)),
     ));
     let layer_entity_id = layer_entity.id();

@@ -1,6 +1,5 @@
 use bevy::{ecs::query::QueryData, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use crate::data::objects::ObjectData;
 use crate::plugins::game::objects::Object;
@@ -110,18 +109,16 @@ pub fn spawn_object(
             // TODO: AnimatedTile for animation
             Name::new(format!("Object ({},{})", position.x, position.y)),
             Object(data),
-            PickableBundle::default(),
-            On::<Pointer<Click>>::run(
-                |event: Listener<Pointer<Click>>,
-                 mut click_events: EventWriter<TiledMapObjectClickEvent>| {
-                    click_events.send(TiledMapObjectClickEvent {
-                        listener: event.listener(),
-                        target: event.target,
-                        button: event.button,
-                    });
-                },
-            ),
         ))
+        .observe(
+            |event: Trigger<Pointer<Click>>,
+             mut click_events: EventWriter<TiledMapObjectClickEvent>| {
+                click_events.send(TiledMapObjectClickEvent {
+                    target: event.target,
+                    button: event.button,
+                });
+            },
+        )
         .id();
 
     storage.set(&position, tile_entity);
@@ -165,18 +162,16 @@ where
             // TODO: AnimatedTile for animation
             Name::new(format!("Item ({},{})", position.x, position.y)),
             tag,
-            PickableBundle::default(),
-            On::<Pointer<Click>>::run(
-                |event: Listener<Pointer<Click>>,
-                 mut click_events: EventWriter<TiledMapItemClickEvent>| {
-                    click_events.send(TiledMapItemClickEvent {
-                        listener: event.listener(),
-                        target: event.target,
-                        button: event.button,
-                    });
-                },
-            ),
         ))
+        .observe(
+            |event: Trigger<Pointer<Click>>,
+             mut click_events: EventWriter<TiledMapItemClickEvent>| {
+                click_events.send(TiledMapItemClickEvent {
+                    target: event.target,
+                    button: event.button,
+                });
+            },
+        )
         .id();
 
     storage.set(&position, tile_entity);

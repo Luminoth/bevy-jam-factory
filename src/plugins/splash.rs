@@ -30,22 +30,21 @@ fn enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     info!("entering Splash state");
 
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
-    commands.spawn((Camera2dBundle::default(), OnSplashScreen));
+    commands.spawn((Camera2d, OnSplashScreen));
 
     let image = asset_server.load("images/splash.png");
 
     // TODO: fade-in / fade-out
     // TODO: multiple splash screens (PIGSquad, Bevy)
 
-    create_canvas(&mut commands, "Main Menu").with_children(|parent| {
-        parent.spawn(ImageBundle {
-            style: Style {
+    create_canvas(&mut commands, "Splash Screen").with_children(|parent| {
+        parent.spawn((
+            Node {
                 width: Val::Px(200.0),
                 ..default()
             },
-            image: UiImage::new(image),
-            ..default()
-        });
+            ImageNode::new(image),
+        ));
     });
 
     commands.insert_resource(SplashTimer(Timer::from_seconds(5.0, TimerMode::Once)));
@@ -65,7 +64,7 @@ fn update(
     mut contexts: EguiContexts,
 ) {
     if timer.tick(time.delta()).finished() {
-        game_state.set(AppState::MainMenu);
+        game_state.set(AppState::PreLoadAssets);
     }
 
     // TODO: this is just for debugging

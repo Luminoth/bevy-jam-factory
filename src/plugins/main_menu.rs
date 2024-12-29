@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use bevy_mod_picking::prelude::*;
 
 use crate::cleanup_state;
 use crate::plugins::ui::UiAssets;
-use crate::ui::{check_click_event, create_button, create_canvas};
+use crate::ui::{create_button, create_canvas};
 use crate::AppState;
 
 /// Main menu state tag
@@ -31,48 +30,25 @@ fn enter(mut commands: Commands, ui_assets: Res<UiAssets>) {
     info!("entering MainMenu state");
 
     commands.insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)));
-    commands.spawn((Camera2dBundle::default(), OnMainMenu));
+    commands.spawn((Camera2d, OnMainMenu));
 
     create_canvas(&mut commands, "Main Menu")
         .insert(MainMenuCanvas)
         .with_children(|parent| {
-            create_button(
-                parent,
-                &ui_assets,
-                "Start Game",
-                On::<Pointer<Click>>::run(
-                    |event: Listener<Pointer<Click>>,
-                     mut game_state: ResMut<NextState<AppState>>| {
-                        if !check_click_event(
-                            event.listener(),
-                            event.target,
-                            event.button,
-                            PointerButton::Primary,
-                        ) {
-                            return;
-                        }
+            create_button(parent, &ui_assets, "Start Game").observe(
+                |event: Trigger<Pointer<Click>>, mut game_state: ResMut<NextState<AppState>>| {
+                    if event.button == PointerButton::Primary {
                         game_state.set(AppState::LoadAssets);
-                    },
-                ),
+                    }
+                },
             );
 
-            create_button(
-                parent,
-                &ui_assets,
-                "Exit Game",
-                On::<Pointer<Click>>::run(
-                    |event: Listener<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
-                        if !check_click_event(
-                            event.listener(),
-                            event.target,
-                            event.button,
-                            PointerButton::Primary,
-                        ) {
-                            return;
-                        }
+            create_button(parent, &ui_assets, "Exit Game").observe(
+                |event: Trigger<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
+                    if event.button == PointerButton::Primary {
                         exit.send(AppExit::Success);
-                    },
-                ),
+                    }
+                },
             );
         });
 }

@@ -236,6 +236,7 @@ pub(super) fn setup_window(
                                             game_assets.resources_image.clone(),
                                             game_assets.resources_atlas.clone(),
                                             0,
+                                            false,
                                         );
                                         create_label(parent, &ui_assets, "Iron:", 14.0, FONT_COLOR);
                                         create_label(parent, &ui_assets, "N/A", 14.0, FONT_COLOR)
@@ -264,6 +265,7 @@ pub(super) fn setup_window(
                                             game_assets.harvester_image.clone(),
                                             game_assets.harvester_atlas.clone(),
                                             0,
+                                            true,
                                         )
                                         .insert(InventoryItemImage(ItemType::Harvester))
                                         .observe(start_drag_inventory_item)
@@ -298,8 +300,12 @@ pub(super) fn setup_window(
                                             game_assets.conveyor_image.clone(),
                                             game_assets.conveyor_atlas.clone(),
                                             0,
+                                            true,
                                         )
-                                        .insert(InventoryItemImage(ItemType::Conveyor))
+                                        .insert((
+                                            InventoryItemImage(ItemType::Conveyor),
+                                            PickingBehavior::IGNORE,
+                                        ))
                                         .observe(start_drag_inventory_item)
                                         .observe(drag_inventory_item)
                                         .observe(end_drag_inventory_item)
@@ -332,8 +338,12 @@ pub(super) fn setup_window(
                                             game_assets.crafter_image.clone(),
                                             game_assets.crafter_atlas.clone(),
                                             0,
+                                            true,
                                         )
-                                        .insert(InventoryItemImage(ItemType::Crafter))
+                                        .insert((
+                                            InventoryItemImage(ItemType::Crafter),
+                                            PickingBehavior::IGNORE,
+                                        ))
                                         .observe(start_drag_inventory_item)
                                         .observe(drag_inventory_item)
                                         .observe(end_drag_inventory_item)
@@ -372,6 +382,7 @@ pub(super) fn setup_window(
         ImageNode::new(ui_assets.missing_image.clone()),
         Visibility::Hidden,
         Name::new("Inventory Item Drag Image"),
+        PickingBehavior::IGNORE,
         InventoryDragImage::default(),
     ));
 }

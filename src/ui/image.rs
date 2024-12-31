@@ -1,8 +1,12 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 
 #[allow(dead_code)]
-pub fn create_image<'a>(parent: &'a mut ChildBuilder, image: Handle<Image>) -> EntityCommands<'a> {
-    parent.spawn((
+pub fn create_image<'a>(
+    parent: &'a mut ChildBuilder,
+    image: Handle<Image>,
+    draggable: bool,
+) -> EntityCommands<'a> {
+    let mut commands = parent.spawn((
         Node {
             // TODO: don't assume size here
             width: Val::Px(32.0),
@@ -11,7 +15,13 @@ pub fn create_image<'a>(parent: &'a mut ChildBuilder, image: Handle<Image>) -> E
         },
         ImageNode::new(image),
         Name::new("Image"),
-    ))
+    ));
+
+    if !draggable {
+        commands.insert(PickingBehavior::IGNORE);
+    }
+
+    commands
 }
 
 pub fn create_image_from_slice<'a>(
@@ -19,8 +29,9 @@ pub fn create_image_from_slice<'a>(
     image: Handle<Image>,
     atlas: Handle<TextureAtlasLayout>,
     index: usize,
+    draggable: bool,
 ) -> EntityCommands<'a> {
-    parent.spawn((
+    let mut commands = parent.spawn((
         Node {
             // TODO: don't assume size here
             width: Val::Px(32.0),
@@ -35,5 +46,12 @@ pub fn create_image_from_slice<'a>(
             },
         ),
         Name::new("Image"),
-    ))
+        PickingBehavior::IGNORE,
+    ));
+
+    if !draggable {
+        commands.insert(PickingBehavior::IGNORE);
+    }
+
+    commands
 }

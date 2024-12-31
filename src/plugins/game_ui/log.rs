@@ -57,6 +57,7 @@ pub(super) fn setup_window(
             TextFont::from_font(ui_assets.font.clone()).with_font_size(12.0),
             TextColor(FONT_COLOR),
             Name::new("Log"),
+            PickingBehavior::IGNORE,
             LogWindowText,
         ));
     });

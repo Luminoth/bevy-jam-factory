@@ -26,6 +26,7 @@ pub fn create_canvas<'a>(commands: &'a mut Commands, name: impl AsRef<str>) -> E
             ..default()
         },
         Name::new(format!("Ui Canvas - {}", name.as_ref())),
+        PickingBehavior::IGNORE,
     ))
 }
 
@@ -38,6 +39,7 @@ pub fn create_column_container<'a>(parent: &'a mut ChildBuilder) -> EntityComman
             ..default()
         },
         Name::new("Column"),
+        PickingBehavior::IGNORE,
     ))
 }
 
@@ -50,5 +52,6 @@ pub fn create_row_container<'a>(parent: &'a mut ChildBuilder) -> EntityCommands<
             ..default()
         },
         Name::new("Row"),
+        PickingBehavior::IGNORE,
     ))
 }

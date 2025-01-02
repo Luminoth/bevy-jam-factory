@@ -15,6 +15,11 @@ pub use window::*;
 pub const FONT: &str = "fonts/FiraSans-Bold.ttf";
 pub const FONT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
+pub const PICKING_BEHAVIOR_BLOCKING: PickingBehavior = PickingBehavior {
+    should_block_lower: true,
+    is_hoverable: false,
+};
+
 pub fn create_canvas<'a>(commands: &'a mut Commands, name: impl AsRef<str>) -> EntityCommands<'a> {
     commands.spawn((
         Node {
@@ -26,7 +31,7 @@ pub fn create_canvas<'a>(commands: &'a mut Commands, name: impl AsRef<str>) -> E
             ..default()
         },
         Name::new(format!("Ui Canvas - {}", name.as_ref())),
-        PickingBehavior::IGNORE,
+        PICKING_BEHAVIOR_BLOCKING,
     ))
 }
 

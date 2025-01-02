@@ -85,7 +85,7 @@ where
                 Visibility::Hidden
             },
             Name::new(format!("UiWindow - {}", name)),
-            PickingBehavior::IGNORE,
+            PICKING_BEHAVIOR_BLOCKING,
             UiWindow,
             tag,
         ))
@@ -101,7 +101,7 @@ where
                     ..default()
                 },
                 Name::new("Title Bar"),
-                PickingBehavior::IGNORE,
+                PICKING_BEHAVIOR_BLOCKING,
             ))
             .with_children(|parent| {
                 parent
@@ -159,7 +159,7 @@ where
                 ..default()
             },
             Name::new("Content"),
-            PickingBehavior::IGNORE,
+            PICKING_BEHAVIOR_BLOCKING,
             UiWindowContent,
         ))
         .id();
@@ -204,7 +204,7 @@ where
                 Visibility::Hidden
             },
             Name::new(format!("UiWindow - {}", name)),
-            PickingBehavior::IGNORE,
+            PICKING_BEHAVIOR_BLOCKING,
             UiWindow,
             tag,
         ))
@@ -221,7 +221,7 @@ where
                 ..default()
             },
             Name::new("Content"),
-            PickingBehavior::IGNORE,
+            PICKING_BEHAVIOR_BLOCKING,
             UiWindowContent,
         ))
         .id();

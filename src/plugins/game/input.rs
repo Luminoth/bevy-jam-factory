@@ -5,6 +5,8 @@ use super::TileDrag;
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::ui::IsPointerCaptured;
 
+// TODO: wtf is this drag code for again?
+
 pub(super) fn start_drag(
     mut commands: Commands,
     is_pointer_captured: Res<IsPointerCaptured>,

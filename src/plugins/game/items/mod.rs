@@ -5,20 +5,20 @@ mod harvester;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
+use super::ItemInfo;
 use super::camera::MainCamera;
 use super::inventory::{Inventory, InventoryUpdatedEvent};
 use super::objects::Object;
-use super::ItemInfo;
-use crate::data::items::{harvester::HarvesterData, ItemType};
+use crate::data::items::{ItemType, harvester::HarvesterData};
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{
     game_ui::{inventory::InventoryDragImage, item_info::ItemInfoWindow, log::LogEvent},
     tiled::{TiledMapItemClickEvent, TiledMapObjectLayer, TiledMapTileLayer},
 };
 use crate::tilemap::{
-    despawn_object, despawn_tile, get_tile_position, TileMapQuery, TileMapQueryMut,
+    TileMapQuery, TileMapQueryMut, despawn_object, despawn_tile, get_tile_position,
 };
-use crate::ui::{simple_tween_ui_object, TweenId};
+use crate::ui::{TweenId, simple_tween_ui_object};
 
 /// Tracks the current Object being dragged over
 #[derive(Debug, Resource)]
@@ -122,40 +122,39 @@ pub(super) fn item_drag_event_handler(
                 object_tilemap.grid_size,
                 object_tilemap.r#type,
                 object_tilemap.transform,
-            ) {
-                if let Some(object_entity) = object_tilemap.storage.get(&object_position) {
-                    // reset and remove previous tile
-                    if let Some(drag_tile) = &drag_tile {
-                        let mut color = tile_query.get_mut(drag_tile.0).unwrap();
+            ) && let Some(object_entity) = object_tilemap.storage.get(&object_position)
+            {
+                // reset and remove previous tile
+                if let Some(drag_tile) = &drag_tile {
+                    let mut color = tile_query.get_mut(drag_tile.0).unwrap();
+                    color.0 = Color::default();
+                    commands.remove_resource::<ItemDragTile>();
+                }
+
+                // check previous object
+                if let Some(drag_object) = &mut drag_object {
+                    if drag_object.0 != object_entity {
+                        let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
                         color.0 = Color::default();
-                        commands.remove_resource::<ItemDragTile>();
-                    }
 
-                    // check previous object
-                    if let Some(drag_object) = &mut drag_object {
-                        if drag_object.0 != object_entity {
-                            let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
-                            color.0 = Color::default();
-
-                            let (object, mut color) = object_query.get_mut(object_entity).unwrap();
-                            color.0 = if event.item_type.can_drop_on_object(object.get_type()) {
-                                CAN_DROP_COLOR
-                            } else {
-                                NO_DROP_COLOR
-                            };
-                            drag_object.0 = object_entity;
-                        }
-                    } else {
                         let (object, mut color) = object_query.get_mut(object_entity).unwrap();
                         color.0 = if event.item_type.can_drop_on_object(object.get_type()) {
                             CAN_DROP_COLOR
                         } else {
                             NO_DROP_COLOR
                         };
-                        commands.insert_resource(ItemDragObject(object_entity));
+                        drag_object.0 = object_entity;
                     }
-                    continue;
+                } else {
+                    let (object, mut color) = object_query.get_mut(object_entity).unwrap();
+                    color.0 = if event.item_type.can_drop_on_object(object.get_type()) {
+                        CAN_DROP_COLOR
+                    } else {
+                        NO_DROP_COLOR
+                    };
+                    commands.insert_resource(ItemDragObject(object_entity));
                 }
+                continue;
             }
 
             // then check for tiles
@@ -166,40 +165,39 @@ pub(super) fn item_drag_event_handler(
                 tilemap.grid_size,
                 tilemap.r#type,
                 tilemap.transform,
-            ) {
-                if let Some(tile_entity) = tilemap.storage.get(&tile_position) {
-                    // reset and remove previous object
-                    if let Some(drag_object) = &drag_object {
-                        let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
+            ) && let Some(tile_entity) = tilemap.storage.get(&tile_position)
+            {
+                // reset and remove previous object
+                if let Some(drag_object) = &drag_object {
+                    let (_, mut color) = object_query.get_mut(drag_object.0).unwrap();
+                    color.0 = Color::default();
+                    commands.remove_resource::<ItemDragObject>();
+                }
+
+                // check previous tile
+                if let Some(drag_tile) = &mut drag_tile {
+                    if drag_tile.0 != tile_entity {
+                        let mut color = tile_query.get_mut(drag_tile.0).unwrap();
                         color.0 = Color::default();
-                        commands.remove_resource::<ItemDragObject>();
-                    }
 
-                    // check previous tile
-                    if let Some(drag_tile) = &mut drag_tile {
-                        if drag_tile.0 != tile_entity {
-                            let mut color = tile_query.get_mut(drag_tile.0).unwrap();
-                            color.0 = Color::default();
-
-                            let mut color = tile_query.get_mut(tile_entity).unwrap();
-                            color.0 = if event.item_type.can_drop_on_tile() {
-                                CAN_DROP_COLOR
-                            } else {
-                                NO_DROP_COLOR
-                            };
-                            drag_tile.0 = tile_entity;
-                        }
-                    } else {
                         let mut color = tile_query.get_mut(tile_entity).unwrap();
                         color.0 = if event.item_type.can_drop_on_tile() {
                             CAN_DROP_COLOR
                         } else {
                             NO_DROP_COLOR
                         };
-                        commands.insert_resource(ItemDragTile(tile_entity));
+                        drag_tile.0 = tile_entity;
                     }
-                    continue;
+                } else {
+                    let mut color = tile_query.get_mut(tile_entity).unwrap();
+                    color.0 = if event.item_type.can_drop_on_tile() {
+                        CAN_DROP_COLOR
+                    } else {
+                        NO_DROP_COLOR
+                    };
+                    commands.insert_resource(ItemDragTile(tile_entity));
                 }
+                continue;
             }
         }
     }

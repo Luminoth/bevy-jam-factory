@@ -4,9 +4,9 @@ use bevy_simple_scroll_view::{ScrollView, ScrollableContent};
 use crate::data::{items::ItemType, resources::ResourceType};
 use crate::plugins::{
     game::{
+        GameAssets,
         inventory::{Inventory, InventoryUpdatedEvent},
         items::{ItemDragEvent, ItemDropEvent},
-        GameAssets,
     },
     ui::UiAssets,
 };
@@ -418,13 +418,12 @@ pub(super) fn inventory_updated_event_handler(
     }
 
     for (mut text, mut resources) in text_set.p0().iter_mut() {
-        if inventory_resources.contains_key(&resources.0) {
-            if let Some(amount) = inventory_resources.get(&resources.0) {
-                if *amount != resources.1 {
-                    text.0 = amount.to_string();
-                    resources.1 = *amount;
-                }
-            }
+        if inventory_resources.contains_key(&resources.0)
+            && let Some(amount) = inventory_resources.get(&resources.0)
+            && *amount != resources.1
+        {
+            text.0 = amount.to_string();
+            resources.1 = *amount;
         }
     }
 
@@ -437,19 +436,18 @@ pub(super) fn inventory_updated_event_handler(
     }
 
     for (mut text, mut item) in text_set.p1().iter_mut() {
-        if inventory_items.contains_key(&item.0) {
-            if let Some(amount) = inventory_items.get(&item.0) {
-                if *amount != item.1 {
-                    text.0 = amount.to_string();
-                    item.1 = *amount;
+        if inventory_items.contains_key(&item.0)
+            && let Some(amount) = inventory_items.get(&item.0)
+            && *amount != item.1
+        {
+            text.0 = amount.to_string();
+            item.1 = *amount;
 
-                    let mut item_image = commands.entity(item.2);
-                    if item.1 == 0 {
-                        item_image.insert(PickingBehavior::IGNORE);
-                    } else {
-                        item_image.remove::<PickingBehavior>();
-                    }
-                }
+            let mut item_image = commands.entity(item.2);
+            if item.1 == 0 {
+                item_image.insert(PickingBehavior::IGNORE);
+            } else {
+                item_image.remove::<PickingBehavior>();
             }
         }
     }

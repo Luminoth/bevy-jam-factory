@@ -1,12 +1,12 @@
 use bevy::{
-    picking::backend::{prelude::*, PointerHits},
+    picking::backend::{PointerHits, prelude::*},
     prelude::*,
     window::PrimaryWindow,
 };
 
 use crate::get_world_position_from_cursor_position;
 use crate::plugins::{game::camera::MainCamera, tiled::TiledMapObjectLayer};
-use crate::tilemap::{get_tile_position, TileMapQuery};
+use crate::tilemap::{TileMapQuery, get_tile_position};
 
 // TODO: is this actually needed now?
 
@@ -52,33 +52,25 @@ fn object_picking(
             window.cursor_position(),
             camera,
             camera_transform,
-        ) {
-            if let Some(object_position) = get_tile_position(
-                world_position,
-                object_tilemap.size,
-                object_tilemap.grid_size,
-                object_tilemap.r#type,
-                object_tilemap.transform,
-            ) {
-                if let Some(tile_entity) = object_tilemap.storage.get(&object_position) {
-                    // TODO: don't pick objects that aren't visible
-                    // (have to query TileVisible to check this)
+        ) && let Some(object_position) = get_tile_position(
+            world_position,
+            object_tilemap.size,
+            object_tilemap.grid_size,
+            object_tilemap.r#type,
+            object_tilemap.transform,
+        ) && let Some(tile_entity) = object_tilemap.storage.get(&object_position)
+        {
+            // TODO: don't pick objects that aren't visible
+            // (have to query TileVisible to check this)
 
-                    output.send(PointerHits::new(
-                        pointer_id,
-                        vec![(
-                            tile_entity,
-                            HitData::new(
-                                camera_entity,
-                                0.0,
-                                Some(world_position.extend(0.0)),
-                                None,
-                            ),
-                        )],
-                        camera.order as f32,
-                    ));
-                }
-            }
+            output.send(PointerHits::new(
+                pointer_id,
+                vec![(
+                    tile_entity,
+                    HitData::new(camera_entity, 0.0, Some(world_position.extend(0.0)), None),
+                )],
+                camera.order as f32,
+            ));
         }
     }
 }

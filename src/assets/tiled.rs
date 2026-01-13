@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use bevy::{
-    asset::{io::Reader, AssetLoader, AssetPath},
+    asset::{AssetLoader, AssetPath, io::Reader},
     prelude::*,
     reflect::TypePath,
 };
@@ -83,9 +83,9 @@ impl AssetLoader for TiledLoader {
             tiled::DefaultResourceCache::new(),
             BytesResourceReader::new(&bytes, load_context),
         );
-        let map = loader.load_tmx_map(&path).map_err(|e| {
-            std::io::Error::new(ErrorKind::Other, format!("Could not load TMX map: {e}"))
-        })?;
+        let map = loader
+            .load_tmx_map(&path)
+            .map_err(|e| std::io::Error::other(format!("Could not load TMX map: {e}")))?;
 
         let mut tilemap_textures = HashMap::default();
         for tileset in map.tilesets() {
